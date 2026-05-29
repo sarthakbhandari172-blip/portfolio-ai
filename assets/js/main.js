@@ -215,17 +215,20 @@ const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
   const panel = qs('.hero__panel');
   if (!panel || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+  // Future: this pointer tilt system can be adapted to drive turntable frames
+  // or a lightweight 3D/GLB orbit model using CSS vars and frame state.
   const state = {
     targetX: 0,
     targetY: 0,
     currentX: 0,
     currentY: 0,
     active: false,
+    hovering: false,
     pointerType: 'mouse',
   };
   const bounds = { left: 0, top: 0, width: 0, height: 0 };
 
-  const getMaxTilt = () => (state.pointerType === 'touch' ? 9 : 16);
+  const getMaxTilt = () => ({ x: state.pointerType === 'touch' ? 8 : 14, y: state.pointerType === 'touch' ? 12 : 24 });
 
   const refreshBounds = () => {
     const rect = panel.getBoundingClientRect();
@@ -259,22 +262,33 @@ const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
   };
 
   const tick = () => {
-    const ease = state.active ? 0.32 : 0.14;
+    const ease = state.active ? 0.34 : state.hovering ? 0.22 : 0.16;
     state.currentX += (state.targetX - state.currentX) * ease;
     state.currentY += (state.targetY - state.currentY) * ease;
 
-    const maxTiltValue = getMaxTilt();
-    const rx = -state.currentY * maxTiltValue * 0.72;
-    const ry = state.currentX * maxTiltValue;
+    const maxTilt = getMaxTilt();
+    const rx = -state.currentY * maxTilt.x;
+    const ry = state.currentX * maxTilt.y;
+    const charOffsetX = state.currentX * (state.active ? 42 : 30);
+    const charOffsetY = state.currentY * (state.active ? 34 : 26);
+    const glowOffsetX = state.currentX * (state.active ? 38 : 28);
+    const glowOffsetY = state.currentY * (state.active ? 30 : 22);
+
     panel.style.setProperty('--rx', `${rx.toFixed(2)}deg`);
     panel.style.setProperty('--ry', `${ry.toFixed(2)}deg`);
-    panel.style.setProperty('--mx', `${(state.currentX * 18).toFixed(2)}`);
-    panel.style.setProperty('--my', `${(state.currentY * 14).toFixed(2)}`);
-    panel.style.setProperty('--depth', `${(state.active ? 12 : 0).toFixed(2)}px`);
-    panel.style.setProperty('--hero-ring-offset-x', `${(-ry * 0.3).toFixed(2)}px`);
-    panel.style.setProperty('--hero-ring-offset-y', `${(-rx * 0.3).toFixed(2)}px`);
-    panel.style.setProperty('--hero-glow-x', `${(state.currentX * 24).toFixed(2)}px`);
-    panel.style.setProperty('--hero-glow-y', `${(state.currentY * 18).toFixed(2)}px`);
+    panel.style.setProperty('--mx', `${charOffsetX.toFixed(2)}`);
+    panel.style.setProperty('--my', `${charOffsetY.toFixed(2)}`);
+    panel.style.setProperty('--depth', `${(state.active ? 16 : 0).toFixed(2)}px`);
+    panel.style.setProperty('--hero-ring-offset-x', `${(-ry * 0.5).toFixed(2)}px`);
+    panel.style.setProperty('--hero-ring-offset-y', `${(-rx * 0.5).toFixed(2)}px`);
+    panel.style.setProperty('--hero-glow-x', `${glowOffsetX.toFixed(2)}px`);
+    panel.style.setProperty('--hero-glow-y', `${glowOffsetY.toFixed(2)}px`);
+    panel.style.setProperty('--hero-bg-x', `${(-state.currentX * (state.active ? 16 : 10)).toFixed(2)}px`);
+    panel.style.setProperty('--hero-bg-y', `${(-state.currentY * (state.active ? 12 : 8)).toFixed(2)}px`);
+    panel.style.setProperty('--hero-particles-x', `${(-state.currentX * (state.active ? 16 : 10)).toFixed(2)}px`);
+    panel.style.setProperty('--hero-particles-y', `${(-state.currentY * (state.active ? 12 : 8)).toFixed(2)}px`);
+    panel.style.setProperty('--panel-shadow-x', `${(ry * 0.18).toFixed(2)}px`);
+    panel.style.setProperty('--panel-shadow-y', `${(18 + Math.abs(ry * 0.18)).toFixed(2)}px`);
 
     requestAnimationFrame(tick);
   };
@@ -291,8 +305,20 @@ const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
   };
 
   const onPointerMove = (event) => {
-    if (!state.active) return;
+    if (!state.active && !state.hovering) return;
     setTarget(event.clientX, event.clientY);
+  };
+
+  const onPointerEnter = () => {
+    state.hovering = true;
+    refreshBounds();
+  };
+
+  const onPointerLeave = () => {
+    state.hovering = false;
+    if (!state.active) {
+      resetTarget();
+    }
   };
 
   const onPointerUp = (event) => {
@@ -304,14 +330,11 @@ const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
   };
 
   panel.addEventListener('pointerdown', onPointerDown, { passive: false });
-  panel.addEventListener('pointermove', onPointerMove, { passive: false });
+  panel.addEventListener('pointermove', onPointerMove, { passive: true });
   panel.addEventListener('pointerup', onPointerUp);
   panel.addEventListener('pointercancel', onPointerUp);
-  panel.addEventListener('pointerleave', () => {
-    if (!state.active) {
-      resetTarget();
-    }
-  });
+  panel.addEventListener('pointerenter', onPointerEnter);
+  panel.addEventListener('pointerleave', onPointerLeave);
   window.addEventListener('resize', refreshBounds, { passive: true });
 
   const portalButton = qs('#cta-enter-portal');
@@ -468,9 +491,12 @@ const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
 
   requestAnimationFrame(draw);
 })();
+
 /* ── 7. Custom Sci-Fi Cursor ─────────────────────────────── */
 (function initCustomCursor() {
   if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  if (window.__customCursorActive) return;
+  window.__customCursorActive = true;
 
   const body = document.body;
   const cursor = document.createElement('div');
@@ -481,101 +507,193 @@ const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
 
   const dot = qs('.cursor-dot', cursor);
   const ring = qs('.cursor-ring', cursor);
-  const interactive = qsa('.btn, .nav__link, .card, .social-node');
 
-  let targetX = window.innerWidth / 2;
-  let targetY = window.innerHeight / 2;
-  let currentX = targetX;
-  let currentY = targetY;
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let ringX = mouseX;
+  let ringY = mouseY;
 
-  const setHoverState = (active) => {
-    cursor.classList.toggle('custom-cursor--hover', active);
-  };
+  const hoverSelectors = 'a, button, input, textarea, select, .card, .hero__panel, .btn, .social-node, [role="button"]';
 
-  document.addEventListener('pointermove', (event) => {
-    targetX = event.clientX;
-    targetY = event.clientY;
-    dot.style.left = `${targetX}px`;
-    dot.style.top = `${targetY}px`;
-  });
+  window.addEventListener('mousemove', (event) => {
+    mouseX = event.clientX;
+    mouseY = event.clientY;
+    dot.style.left = `${mouseX}px`;
+    dot.style.top = `${mouseY}px`;
+    
+    const hovering = !!event.target.closest(hoverSelectors);
+    cursor.classList.toggle('custom-cursor--hover', hovering);
+  }, { passive: true });
 
-  interactive.forEach((element) => {
-    element.addEventListener('pointerenter', () => setHoverState(true));
-    element.addEventListener('pointerleave', () => setHoverState(false));
-  });
-
-  const animateCursor = () => {
-    currentX += (targetX - currentX) * 0.28;
-    currentY += (targetY - currentY) * 0.28;
-    ring.style.left = `${currentX}px`;
-    ring.style.top = `${currentY}px`;
+  function animateCursor() {
+    ringX += (mouseX - ringX) * 0.32;
+    ringY += (mouseY - ringY) * 0.32;
+    ring.style.left = `${ringX}px`;
+    ring.style.top = `${ringY}px`;
     requestAnimationFrame(animateCursor);
-  };
+  }
 
-  requestAnimationFrame(animateCursor);
+  animateCursor();
 })();
 
-/* ── 6. Smooth-scroll for hash links ─────────────────────── */
-(function initSmoothScroll() {
-  document.addEventListener('click', e => {
-    const link = e.target.closest('a[href^="#"]');
+/* ── 8. Section Transition System ────────────────────────── */
+(function initSectionTransition() {
+  if (window.__sectionTransitionActive) return;
+  window.__sectionTransitionActive = true;
+  
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReducedMotion) return;
+
+  let transitionActive = false;
+  let transitionTimeout = null;
+
+  // Clean up old transition elements if they exist
+  document.querySelectorAll(
+    '.portal-transition, .scene-wipe-transition, .section-warp-transition, .quantum-gate, .hyper-cut'
+  ).forEach((el) => el.remove());
+
+  const overlay = document.createElement('div');
+  overlay.className = 'section-tunnel-transition';
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.innerHTML = `
+    <span class="section-tunnel__ring section-tunnel__ring--one"></span>
+    <span class="section-tunnel__ring section-tunnel__ring--two"></span>
+    <span class="section-tunnel__line"></span>
+    <span class="section-tunnel__flash"></span>
+  `;
+  document.body.appendChild(overlay);
+
+  function startTransition(centerX, centerY) {
+    if (transitionActive) {
+      clearTimeout(transitionTimeout);
+      overlay.classList.remove('is-active');
+      transitionActive = false;
+    }
+
+    transitionActive = true;
+    overlay.style.setProperty('--tunnel-x', `${centerX}px`);
+    overlay.style.setProperty('--tunnel-y', `${centerY}px`);
+    
+    overlay.classList.add('is-active');
+
+    transitionTimeout = setTimeout(() => {
+      overlay.classList.remove('is-active');
+      transitionActive = false;
+    }, 750);
+  }
+
+  // Intercept all hash link clicks using capture phase
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('a[href^="#"]');
     if (!link) return;
 
-    const id = link.getAttribute('href').slice(1);
-    const target = document.getElementById(id);
+    const href = link.getAttribute('href');
+    if (!href || href === '#') return;
+
+    const targetId = href.substring(1);
+    const target = document.getElementById(targetId);
     if (!target) return;
 
-    e.preventDefault();
-    const navH = parseInt(
-      getComputedStyle(document.documentElement).getPropertyValue('--nav-h') || '70',
-      10
-    );
-    const top = target.getBoundingClientRect().top + window.scrollY - navH - 16;
-    window.scrollTo({ top, behavior: 'smooth' });
-  });
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    // Calculate transition center from link position
+    const rect = link.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    startTransition(centerX, centerY);
+
+    // Scroll to target after short delay (140-220ms for visibility)
+    setTimeout(() => {
+      const header = document.querySelector('.site-header, header');
+      const headerHeight = header ? header.offsetHeight : 0;
+      const targetTop = target.getBoundingClientRect().top + window.scrollY - headerHeight;
+
+      window.scrollTo({
+        top: targetTop,
+        behavior: 'smooth'
+      });
+    }, 180);
+  }, true);
 })();
 
-/* ── 7. Console Branding ──────────────────────────────────── */
+/* ── 9. Console Branding ──────────────────────────────────── */
 console.log(
   '%c⬡ Portfolio AI %c— Sarthak Bhandari',
   'background:#7c3aed;color:#fff;font-size:14px;font-weight:700;padding:4px 10px;border-radius:4px;',
   'color:#a0a0c0;font-size:12px;padding:4px 0;'
 );
-// Lightweight portal transition for internal section navigation
+// SAFE NEO CURSOR — fast, fallback-safe, admin/public compatible
 (() => {
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (prefersReducedMotion) return;
+  if (window.__neoCursorActive) return;
+  window.__neoCursorActive = true;
 
-  const portal = document.createElement('div');
-  portal.className = 'portal-transition';
-  portal.setAttribute('aria-hidden', 'true');
-  document.body.appendChild(portal);
+  const canUseCursor = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (!canUseCursor) return;
 
-  const internalLinks = document.querySelectorAll('a[href^="#"]');
+  const oldCursorLayers = document.querySelectorAll(
+    '.cursor, .cursor-dot, .cursor-ring, .cursor-follower, .custom-cursor, .mouse-cursor, .fast-cursor-dot, .fast-cursor-ring'
+  );
 
-  internalLinks.forEach((link) => {
-    link.addEventListener('click', (event) => {
-      const targetId = link.getAttribute('href');
-
-      if (!targetId || targetId === '#') return;
-
-      const target = document.querySelector(targetId);
-      if (!target) return;
-
-      event.preventDefault();
-
-      portal.classList.add('is-active');
-
-      window.setTimeout(() => {
-        target.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }, 240);
-
-      window.setTimeout(() => {
-        portal.classList.remove('is-active');
-      }, 900);
-    });
+  oldCursorLayers.forEach((el) => {
+    el.style.display = 'none';
+    el.style.opacity = '0';
+    el.style.visibility = 'hidden';
   });
+
+  const dot = document.createElement('div');
+  const ring = document.createElement('div');
+
+  dot.className = 'neo-cursor-dot';
+  ring.className = 'neo-cursor-ring';
+
+  document.body.appendChild(dot);
+  document.body.appendChild(ring);
+
+  document.documentElement.classList.add('neo-cursor-ready');
+
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let ringX = mouseX;
+  let ringY = mouseY;
+
+  const hoverSelector = [
+    'a',
+    'button',
+    '.btn',
+    '.card',
+    '.admin-card',
+    '.hero__panel-frame',
+    '[role="button"]',
+    'input[type="submit"]',
+    'input[type="button"]'
+  ].join(',');
+
+  const typingSelector = 'input, textarea, select';
+
+  window.addEventListener('mousemove', (event) => {
+    mouseX = event.clientX;
+    mouseY = event.clientY;
+
+    dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+
+    const isHovering = Boolean(event.target.closest(hoverSelector));
+    const isTyping = Boolean(event.target.closest(typingSelector));
+
+    ring.classList.toggle('is-hovering', isHovering);
+    ring.classList.toggle('is-typing', isTyping);
+    dot.classList.toggle('is-typing', isTyping);
+  }, { passive: true });
+
+  function animateCursor() {
+    ringX += (mouseX - ringX) * 0.48;
+    ringY += (mouseY - ringY) * 0.48;
+
+    ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
+
+    requestAnimationFrame(animateCursor);
+  }
+
+  animateCursor();
 })();

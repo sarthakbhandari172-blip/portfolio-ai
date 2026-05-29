@@ -360,13 +360,15 @@ require_once __DIR__ . '/includes/header.php';
         <span class="card-corner card-corner--br"></span>
 
         <div class="hero__panel-glow"></div>
-        <div class="hero__panel-hint">DRAG TO INSPECT</div>
-
         <div class="hero__panel-frame" aria-label="Sarthak Bhandari futuristic character">
             <div class="hero__character-frame">
                 <div class="hero__character">
-                    <img class="hero-character-img" src="assets/images/hero.png" alt="Sarthak Bhandari futuristic character" />
-                    <span class="hero__eye-pulse hero__eye-pulse--left"></span>
+<?php
+    $heroCharacterSrc = $hasProfileAvatar
+        ? $profileAvatarUrl
+        : BASE_URL . '/assets/images/hero.png';
+?>
+<img class="hero-character-img" src="<?= e($heroCharacterSrc) ?>" alt="Sarthak Bhandari futuristic character" />
                     <span class="hero__eye-pulse hero__eye-pulse--right"></span>
                     <span class="hero__eye-ray hero__eye-ray--left"></span>
                     <span class="hero__eye-ray hero__eye-ray--right"></span>
@@ -584,6 +586,16 @@ require_once __DIR__ . '/includes/header.php';
                                     ?? $project['image_path']
                                     ?? ''
                                 ));
+
+                                if ($thumb_src !== '') {
+                                    if (preg_match('#^https?://#i', $thumb_src)) {
+                                        // Absolute URLs remain unchanged.
+                                    } elseif (str_starts_with($thumb_src, '/')) {
+                                        $thumb_src = BASE_URL . $thumb_src;
+                                    } else {
+                                        $thumb_src = upload_url($thumb_src);
+                                    }
+                                }
 
                                 $link = trim((string)(
                                     $project['external_url']

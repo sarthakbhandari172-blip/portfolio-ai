@@ -53,18 +53,34 @@ CREATE TABLE IF NOT EXISTS projects (
     id            INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     title         VARCHAR(150)    NOT NULL,
     slug          VARCHAR(160)    NOT NULL UNIQUE,
+    category      VARCHAR(120)    DEFAULT NULL,
     description   TEXT            DEFAULT NULL,
     tech_stack    VARCHAR(255)    DEFAULT NULL  COMMENT 'comma-separated',
     thumbnail     VARCHAR(255)    DEFAULT NULL,
+    thumbnail_path VARCHAR(255)   DEFAULT NULL,
+    external_url  VARCHAR(500)    DEFAULT NULL,
     live_url      VARCHAR(255)    DEFAULT NULL,
     github_url    VARCHAR(255)    DEFAULT NULL,
+    icon_text     VARCHAR(20)     DEFAULT NULL,
     featured      TINYINT(1)      NOT NULL DEFAULT 0,
     sort_order    SMALLINT        NOT NULL DEFAULT 0,
+    is_active     TINYINT(1)      NOT NULL DEFAULT 1,
     created_at    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
 -- ── Experience ───────────────────────────────────────────────
+
+-- Ensure the projects table supports admin-managed featured work fields.
+ALTER TABLE projects
+    ADD COLUMN IF NOT EXISTS category VARCHAR(120) DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS thumbnail_path VARCHAR(255) DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS external_url VARCHAR(500) DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS icon_text VARCHAR(20) DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS is_active TINYINT(1) NOT NULL DEFAULT 1,
+    ADD COLUMN IF NOT EXISTS updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
 CREATE TABLE IF NOT EXISTS experience (
     id            INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     company       VARCHAR(120)    NOT NULL,

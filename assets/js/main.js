@@ -541,3 +541,41 @@ console.log(
   'background:#7c3aed;color:#fff;font-size:14px;font-weight:700;padding:4px 10px;border-radius:4px;',
   'color:#a0a0c0;font-size:12px;padding:4px 0;'
 );
+// Lightweight portal transition for internal section navigation
+(() => {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReducedMotion) return;
+
+  const portal = document.createElement('div');
+  portal.className = 'portal-transition';
+  portal.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(portal);
+
+  const internalLinks = document.querySelectorAll('a[href^="#"]');
+
+  internalLinks.forEach((link) => {
+    link.addEventListener('click', (event) => {
+      const targetId = link.getAttribute('href');
+
+      if (!targetId || targetId === '#') return;
+
+      const target = document.querySelector(targetId);
+      if (!target) return;
+
+      event.preventDefault();
+
+      portal.classList.add('is-active');
+
+      window.setTimeout(() => {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 240);
+
+      window.setTimeout(() => {
+        portal.classList.remove('is-active');
+      }, 900);
+    });
+  });
+})();

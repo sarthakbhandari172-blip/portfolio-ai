@@ -84,6 +84,107 @@ function upload_url(string $path): string {
     return BASE_URL . '/uploads/' . ltrim($path, '/');
 }
 
+/**
+ * Return true for valid HTTP or HTTPS URLs.
+ */
+function is_valid_external_url(string $url): bool {
+    $url = trim($url);
+    if ($url === '') {
+        return false;
+    }
+
+    if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+        return false;
+    }
+
+    $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+    return in_array($scheme, ['http', 'https'], true);
+}
+
+function ensure_upload_directory(string $directory): bool {
+    if (is_dir($directory)) {
+        return is_writable($directory);
+    }
+
+    return mkdir($directory, 0755, true);
+}
+
+function generate_random_filename(string $extension): string {
+    return bin2hex(random_bytes(16)) . '.' . $extension;
+}
+
+/**
+ * Upload an image file and return a relative path inside uploads/projects.
+ * Throws RuntimeException on failure.
+ */
+function upload_image_file(array $file, string $uploadDirectory, int $maxBytes = 3145728): string {
+    if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+        throw new RuntimeException('No upload was provided.');
+    }
+
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        throw new RuntimeException('File upload failed.');
+    }
+
+    if (($file['size'] ?? 0) > $maxBytes) {
+        throw new RuntimeException('Image must be 3MB or smaller.');
+    }
+
+    $imageInfo = @getimagesize($file['tmp_name']);
+    if ($imageInfo === false) {
+        throw new RuntimeException('Uploaded file is not a valid image.');
+    }
+
+    $mime = $imageInfo['mime'] ?? '';
+    $allowed = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/webp' => 'webp',
+    ];
+
+    if (!isset($allowed[$mime])) {
+        throw new RuntimeException('Supported formats: jpg, png, webp.');
+    }
+
+    if (!ensure_upload_directory($uploadDirectory)) {
+        throw new RuntimeException('Unable to create upload directory.');
+    }
+
+    $filename = generate_random_filename($allowed[$mime]);
+    $destination = rtrim($uploadDirectory, '/\\') . '/' . $filename;
+
+    if (!move_uploaded_file($file['tmp_name'], $destination)) {
+        throw new RuntimeException('Unable to save uploaded image.');
+    }
+
+    return 'projects/' . $filename;
+}
+
+function unique_project_slug(string $title, PDO $db, ?int $excludeId = null): string {
+    $base = slugify($title) ?: 'project';
+    $slug = $base;
+    $count = 1;
+
+    while (true) {
+        $sql = 'SELECT COUNT(*) FROM projects WHERE slug = ?';
+        $params = [$slug];
+
+        if ($excludeId !== null) {
+            $sql .= ' AND id <> ?';
+            $params[] = $excludeId;
+        }
+
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+
+        if ((int) $stmt->fetchColumn() === 0) {
+            return $slug;
+        }
+
+        $slug = $base . '-' . $count++;
+    }
+}
+
 // ── Flash messages ───────────────────────────────────────────
 
 /**

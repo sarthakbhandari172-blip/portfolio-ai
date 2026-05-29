@@ -26,6 +26,7 @@ require_once __DIR__ . '/../includes/header.php';
 $stats = [
     'users' => 0,
     'messages' => 0,
+    'active_projects' => 0,
 ];
 
 try {
@@ -36,6 +37,9 @@ try {
 
     $stmt = $db->query('SELECT COUNT(*) AS total FROM contact_messages');
     $stats['messages'] = (int) $stmt->fetchColumn();
+
+    $stmt = $db->query('SELECT COUNT(*) AS total FROM projects WHERE is_active = 1');
+    $stats['active_projects'] = (int) $stmt->fetchColumn();
 } catch (Throwable $e) {
     // Keep counts at zero if the query fails.
 }
@@ -50,6 +54,7 @@ try {
                 <p style="color:var(--t2); max-width:68ch;">This is the admin foundation. Use the logout action when you are finished managing portfolio data.</p>
             </div>
             <div style="display:flex; flex-wrap:wrap; gap:0.75rem; align-items:center;">
+                <a href="<?= BASE_URL ?>/admin/projects.php" class="btn btn--primary">Work / Projects</a>
                 <a href="<?= BASE_URL ?>/admin/profile.php" class="btn btn--primary">Profile Photo</a>
                 <a href="<?= BASE_URL ?>/admin/social-links.php" class="btn btn--primary">Social Links</a>
                 <a href="<?= BASE_URL ?>/admin/logout.php" class="btn btn--outline">Logout</a>
@@ -61,6 +66,11 @@ try {
                 <h3 style="margin-bottom:.75rem;">User Accounts</h3>
                 <p style="font-size:3rem; margin:0;"><?= e((string) $stats['users']) ?></p>
                 <p style="color:var(--t2); margin-top:.75rem;">Registered user accounts in the database.</p>
+            </div>
+            <div class="card">
+                <h3 style="margin-bottom:.75rem;">Active Projects</h3>
+                <p style="font-size:3rem; margin:0;"><?= e((string) $stats['active_projects']) ?></p>
+                <p style="color:var(--t2); margin-top:.75rem;">Featured work cards currently visible on the public site.</p>
             </div>
             <div class="card">
                 <h3 style="margin-bottom:.75rem;">Contact Messages</h3>

@@ -274,73 +274,86 @@ require_once __DIR__ . '/../includes/header.php';
         <?php endif; ?>
 
         <div class="grid2">
-            <div class="card" style="overflow-x:auto; padding:1.5rem;">
+                        <div class="card" style="padding:1.5rem;">
                 <h2 style="margin-top:0; margin-bottom:1.2rem;">Project Records</h2>
-                <table style="width:100%; border-collapse:collapse; color:var(--t1);">
-                    <thead>
-                        <tr style="border-bottom:1px solid rgba(255,255,255,.08); text-align:left; color:var(--t2); font-size:.82rem; letter-spacing:.08em; text-transform:uppercase;">
-                            <th style="padding:.85rem 0; min-width:90px;">Preview</th>
-                            <th style="padding:.85rem 0;">Title</th>
-                            <th style="padding:.85rem 0;">Category</th>
-                            <th style="padding:.85rem 0; text-align:center;">Active</th>
-                            <th style="padding:.85rem 0; text-align:center;">Order</th>
-                            <th style="padding:.85rem 0; text-align:right;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($projects)): ?>
-                            <tr>
-                                <td colspan="6" style="padding:1.5rem 0; color:var(--t2);">No project records are available yet.</td>
-                            </tr>
-                        <?php else: ?>
-                            <?php foreach ($projects as $project): ?>
-                                <?php
-                                    $thumb = trim((string) ($project['thumbnail_path'] ?? $project['thumbnail'] ?? ''));
-                                    if ($thumb !== '') {
-                                        if (!preg_match('#^https?://#i', $thumb) && !str_starts_with($thumb, '/')) {
-                                            $thumb = upload_url($thumb);
-                                        } elseif (str_starts_with($thumb, '/')) {
-                                            $thumb = BASE_URL . $thumb;
-                                        }
+
+                <?php if (empty($projects)): ?>
+                    <div style="padding:1.5rem; border:1px solid rgba(255,255,255,.08); border-radius:var(--r1); background:rgba(255,255,255,.025); color:var(--t2);">
+                        No project records are available yet. Add your first demo or real project from the form.
+                    </div>
+                <?php else: ?>
+                    <div style="display:grid; gap:1rem;">
+                        <?php foreach ($projects as $project): ?>
+                            <?php
+                                $thumb = trim((string) ($project['thumbnail_path'] ?? $project['thumbnail'] ?? ''));
+                                if ($thumb !== '') {
+                                    if (!preg_match('#^https?://#i', $thumb) && !str_starts_with($thumb, '/')) {
+                                        $thumb = upload_url($thumb);
+                                    } elseif (str_starts_with($thumb, '/')) {
+                                        $thumb = BASE_URL . $thumb;
                                     }
-                                ?>
-                                <tr style="border-bottom:1px solid rgba(255,255,255,.08);">
-                                    <td style="padding:.85rem 0; vertical-align:middle;">
-                                        <div style="width:84px; height:56px; border-radius:var(--r1); overflow:hidden; background:rgba(255,255,255,.03); display:flex; align-items:center; justify-content:center; border:1px solid rgba(124,58,237,.15);">
-                                            <?php if ($thumb !== ''): ?>
-                                                <img src="<?= e($thumb) ?>" alt="<?= e($project['title'] ?? 'Project thumbnail') ?>" style="width:100%; height:100%; object-fit:cover; display:block;" loading="lazy">
-                                            <?php else: ?>
-                                                <span style="font-size:1.3rem;"><?= e(trim((string) ($project['icon_text'] ?? '📁')) ?: '📁') ?></span>
-                                            <?php endif; ?>
+                                }
+
+                                $projectTitle = trim((string) ($project['title'] ?? 'Untitled Project'));
+                                $projectCategory = trim((string) ($project['category'] ?? 'Project'));
+                                $projectLink = trim((string) ($project['external_url'] ?? $project['live_url'] ?? ''));
+                                $projectIcon = trim((string) ($project['icon_text'] ?? '📁')) ?: '📁';
+                                $projectActive = isset($project['is_active']) && (int) $project['is_active'] === 1;
+                            ?>
+
+                            <div style="display:grid; grid-template-columns:92px 1fr; gap:1rem; padding:1rem; border:1px solid rgba(6,182,212,.18); border-radius:var(--r1); background:linear-gradient(135deg, rgba(124,58,237,.08), rgba(6,182,212,.035));">
+                                <div style="width:92px; height:68px; border-radius:var(--r1); overflow:hidden; background:rgba(255,255,255,.035); display:flex; align-items:center; justify-content:center; border:1px solid rgba(124,58,237,.18);">
+                                    <?php if ($thumb !== ''): ?>
+                                        <img src="<?= e($thumb) ?>" alt="<?= e($projectTitle) ?>" style="width:100%; height:100%; object-fit:cover; display:block;" loading="lazy">
+                                    <?php else: ?>
+                                        <span style="font-size:1.8rem;"><?= e($projectIcon) ?></span>
+                                    <?php endif; ?>
+                                </div>
+
+                                <div style="min-width:0;">
+                                    <div style="display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin-bottom:.45rem;">
+                                        <strong style="font-size:1rem; color:var(--t1);"><?= e($projectTitle) ?></strong>
+                                        <span class="badge badge--cyan"><?= e($projectCategory !== '' ? $projectCategory : 'Project') ?></span>
+                                        <span class="<?= $projectActive ? 'badge badge--ok' : 'badge badge--muted' ?>">
+                                            <?= $projectActive ? 'Active' : 'Hidden' ?>
+                                        </span>
+                                        <span style="font-family:var(--mono); color:var(--t2); font-size:.72rem;">Order: <?= e((string) ($project['sort_order'] ?? '0')) ?></span>
+                                    </div>
+
+                                    <?php if ($projectLink !== ''): ?>
+                                        <div style="color:var(--t2); font-size:.78rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-bottom:.8rem;">
+                                            <?= e($projectLink) ?>
                                         </div>
-                                    </td>
-                                    <td style="padding:.85rem 0; vertical-align:middle;">
-                                        <strong><?= e($project['title'] ?? 'Untitled') ?></strong>
-                                        <div style="color:var(--t2); font-size:.82rem; margin-top:.3rem;"><?= e($project['external_url'] ?? $project['live_url'] ?? '') ?></div>
-                                    </td>
-                                    <td style="padding:.85rem 0; vertical-align:middle;"><?= e($project['category'] ?? '') ?></td>
-                                    <td style="padding:.85rem 0; vertical-align:middle; text-align:center;"><?= (isset($project['is_active']) && (int) $project['is_active'] === 1) ? 'Yes' : 'No' ?></td>
-                                    <td style="padding:.85rem 0; vertical-align:middle; text-align:center;"><?= e((string) ($project['sort_order'] ?? '0')) ?></td>
-                                    <td style="padding:.85rem 0; vertical-align:middle; text-align:right; white-space:nowrap;">
-                                        <form action="" method="POST" style="display:inline-block; margin-right:.5rem;">
+                                    <?php else: ?>
+                                        <div style="color:var(--t2); font-size:.78rem; margin-bottom:.8rem;">
+                                            No external link added yet.
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <div style="display:flex; flex-wrap:wrap; gap:.55rem;">
+                                        <a href="<?= BASE_URL ?>/admin/projects.php?edit=<?= e((string) $project['id']) ?>" class="btn btn--outline" style="font-size:.78rem; padding:.48rem .75rem;">Edit</a>
+
+                                        <form action="" method="POST" style="display:inline-block;">
                                             <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
                                             <input type="hidden" name="action" value="toggle">
                                             <input type="hidden" name="project_id" value="<?= e((string) $project['id']) ?>">
-                                            <button type="submit" class="btn btn--outline" style="font-size:.8rem; padding:.5rem .75rem;"><?= (isset($project['is_active']) && (int) $project['is_active'] === 1) ? 'Deactivate' : 'Activate' ?></button>
+                                            <button type="submit" class="btn btn--outline" style="font-size:.78rem; padding:.48rem .75rem;">
+                                                <?= $projectActive ? 'Deactivate' : 'Activate' ?>
+                                            </button>
                                         </form>
-                                        <a href="<?= BASE_URL ?>/admin/projects.php?edit=<?= e((string) $project['id']) ?>" class="btn btn--outline" style="font-size:.8rem; padding:.5rem .75rem; margin-right:.5rem;">Edit</a>
+
                                         <form action="" method="POST" style="display:inline-block;" onsubmit="return confirm('Delete this project? This cannot be undone.');">
                                             <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
                                             <input type="hidden" name="action" value="delete">
                                             <input type="hidden" name="project_id" value="<?= e((string) $project['id']) ?>">
-                                            <button type="submit" class="btn btn--outline" style="font-size:.8rem; padding:.5rem .75rem; color:#ffb3b3; border-color:rgba(255,179,179,.35);">Delete</button>
+                                            <button type="submit" class="btn btn--outline" style="font-size:.78rem; padding:.48rem .75rem; color:#ffb3b3; border-color:rgba(255,179,179,.35);">Delete</button>
                                         </form>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="card" style="padding:2rem;">

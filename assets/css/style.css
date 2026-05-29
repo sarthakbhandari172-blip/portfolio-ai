@@ -2736,3 +2736,26 @@ label,
     opacity: 0;
   }
 }
+/* PROJECT THUMBNAIL FIT FIX */
+#work .card img {
+  object-fit: contain !important;
+  background:
+    radial-gradient(circle at center, rgba(6, 182, 212, 0.08), transparent 55%),
+    rgba(3, 7, 18, 0.72) !important;
+}
+
+#work .card > div:has(img) {
+  height: 210px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background:
+    linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(6, 182, 212, 0.08)) !important;
+}
+
+/* Mobile thumbnail adjustment */
+@media (max-width: 768px) {
+  #work .card > div:has(img) {
+    height: 180px !important;
+  }
+}

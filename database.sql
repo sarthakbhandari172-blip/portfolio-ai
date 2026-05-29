@@ -104,10 +104,19 @@ CREATE TABLE IF NOT EXISTS social_links (
     icon_text     VARCHAR(20)     NOT NULL,
     sort_order    INT             NOT NULL DEFAULT 0,
     is_active     TINYINT(1)      NOT NULL DEFAULT 1,
+    show_in_hero   TINYINT(1)      NOT NULL DEFAULT 1,
+    show_in_contact TINYINT(1)     NOT NULL DEFAULT 1,
+    show_in_footer TINYINT(1)      NOT NULL DEFAULT 1,
     created_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
+
+-- Add visibility controls (safe on updated MySQL versions)
+ALTER TABLE social_links
+    ADD COLUMN IF NOT EXISTS show_in_hero TINYINT(1) NOT NULL DEFAULT 1,
+    ADD COLUMN IF NOT EXISTS show_in_contact TINYINT(1) NOT NULL DEFAULT 1,
+    ADD COLUMN IF NOT EXISTS show_in_footer TINYINT(1) NOT NULL DEFAULT 1;
 
 INSERT INTO social_links (platform, label, url, icon_text, sort_order, is_active)
 SELECT 'email', 'Email', 'mailto:sarthakbhandari172@gmail.com', 'EM', 1, 1
@@ -128,6 +137,15 @@ WHERE NOT EXISTS (SELECT 1 FROM social_links WHERE platform = 'instagram');
 INSERT INTO social_links (platform, label, url, icon_text, sort_order, is_active)
 SELECT 'facebook', 'Facebook', '#', 'FB', 5, 0
 WHERE NOT EXISTS (SELECT 1 FROM social_links WHERE platform = 'facebook');
+
+-- Defaults / updates for visibility flags
+UPDATE social_links SET show_in_hero = 1, show_in_contact = 1, show_in_footer = 1
+WHERE platform IN ('email', 'github', 'instagram');
+
+UPDATE social_links SET show_in_hero = 0, show_in_contact = 1, show_in_footer = 1
+WHERE platform = 'linkedin';
+
+-- Keep facebook inactive unless already active; visibility defaults stay on.
 
 -- Default settings seed
 INSERT INTO settings (setting_key, setting_value) VALUES

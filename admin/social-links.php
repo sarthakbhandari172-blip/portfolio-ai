@@ -47,32 +47,39 @@ if (is_post()) {
         $icon_text = trim($_POST['icon_text'] ?? '');
         $sort_order = max(0, min(999, (int) ($_POST['sort_order'] ?? 0)));
         $is_active = isset($_POST['is_active']) ? 1 : 0;
+        $show_in_hero = isset($_POST['show_in_hero']) ? 1 : 0;
+        $show_in_contact = isset($_POST['show_in_contact']) ? 1 : 0;
+        $show_in_footer = isset($_POST['show_in_footer']) ? 1 : 0;
 
         if ($platform === '' || $url === '' || $icon_text === '') {
             flash('error', 'Platform, URL, and icon text are required.');
-            $editLink = compact('id', 'platform', 'url', 'label', 'icon_text', 'sort_order', 'is_active');
+            $editLink = compact('id', 'platform', 'url', 'label', 'icon_text', 'sort_order', 'is_active', 'show_in_hero', 'show_in_contact', 'show_in_footer');
         } elseif (!is_social_url($url)) {
             flash('error', 'URL must begin with https://, http://, or mailto:.');
-            $editLink = compact('id', 'platform', 'url', 'label', 'icon_text', 'sort_order', 'is_active');
+            $editLink = compact('id', 'platform', 'url', 'label', 'icon_text', 'sort_order', 'is_active', 'show_in_hero', 'show_in_contact', 'show_in_footer');
         } else {
             try {
                 if ($id > 0) {
                     $stmt = get_db()->prepare(
-                        'UPDATE social_links SET platform = ?, url = ?, label = ?, icon_text = ?, sort_order = ?, is_active = ? WHERE id = ? LIMIT 1'
+                        'UPDATE social_links
+                         SET platform = ?, url = ?, label = ?, icon_text = ?, sort_order = ?, is_active = ?,
+                             show_in_hero = ?, show_in_contact = ?, show_in_footer = ?
+                         WHERE id = ? LIMIT 1'
                     );
-                    $stmt->execute([$platform, $url, $label, $icon_text, $sort_order, $is_active, $id]);
+                    $stmt->execute([$platform, $url, $label, $icon_text, $sort_order, $is_active, $show_in_hero, $show_in_contact, $show_in_footer, $id]);
                     flash('success', 'Social link updated successfully.');
                 } else {
                     $stmt = get_db()->prepare(
-                        'INSERT INTO social_links (platform, url, label, icon_text, sort_order, is_active) VALUES (?, ?, ?, ?, ?, ?)'
+                        'INSERT INTO social_links (platform, url, label, icon_text, sort_order, is_active, show_in_hero, show_in_contact, show_in_footer)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
                     );
-                    $stmt->execute([$platform, $url, $label, $icon_text, $sort_order, $is_active]);
+                    $stmt->execute([$platform, $url, $label, $icon_text, $sort_order, $is_active, $show_in_hero, $show_in_contact, $show_in_footer]);
                     flash('success', 'Social link added successfully.');
                 }
                 redirect(BASE_URL . '/admin/social-links.php');
             } catch (Throwable $e) {
                 flash('error', 'Database error saving link.');
-                $editLink = compact('id', 'platform', 'url', 'label', 'icon_text', 'sort_order', 'is_active');
+                $editLink = compact('id', 'platform', 'url', 'label', 'icon_text', 'sort_order', 'is_active', 'show_in_hero', 'show_in_contact', 'show_in_footer');
             }
         }
     }
@@ -183,6 +190,26 @@ if (isset($_GET['edit'])) {
                             <input type="checkbox" name="is_active" <?= !empty($editLink['is_active']) ? 'checked' : '' ?> style="accent-color:var(--acc2);">
                             Active
                         </label>
+                    </div>
+
+                    <div class="card" style="padding:1rem; background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.06);">
+                        <p style="margin:0 0 .75rem; font-family:var(--mono); font-size:.75rem; letter-spacing:.08em; text-transform:uppercase; color:var(--t2);">
+                            Visibility Controls
+                        </p>
+                        <div style="display:flex; flex-wrap:wrap; gap:1rem;">
+                            <label style="display:flex; align-items:center; gap:0.5rem; font-family:var(--mono); font-size:.82rem; color:var(--t2);">
+                                <input type="checkbox" name="show_in_hero" <?= (!isset($editLink['show_in_hero']) || !empty($editLink['show_in_hero'])) ? 'checked' : '' ?> style="accent-color:var(--acc2);">
+                                Show in Hero
+                            </label>
+                            <label style="display:flex; align-items:center; gap:0.5rem; font-family:var(--mono); font-size:.82rem; color:var(--t2);">
+                                <input type="checkbox" name="show_in_contact" <?= (!isset($editLink['show_in_contact']) || !empty($editLink['show_in_contact'])) ? 'checked' : '' ?> style="accent-color:var(--acc2);">
+                                Show in Contact
+                            </label>
+                            <label style="display:flex; align-items:center; gap:0.5rem; font-family:var(--mono); font-size:.82rem; color:var(--t2);">
+                                <input type="checkbox" name="show_in_footer" <?= (!isset($editLink['show_in_footer']) || !empty($editLink['show_in_footer'])) ? 'checked' : '' ?> style="accent-color:var(--acc2);">
+                                Show in Footer
+                            </label>
+                        </div>
                     </div>
 
                     <button type="submit" class="btn btn--primary" style="justify-content:center; width:min(100%,220px);">

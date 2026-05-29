@@ -211,6 +211,123 @@ const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
 
   requestAnimationFrame(update);
 })();
+(function initHeroPanelTilt() {
+  const panel = qs('.hero__panel');
+  if (!panel || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const state = {
+    targetX: 0,
+    targetY: 0,
+    currentX: 0,
+    currentY: 0,
+    active: false,
+    pointerType: 'mouse',
+  };
+  const bounds = { left: 0, top: 0, width: 0, height: 0 };
+
+  const getMaxTilt = () => (state.pointerType === 'touch' ? 9 : 16);
+
+  const refreshBounds = () => {
+    const rect = panel.getBoundingClientRect();
+    bounds.left = rect.left;
+    bounds.top = rect.top;
+    bounds.width = rect.width;
+    bounds.height = rect.height;
+  };
+
+  const normalize = (clientX, clientY) => {
+    if (!bounds.width || !bounds.height) {
+      return { x: 0, y: 0 };
+    }
+    const x = ((clientX - bounds.left) / bounds.width) * 2 - 1;
+    const y = ((clientY - bounds.top) / bounds.height) * 2 - 1;
+    return {
+      x: Math.max(-1, Math.min(1, x)),
+      y: Math.max(-1, Math.min(1, y)),
+    };
+  };
+
+  const setTarget = (clientX, clientY) => {
+    const pos = normalize(clientX, clientY);
+    state.targetX = pos.x;
+    state.targetY = pos.y;
+  };
+
+  const resetTarget = () => {
+    state.targetX = 0;
+    state.targetY = 0;
+  };
+
+  const tick = () => {
+    const ease = state.active ? 0.32 : 0.14;
+    state.currentX += (state.targetX - state.currentX) * ease;
+    state.currentY += (state.targetY - state.currentY) * ease;
+
+    const maxTiltValue = getMaxTilt();
+    const rx = -state.currentY * maxTiltValue * 0.72;
+    const ry = state.currentX * maxTiltValue;
+    panel.style.setProperty('--rx', `${rx.toFixed(2)}deg`);
+    panel.style.setProperty('--ry', `${ry.toFixed(2)}deg`);
+    panel.style.setProperty('--mx', `${(state.currentX * 18).toFixed(2)}`);
+    panel.style.setProperty('--my', `${(state.currentY * 14).toFixed(2)}`);
+    panel.style.setProperty('--depth', `${(state.active ? 12 : 0).toFixed(2)}px`);
+    panel.style.setProperty('--hero-ring-offset-x', `${(-ry * 0.3).toFixed(2)}px`);
+    panel.style.setProperty('--hero-ring-offset-y', `${(-rx * 0.3).toFixed(2)}px`);
+    panel.style.setProperty('--hero-glow-x', `${(state.currentX * 24).toFixed(2)}px`);
+    panel.style.setProperty('--hero-glow-y', `${(state.currentY * 18).toFixed(2)}px`);
+
+    requestAnimationFrame(tick);
+  };
+
+  const onPointerDown = (event) => {
+    if (!['mouse', 'touch', 'pen'].includes(event.pointerType)) return;
+    state.pointerType = event.pointerType;
+    refreshBounds();
+    panel.setPointerCapture?.(event.pointerId);
+    panel.classList.add('hero__panel--dragging');
+    state.active = true;
+    setTarget(event.clientX, event.clientY);
+    event.preventDefault();
+  };
+
+  const onPointerMove = (event) => {
+    if (!state.active) return;
+    setTarget(event.clientX, event.clientY);
+  };
+
+  const onPointerUp = (event) => {
+    if (!state.active) return;
+    state.active = false;
+    panel.classList.remove('hero__panel--dragging');
+    resetTarget();
+    panel.releasePointerCapture?.(event.pointerId);
+  };
+
+  panel.addEventListener('pointerdown', onPointerDown, { passive: false });
+  panel.addEventListener('pointermove', onPointerMove, { passive: false });
+  panel.addEventListener('pointerup', onPointerUp);
+  panel.addEventListener('pointercancel', onPointerUp);
+  panel.addEventListener('pointerleave', () => {
+    if (!state.active) {
+      resetTarget();
+    }
+  });
+  window.addEventListener('resize', refreshBounds, { passive: true });
+
+  const portalButton = qs('#cta-enter-portal');
+  if (portalButton) {
+    portalButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      const workSection = document.querySelector('#work');
+      if (workSection) {
+        workSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
+
+  refreshBounds();
+  requestAnimationFrame(tick);
+})();
 /* ── 7. Background Canvas Field ───────────────────────────── */
 (function initBackgroundCanvas() {
   const canvas = qs('.bg-canvas__field');

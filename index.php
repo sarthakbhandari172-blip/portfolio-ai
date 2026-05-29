@@ -52,16 +52,25 @@ try {
     $skills = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Fetch Projects
-    $stmt = $db->query('SELECT * FROM projects ORDER BY sort_order ASC, created_at DESC');
+    $stmt = $db->query('SELECT * FROM projects WHERE is_active = 1 ORDER BY sort_order ASC, id DESC');
     $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Fetch Experience
     $stmt = $db->query('SELECT * FROM experience ORDER BY sort_order ASC, start_date DESC');
     $experience = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Fetch profile avatar for hero lobby display
+    $stmt = $db->query('SELECT avatar FROM profile WHERE avatar <> "" ORDER BY updated_at DESC, id DESC LIMIT 1');
+    $profileAvatarRow = $stmt->fetch(PDO::FETCH_ASSOC);
+    $profileAvatarUrl = '';
+    if (!empty($profileAvatarRow['avatar'])) {
+        $profileAvatarUrl = upload_url($profileAvatarRow['avatar']);
+    }
 } catch (Throwable $e) {
     $skills = [];
     $projects = [];
     $experience = [];
+    $profileAvatarUrl = '';
     $social_links = [];
 }
 
@@ -77,11 +86,16 @@ try {
 
 if (empty($social_links)) {
     $social_links = [
-        ['platform' => 'github', 'label' => 'GitHub Profile', 'url' => 'https://github.com', 'icon_text' => 'GH'],
-        ['platform' => 'linkedin', 'label' => 'LinkedIn Profile', 'url' => 'https://linkedin.com', 'icon_text' => 'LI'],
-        ['platform' => 'email', 'label' => 'Email Uplink', 'url' => 'mailto:contact@sarthakbhandari.com', 'icon_text' => 'EM'],
+        ['platform' => 'github', 'label' => 'GitHub Profile', 'url' => 'https://github.com', 'icon_text' => 'GH', 'show_in_hero' => 1, 'show_in_contact' => 1, 'show_in_footer' => 1],
+        ['platform' => 'linkedin', 'label' => 'LinkedIn Profile', 'url' => 'https://linkedin.com', 'icon_text' => 'LI', 'show_in_hero' => 0, 'show_in_contact' => 1, 'show_in_footer' => 1],
+        ['platform' => 'email', 'label' => 'Email Uplink', 'url' => 'mailto:contact@sarthakbhandari.com', 'icon_text' => 'EM', 'show_in_hero' => 1, 'show_in_contact' => 1, 'show_in_footer' => 1],
     ];
 }
+
+// Apply per-location visibility filters (defaults to visible if columns aren't present yet)
+$hero_social_links = array_values(array_filter($social_links, fn($l) => !isset($l['show_in_hero']) || (int) $l['show_in_hero'] === 1));
+$contact_social_links = array_values(array_filter($social_links, fn($l) => !isset($l['show_in_contact']) || (int) $l['show_in_contact'] === 1));
+$hasProfileAvatar = !empty($profileAvatarUrl);
 
 // Fallback Skills if database is unseeded
 if (empty($skills)) {
@@ -293,6 +307,12 @@ require_once __DIR__ . '/includes/header.php';
                         </svg>
                         View Work
                     </a>
+                    <a href="#work" class="btn btn--portal" id="cta-enter-portal">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="margin-right: 0.35rem;">
+                            <path d="M4 12h16M12 4v16"/>
+                        </svg>
+                        Enter Portal
+                    </a>
                     <a href="#contact" class="btn btn--outline" id="cta-contact">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="margin-right: 0.35rem;">
                             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
@@ -305,153 +325,56 @@ require_once __DIR__ . '/includes/header.php';
                 <!-- Social icon area placeholders -->
                 <div class="hero__socials" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                     <span style="font-family: var(--mono); font-size: 0.68rem; color: var(--t3); letter-spacing: 0.12em; text-transform: uppercase;">Channel Uplinks:</span>
-                    <?php foreach ($social_links as $link):
+                    <?php foreach ($hero_social_links as $link):
                         $url = $link['url'] ?? '#';
                         $isMail = strpos($url, 'mailto:') === 0;
-                        $label = $link['icon_text'] ?? mb_strtoupper(mb_substr($link['platform'] ?? '', 0, 2));
+                        $a11yLabel = (string) ($link['label'] ?? $link['platform'] ?? 'Link');
+                        $platformKey = mb_strtolower(trim((string) ($link['platform'] ?? '')));
                     ?>
-                        <a href="<?= e($url) ?>" <?= $isMail ? '' : 'target="_blank" rel="noopener noreferrer"' ?> class="social-node" title="<?= e($link['label'] ?? $link['platform']) ?>"><?= e($label) ?></a>
+                        <a
+                            href="<?= e($url) ?>"
+                            <?= $isMail ? '' : 'target="_blank" rel="noopener noreferrer"' ?>
+                            class="social-node"
+                            title="<?= e($a11yLabel) ?>"
+                            aria-label="<?= e($a11yLabel) ?>"
+                            data-platform="<?= e($platformKey) ?>"
+                        ><?= get_social_icon_svg((string) ($link['platform'] ?? '')) ?></a>
                     <?php endforeach; ?>
                 </div>
 
-                <!-- System status -->
-                <div class="hero__status" style="margin-top: 2.5rem;">
-                    <span class="status-dot"></span>
-                    <span>LOBBY LOADED &mdash; SECURE TRANSMISSION ESTABLISHED</span>
-                </div>
             </div>
 
             <!-- Right Panel: Cinematic RPG HUD Dashboard -->
             <div class="hero__right">
-                <div class="hero__panel">
-                    <div class="hero__panel-bg"></div>
-                    <div class="hero__particles" aria-hidden="true"></div>
-                    <span class="card-corner card-corner--tl"></span>
-                    <span class="card-corner card-corner--tr"></span>
-                    <span class="card-corner card-corner--bl"></span>
-                    <span class="card-corner card-corner--br"></span>
-                    <div class="hero__panel-glow"></div>
+    <div class="hero__panel">
+        <div class="hero__panel-bg"></div>
+        <div class="hero__particles" aria-hidden="true"></div>
 
-                    <div class="hero__panel-frame">
-                        <div class="hero__panel-ring hero__panel-ring--outer"></div>
-                        <div class="hero__panel-ring hero__panel-ring--inner"></div>
-                        <div class="hero__panel-ring hero__panel-ring--accent"></div>
+        <span class="hero__panel-ring hero__panel-ring--outer" aria-hidden="true"></span>
+        <span class="hero__panel-ring hero__panel-ring--inner" aria-hidden="true"></span>
+        <span class="hero__panel-ring hero__panel-ring--accent" aria-hidden="true"></span>
 
-                        <div class="hero__character-frame">
-                            <div class="hero__character-backdrop"></div>
-                            <div class="hero__character">
-                                <svg viewBox="0 0 300 430" class="hero__character-svg" aria-hidden="true">
-                                    <defs>
-                                        <linearGradient id="heroHelmetGrad" x1="0" x2="0" y1="0" y2="1">
-                                            <stop offset="0%" stop-color="#11131f"/>
-                                            <stop offset="100%" stop-color="#090b14"/>
-                                        </linearGradient>
-                                        <linearGradient id="heroVisorGrad" x1="0" x2="1" y1="0" y2="0">
-                                            <stop offset="0%" stop-color="#06b6d4" stop-opacity=".95"/>
-                                            <stop offset="100%" stop-color="#7c3aed" stop-opacity=".92"/>
-                                        </linearGradient>
-                                        <linearGradient id="heroCoreGrad" x1="0" x2="0" y1="0" y2="1">
-                                            <stop offset="0%" stop-color="#06b6d4" stop-opacity="1"/>
-                                            <stop offset="45%" stop-color="#7c3aed" stop-opacity=".62"/>
-                                            <stop offset="100%" stop-color="#060c1b" stop-opacity="0"/>
-                                        </linearGradient>
-                                        <linearGradient id="heroArmorGrad" x1="0" x2="1" y1="0" y2="1">
-                                            <stop offset="0%" stop-color="#11131f"/>
-                                            <stop offset="100%" stop-color="#16182b"/>
-                                        </linearGradient>
-                                        <linearGradient id="heroArmGrad" x1="0" x2="0" y1="0" y2="1">
-                                            <stop offset="0%" stop-color="#161a2c"/>
-                                            <stop offset="100%" stop-color="#0a0c15"/>
-                                        </linearGradient>
-                                        <linearGradient id="heroLegGrad" x1="0" x2="0" y1="0" y2="1">
-                                            <stop offset="0%" stop-color="#0f1221"/>
-                                            <stop offset="100%" stop-color="#07080f"/>
-                                        </linearGradient>
-                                    </defs>
+        <span class="card-corner card-corner--tl"></span>
+        <span class="card-corner card-corner--tr"></span>
+        <span class="card-corner card-corner--bl"></span>
+        <span class="card-corner card-corner--br"></span>
 
-                                    <g class="character-aura">
-                                        <ellipse cx="150" cy="168" rx="120" ry="150" fill="rgba(6,182,212,.14)"/>
-                                        <ellipse cx="150" cy="188" rx="90" ry="110" fill="rgba(124,58,237,.12)"/>
-                                    </g>
+        <div class="hero__panel-glow"></div>
+        <div class="hero__panel-hint">DRAG TO INSPECT</div>
 
-                                    <g class="character-shell">
-                                        <path class="helmet-shell" d="M88 32 C80 32 72 48 72 72 C72 110 92 132 118 138 C116 158 112 182 112 208 C112 236 122 250 144 268 C154 278 164 286 150 286 C136 286 146 278 156 268 C178 250 188 236 188 208 C188 182 184 158 182 138 C208 132 228 110 228 72 C228 48 220 32 212 32 C204 32 184 44 150 44 C116 44 96 32 88 32 Z"/>
-                                        <path class="helmet-edge" d="M120 42 C126 46 138 46 144 42 C144 46 156 46 162 42 C154 52 140 52 120 42 Z"/>
-                                        <path class="visor" d="M108 90 C108 72 152 72 152 90 C176 92 176 116 152 116 C148 116 116 116 108 108 C108 102 108 96 108 90 Z"/>
-                                        <path class="visor-line" d="M112 96 L148 96"/>
-                                        <path class="neck-shell" d="M118 140 L182 140 C188 176 178 186 150 196 C122 186 112 176 118 140 Z"/>
-
-                                        <path class="shoulder-shell" d="M48 158 C34 178 34 222 70 238 L98 186 C86 172 76 164 66 160 C60 158 54 158 48 158 Z"/>
-                                        <path class="shoulder-shell" d="M252 158 C266 178 266 222 230 238 L202 186 C214 172 224 164 234 160 C240 158 246 158 252 158 Z"/>
-
-                                        <path class="arm-shell" d="M72 238 C56 256 56 292 72 310 C88 328 104 342 114 342 L122 342 C112 318 108 292 120 280 C132 268 140 264 150 264 L150 238 C118 246 94 240 72 238 Z"/>
-                                        <path class="arm-shell" d="M228 238 C244 256 244 292 228 310 C212 328 196 342 186 342 L178 342 C188 318 192 292 180 280 C168 268 160 264 150 264 L150 238 C182 246 206 240 228 238 Z"/>
-
-                                        <path class="chest-shell" d="M84 158 L216 158 C232 158 244 178 244 196 C244 220 228 234 204 246 C188 256 166 268 150 282 C134 268 112 256 96 246 C72 234 56 220 56 196 C56 178 68 158 84 158 Z"/>
-                                        <circle class="core-glow" cx="150" cy="214" r="24"/>
-                                        <circle class="core-inner" cx="150" cy="214" r="14"/>
-                                        <path class="chest-detail" d="M104 180 L196 180"/>
-                                        <path class="chest-detail" d="M132 230 L168 230"/>
-
-                                        <path class="waist-shell" d="M102 278 C112 292 120 316 120 340 L180 340 C180 316 188 292 198 278 C214 278 226 290 226 306 L226 334 C226 344 218 352 208 352 L92 352 C82 352 74 344 74 334 L74 306 C74 290 86 278 102 278 Z"/>
-                                        <path class="leg-shell" d="M112 340 L124 412 C124 418 118 424 110 424 C102 424 96 418 96 412 L108 340 Z"/>
-                                        <path class="leg-shell" d="M188 340 L176 412 C176 418 182 424 190 424 C198 424 204 418 204 412 L192 340 Z"/>
-
-                                        <path class="armor-detail" d="M98 160 L84 198"/>
-                                        <path class="armor-detail" d="M202 160 L216 198"/>
-                                        <path class="armor-detail" d="M150 44 L150 88"/>
-                                    </g>
-                                </svg>
-                            </div>
-
-                            <div class="hero__hud-mini">
-                                <span class="hud__label">PROC SECURE</span>
-                                <span class="hud__value">ARMOR SYSTEM | NOMINAL</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="hero__panel-meta">
-                        <span class="hero__panel-tag">ARMOR GRID</span>
-                        <span class="hero__panel-status">IDLE STATE • STABILIZED</span>
-                    </div>
-
-                    <!-- RPG stats panel block -->
-                    <div class="hero__panel-stats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-family: var(--mono); position: relative; z-index: 1;">
-                        
-                        <!-- Panel: Profile State -->
-                        <div style="border: 1px solid rgba(34, 212, 126, 0.25); background: linear-gradient(135deg, rgba(34, 212, 126, 0.08) 0%, rgba(34, 212, 126, 0.02) 100%); backdrop-filter: blur(10px); padding: 0.6rem 0.75rem; border-radius: var(--r1); box-shadow: 0 0 15px rgba(34, 212, 126, 0.05), inset 0 1px 1px rgba(34, 212, 126, 0.1);">
-                            <span style="display: block; font-size: 0.56rem; color: rgba(34, 212, 126, 0.7); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">● System Status</span>
-                            <span style="font-size: 0.78rem; color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 0.4rem; margin-top: 0.25rem;">
-                                <span style="width: 6px; height: 6px; background: var(--ok); border-radius: 50%; box-shadow: 0 0 8px var(--ok);"></span>
-                                ONLINE
-                            </span>
-                        </div>
-
-                        <!-- Panel: Operator Load -->
-                        <div style="border: 1px solid rgba(6, 182, 212, 0.25); background: linear-gradient(135deg, rgba(6, 182, 212, 0.08) 0%, rgba(6, 182, 212, 0.02) 100%); backdrop-filter: blur(10px); padding: 0.6rem 0.75rem; border-radius: var(--r1); box-shadow: 0 0 15px rgba(6, 182, 212, 0.05), inset 0 1px 1px rgba(6, 182, 212, 0.1);">
-                            <span style="display: block; font-size: 0.56rem; color: rgba(6, 182, 212, 0.7); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">◆ Operator Load</span>
-                            <span style="font-size: 0.78rem; color: var(--acc2); font-weight: 700; display: block; margin-top: 0.25rem;">STABLE (100%)</span>
-                        </div>
-
-                        <!-- Panel: Full-width Operator Class -->
-                        <div style="border: 1.5px solid rgba(124, 58, 237, 0.3); background: linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(168, 85, 247, 0.06) 100%); backdrop-filter: blur(12px); padding: 0.7rem 0.85rem; border-radius: var(--r1); grid-column: span 2; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 0 20px rgba(124, 58, 237, 0.08), inset 0 1px 2px rgba(124, 58, 237, 0.15);">
-                            <div>
-                                <span style="display: block; font-size: 0.56rem; color: rgba(124, 58, 237, 0.75); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">⬡ Creator Class</span>
-                                <span style="font-size: 0.8rem; color: var(--t1); font-weight: 700; display: block; margin-top: 0.2rem;">WEB BUILDER</span>
-                            </div>
-                            <span style="font-size: 0.65rem; color: #fff; background: linear-gradient(135deg, rgba(124, 58, 237, 0.4) 0%, rgba(168, 85, 247, 0.3) 100%); border: 1px solid rgba(124, 58, 237, 0.4); padding: 0.2rem 0.45rem; border-radius: 3px; font-weight: 700; box-shadow: 0 0 12px rgba(124, 58, 237, 0.2);">LVLØ1</span>
-                        </div>
-
-                    </div>
-
+        <div class="hero__panel-frame" aria-label="Sarthak Bhandari futuristic character">
+            <div class="hero__character-frame">
+                <div class="hero__character">
+                    <img class="hero-character-img" src="assets/images/hero.png" alt="Sarthak Bhandari futuristic character" />
+                    <span class="hero__eye-pulse hero__eye-pulse--left"></span>
+                    <span class="hero__eye-pulse hero__eye-pulse--right"></span>
+                    <span class="hero__eye-ray hero__eye-ray--left"></span>
+                    <span class="hero__eye-ray hero__eye-ray--right"></span>
                 </div>
             </div>
-
         </div>
     </div>
-
-    <!-- Scroll cue -->
+</div>
     <div class="hero__scroll-cue" aria-hidden="true">
         <span>scroll</span>
         <div class="scroll-arrow"></div>
@@ -634,151 +557,122 @@ require_once __DIR__ . '/includes/header.php';
 </section>
 
 <!-- ── Work Showcase Section ───────────────────────────── -->
-<section class="section" id="work" aria-label="Work Showcase">
-    <div class="container">
-        <p class="section-label">Work Showcase</p>
-        <h2 class="section-title">Featured <span class="accent">Work</span></h2>
-        <p style="margin-bottom: 2.5rem; max-width: 65ch;">
-            A selection of recent work that highlights websites, automation tools, and design-driven digital experiences.
-        </p>
+        <section class="section" id="work" aria-label="Work Showcase">
+            <div class="container">
+                <p class="section-label">Work Showcase</p>
+                <h2 class="section-title">Featured <span class="accent">Work</span></h2>
+                <p style="margin-bottom: 2.5rem; max-width: 65ch;">
+                    A selection of recent work that highlights websites, automation tools, and design-driven digital experiences.
+                </p>
 
-        <div class="grid3">
-            <?php
-            $work_items = $projects ?? [];
-            $has_db_projects = !empty($work_items) && is_array($work_items);
-            ?>
+                <div class="grid3">
+                    <?php
+                        $work_items = (isset($projects) && is_array($projects)) ? $projects : [];
+                    ?>
 
-            <?php if ($has_db_projects): ?>
-                <?php foreach ($work_items as $project):
-                    $title = (string) ($project['title'] ?? '');
-                    $desc  = (string) ($project['description'] ?? '');
-                    $tech  = trim((string) ($project['tech_stack'] ?? ''));
+                    <?php if (!empty($work_items)): ?>
+                        <?php foreach ($work_items as $project): ?>
+                            <?php
+                                $title = trim((string)($project['title'] ?? ''));
+                                $category = trim((string)($project['category'] ?? 'Project'));
+                                $desc = trim((string)($project['description'] ?? ''));
+                                $icon_text = trim((string)($project['icon_text'] ?? '📁'));
 
-                    // Prefer live URL; fall back to GitHub URL; otherwise no-op.
-                    $link = trim((string) ($project['live_url'] ?? ''));
-                    if ($link === '') $link = trim((string) ($project['project_url'] ?? ''));
-                    if ($link === '') $link = trim((string) ($project['github_url'] ?? ''));
-                    $is_valid_link = $link !== '' && preg_match('/^https?:\\/\\//i', $link) === 1;
-                    $href = $is_valid_link ? $link : '#';
+                                $thumb_src = trim((string)(
+                                    $project['thumbnail_path']
+                                    ?? $project['thumbnail']
+                                    ?? $project['image_path']
+                                    ?? ''
+                                ));
 
-                    // Category / type isn't a column yet; use featured flag as a safe public label.
-                    $is_featured = !empty($project['featured']);
-                    $badge_label = $is_featured ? 'Featured' : 'Project';
-                    $badge_class = $is_featured ? 'badge badge--ok' : 'badge badge--cyan';
+                                $link = trim((string)(
+                                    $project['external_url']
+                                    ?? $project['live_url']
+                                    ?? $project['project_url']
+                                    ?? $project['github_url']
+                                    ?? ''
+                                ));
 
-                    // Thumbnail (stored as path/filename; assume it lives under uploads/projects/ unless it already includes a subpath).
-                    $thumb_raw = trim((string) ($project['thumbnail'] ?? ''));
-                    $thumb_src = '';
-                    if ($thumb_raw !== '') {
-                        $thumb_rel = (strpos($thumb_raw, '/') !== false) ? $thumb_raw : ('projects/' . $thumb_raw);
-                        $thumb_src = upload_url($thumb_rel);
-                    }
-                ?>
-                <div class="card reveal">
-                    <span class="card-corner card-corner--tl"></span>
-                    <span class="card-corner card-corner--tr"></span>
-                    <span class="card-corner card-corner--bl"></span>
-                    <span class="card-corner card-corner--br"></span>
+                                $is_valid_link = $link !== '' && preg_match('/^https?:\/\//i', $link);
+                            ?>
 
-                    <?php if ($thumb_src !== ''): ?>
-                        <div style="width: 100%; height: 160px; border: 1px solid rgba(124, 58, 237, 0.2); border-radius: var(--r1); overflow:hidden; margin-bottom: 1rem; background: rgba(255,255,255,0.02);">
-                            <img
-                                src="<?= e($thumb_src) ?>"
-                                alt="<?= e($title) ?>"
-                                loading="lazy"
-                                style="width:100%; height:100%; object-fit:cover; display:block;"
-                            />
-                        </div>
+                            <div class="card reveal">
+                                <span class="card-corner card-corner--tl"></span>
+                                <span class="card-corner card-corner--tr"></span>
+                                <span class="card-corner card-corner--bl"></span>
+                                <span class="card-corner card-corner--br"></span>
+
+                                <?php if ($thumb_src !== ''): ?>
+                                    <div style="width: 100%; height: 160px; border: 1px solid rgba(124, 58, 237, 0.2); border-radius: var(--r1); overflow: hidden; margin-bottom: 1rem; background: rgba(255,255,255,0.02);">
+                                        <?php if ($is_valid_link): ?>
+                                            <a href="<?= e($link) ?>" target="_blank" rel="noopener noreferrer" aria-label="Open <?= e($title !== '' ? $title : 'project') ?>">
+                                                <img
+                                                    src="<?= e($thumb_src) ?>"
+                                                    alt="<?= e($title !== '' ? $title : 'Project thumbnail') ?>"
+                                                    loading="lazy"
+                                                    style="width:100%; height:100%; object-fit:cover; display:block;"
+                                                />
+                                            </a>
+                                        <?php else: ?>
+                                            <img
+                                                src="<?= e($thumb_src) ?>"
+                                                alt="<?= e($title !== '' ? $title : 'Project thumbnail') ?>"
+                                                loading="lazy"
+                                                style="width:100%; height:100%; object-fit:cover; display:block;"
+                                            />
+                                        <?php endif; ?>
+                                    </div>
+                                <?php else: ?>
+                                    <div style="width: 100%; height: 160px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%); border: 1px solid rgba(124, 58, 237, 0.2); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; font-size: 2.5rem;">
+                                        <?= e($icon_text !== '' ? $icon_text : '📁') ?>
+                                    </div>
+                                <?php endif; ?>
+
+                                <div class="card__header">
+                                    <span class="card__icon"><?= e($icon_text !== '' ? $icon_text : '📁') ?></span>
+                                    <span class="badge badge--ok"><?= e($category !== '' ? $category : 'Project') ?></span>
+                                </div>
+
+                                <h3 class="card__title">
+                                    <?php if ($is_valid_link): ?>
+                                        <a href="<?= e($link) ?>" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;">
+                                            <?= e($title !== '' ? $title : 'Untitled Project') ?>
+                                        </a>
+                                    <?php else: ?>
+                                        <?= e($title !== '' ? $title : 'Untitled Project') ?>
+                                    <?php endif; ?>
+                                </h3>
+
+                                <p class="card__desc">
+                                    <?= e($desc !== '' ? truncate($desc, 170) : 'A portfolio project entry from the admin panel.') ?>
+                                </p>
+                            </div>
+                        <?php endforeach; ?>
                     <?php else: ?>
-                        <div style="width: 100%; height: 160px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%); border: 1px solid rgba(124, 58, 237, 0.2); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; font-size: 2.5rem;">
-                            📁
+                        <div class="card reveal" style="grid-column: span 3;">
+                            <span class="card-corner card-corner--tl"></span>
+                            <span class="card-corner card-corner--tr"></span>
+                            <span class="card-corner card-corner--bl"></span>
+                            <span class="card-corner card-corner--br"></span>
+
+                            <div style="width: 100%; height: 160px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%); border: 1px solid rgba(124, 58, 237, 0.2); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; font-size: 2.5rem;">
+                                ✨
+                            </div>
+
+                            <div class="card__header">
+                                <span class="card__icon">📁</span>
+                                <span class="badge badge--cyan">Updating</span>
+                            </div>
+
+                            <h3 class="card__title">Featured work is being refreshed</h3>
+                            <p class="card__desc">
+                                This section is controlled through the admin panel. Activate projects from the dashboard to make them visible here.
+                            </p>
                         </div>
                     <?php endif; ?>
-
-                    <div class="card__header">
-                        <span class="card__icon">💼</span>
-                        <span class="<?= e($badge_class) ?>"><?= e($badge_label) ?></span>
-                    </div>
-                    <h3 class="card__title"><?= e($title !== '' ? $title : 'Untitled Project') ?></h3>
-                    <p class="card__desc"><?= e($desc !== '' ? truncate($desc, 170) : 'A portfolio project entry from the database.') ?></p>
-
-                    <?php if ($tech !== ''): ?>
-                        <p style="margin-top:0.75rem; color:var(--t2); font-family:var(--mono); font-size:0.72rem; letter-spacing:0.04em;">
-                            <?= e($tech) ?>
-                        </p>
-                    <?php endif; ?>
-
-                    <?php if ($href !== '#'): ?>
-                        <a href="<?= e($href) ?>" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 1rem; padding: 0.6rem 1rem; background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(124, 58, 237, 0.3); border-radius: var(--r1); color: var(--acc2); font-size: 0.8rem; text-decoration: none; transition: all 0.3s; font-family: var(--mono);">View Work →</a>
-                    <?php else: ?>
-                        <span style="display: inline-block; margin-top: 1rem; padding: 0.6rem 1rem; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--r1); color: var(--t2); font-size: 0.8rem; font-family: var(--mono);">Link unavailable</span>
-                    <?php endif; ?>
                 </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <!-- Fallback cards (keeps section polished if projects table is empty) -->
-                <div class="card reveal">
-                    <span class="card-corner card-corner--tl"></span>
-                    <span class="card-corner card-corner--tr"></span>
-                    <span class="card-corner card-corner--bl"></span>
-                    <span class="card-corner card-corner--br"></span>
-
-                    <div style="width: 100%; height: 160px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%); border: 1px solid rgba(124, 58, 237, 0.2); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; font-size: 2.5rem;">
-                        🌐
-                    </div>
-
-                    <div class="card__header">
-                        <span class="card__icon">💻</span>
-                        <span class="badge badge--ok">Websites</span>
-                    </div>
-                    <h3 class="card__title">Websites I Built</h3>
-                    <p class="card__desc">Professional websites built for brands, agencies, and founders. Focused on speed, clarity, and polished presentation.</p>
-                    <a href="#contact" style="display: inline-block; margin-top: 1rem; padding: 0.6rem 1rem; background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(124, 58, 237, 0.3); border-radius: var(--r1); color: var(--acc2); font-size: 0.8rem; text-decoration: none; transition: all 0.3s; font-family: var(--mono);">Request Work →</a>
-                </div>
-
-                <div class="card reveal">
-                    <span class="card-corner card-corner--tl"></span>
-                    <span class="card-corner card-corner--tr"></span>
-                    <span class="card-corner card-corner--bl"></span>
-                    <span class="card-corner card-corner--br"></span>
-
-                    <div style="width: 100%; height: 160px; background: linear-gradient(135deg, rgba(6, 182, 212, 0.12) 0%, rgba(168, 85, 247, 0.08) 100%); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; font-size: 2.5rem;">
-                        🔄
-                    </div>
-
-                    <div class="card__header">
-                        <span class="card__icon">⚙️</span>
-                        <span class="badge badge--cyan">Automation</span>
-                    </div>
-                    <h3 class="card__title">Automation Builds</h3>
-                    <p class="card__desc">Workflow automation systems that connect tools, data, and operations to reduce manual effort and improve reliability.</p>
-                    <a href="#contact" style="display: inline-block; margin-top: 1rem; padding: 0.6rem 1rem; background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--r1); color: var(--acc2); font-size: 0.8rem; text-decoration: none; transition: all 0.3s; font-family: var(--mono);">Request Work →</a>
-                </div>
-
-                <div class="card reveal">
-                    <span class="card-corner card-corner--tl"></span>
-                    <span class="card-corner card-corner--tr"></span>
-                    <span class="card-corner card-corner--bl"></span>
-                    <span class="card-corner card-corner--br"></span>
-
-                    <div style="width: 100%; height: 160px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(124, 58, 237, 0.08) 100%); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; font-size: 2.5rem;">
-                        🎨
-                    </div>
-
-                    <div class="card__header">
-                        <span class="card__icon">🖼️</span>
-                        <span class="badge badge--ok">Design</span>
-                    </div>
-                    <h3 class="card__title">Design & Thumbnails</h3>
-                    <p class="card__desc">Graphic thumbnails and visual assets crafted for marketing, media, and digital campaigns. Clean, on-brand, and conversion-ready.</p>
-                    <a href="#contact" style="display: inline-block; margin-top: 1rem; padding: 0.6rem 1rem; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: var(--r1); color: var(--acc2); font-size: 0.8rem; text-decoration: none; transition: all 0.3s; font-family: var(--mono);">Request Work →</a>
-                </div>
-            <?php endif; ?>
-        </div>
-    </div>
-</section>
-
-<!-- ── Journey Timeline Section ───────────────────────────── -->
+            </div>
+        </section>
 <section class="section" id="journey" aria-label="Journey Chronology">
     <div class="container">
         <p class="section-label">Journey</p>
@@ -862,12 +756,20 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
                     <?php if (!empty($social_links)): ?>
                         <div style="display:flex; flex-wrap:wrap; gap:0.75rem; margin-top:0.5rem;">
-                            <?php foreach ($social_links as $link):
+                            <?php foreach ($contact_social_links as $link):
                                 $url = $link['url'] ?? '#';
                                 $isMail = strpos($url, 'mailto:') === 0;
-                                $label = $link['icon_text'] ?? mb_strtoupper(mb_substr($link['platform'] ?? '', 0, 2));
+                                $a11yLabel = (string) ($link['label'] ?? $link['platform'] ?? 'Link');
+                                $platformKey = mb_strtolower(trim((string) ($link['platform'] ?? '')));
                             ?>
-                                <a href="<?= e($url) ?>" <?= $isMail ? '' : 'target="_blank" rel="noopener noreferrer"' ?> class="social-node" title="<?= e($link['label'] ?? $link['platform']) ?>"><?= e($label) ?></a>
+                                <a
+                                    href="<?= e($url) ?>"
+                                    <?= $isMail ? '' : 'target="_blank" rel="noopener noreferrer"' ?>
+                                    class="social-node"
+                                    title="<?= e($a11yLabel) ?>"
+                                    aria-label="<?= e($a11yLabel) ?>"
+                                    data-platform="<?= e($platformKey) ?>"
+                                ><?= get_social_icon_svg((string) ($link['platform'] ?? '')) ?></a>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>

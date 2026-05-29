@@ -50,6 +50,7 @@ try {
                 <p style="color:var(--t2); max-width:68ch;">This is the admin foundation. Use the logout action when you are finished managing portfolio data.</p>
             </div>
             <div style="display:flex; flex-wrap:wrap; gap:0.75rem; align-items:center;">
+                <a href="<?= BASE_URL ?>/admin/profile.php" class="btn btn--primary">Profile Photo</a>
                 <a href="<?= BASE_URL ?>/admin/social-links.php" class="btn btn--primary">Social Links</a>
                 <a href="<?= BASE_URL ?>/admin/logout.php" class="btn btn--outline">Logout</a>
             </div>

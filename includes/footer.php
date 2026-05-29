@@ -26,7 +26,7 @@ $current_year = date('Y');
                 require_once __DIR__ . '/db.php';
             }
             try {
-                $stmt = get_db()->query('SELECT * FROM social_links WHERE is_active = 1 ORDER BY sort_order ASC');
+                $stmt = get_db()->query('SELECT * FROM social_links WHERE is_active = 1 AND (show_in_footer = 1 OR show_in_footer IS NULL) ORDER BY sort_order ASC');
                 $social_links = $stmt->fetchAll(PDO::FETCH_ASSOC);
             } catch (Throwable) {
                 $social_links = [];
@@ -38,9 +38,17 @@ $current_year = date('Y');
             <?php foreach ($social_links as $link):
                 $url = $link['url'] ?? '#';
                 $isMail = strpos($url, 'mailto:') === 0;
-                $label = $link['icon_text'] ?? mb_strtoupper(mb_substr($link['platform'] ?? '', 0, 2));
+                $a11yLabel = (string) ($link['label'] ?? $link['platform'] ?? 'Link');
+                $platformKey = mb_strtolower(trim((string) ($link['platform'] ?? '')));
             ?>
-                <a href="<?= e($url) ?>" <?= $isMail ? '' : 'target="_blank" rel="noopener noreferrer"' ?> class="social-node" title="<?= e($link['label'] ?? $link['platform']) ?>"><?= e($label) ?></a>
+                <a
+                    href="<?= e($url) ?>"
+                    <?= $isMail ? '' : 'target="_blank" rel="noopener noreferrer"' ?>
+                    class="social-node"
+                    title="<?= e($a11yLabel) ?>"
+                    aria-label="<?= e($a11yLabel) ?>"
+                    data-platform="<?= e($platformKey) ?>"
+                ><?= get_social_icon_svg((string) ($link['platform'] ?? '')) ?></a>
             <?php endforeach; ?>
         </div>
         <?php endif; ?>

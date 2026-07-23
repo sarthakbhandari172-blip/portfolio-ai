@@ -1,115 +1,69 @@
-# Sarthak Bhandari — Portfolio AI
+# Sarthak Bhandari — Portfolio
 
-A **premium, AI-powered developer portfolio** built with PHP 8, MySQL, vanilla CSS, and vanilla JavaScript. Designed with a dark futuristic aesthetic featuring glassmorphism, micro-animations, and a full design token system.
+A professional portfolio built with Next.js, TypeScript, Supabase, and Vercel.
+It replaces the original XAMPP/PHP application while preserving that version in
+[`legacy-php`](./legacy-php) for reference.
 
----
+## Stack
 
-## 🚀 Quick Start
+- Next.js App Router and TypeScript
+- Supabase Postgres, Auth, Storage, and Row Level Security
+- Vercel hosting
+- Local fallback content so the public site still renders before Supabase is connected
 
-### Prerequisites
-- XAMPP (Apache + MySQL) or any PHP 8.1+ server
-- PHP 8.1 or higher
-- MySQL 8.0 or MariaDB 10.6+
-
-### Installation
+## Run locally
 
 ```bash
-# 1. Clone / copy this folder into your web root
-#    (e.g. /Applications/XAMPP/xamppfiles/htdocs/Portfolio-ai)
-
-# 2. Import the database schema
-mysql -u root -p < database.sql
-
-# 3. Configure the database connection
-#    Edit includes/db.php and set your credentials:
-#      DB_HOST, DB_NAME, DB_USER, DB_PASS
-
-# 4. Start Apache & MySQL in XAMPP, then visit:
-#    http://localhost/Portfolio-ai/
+npm install
+cp .env.example .env.local
+npm run dev
 ```
 
----
+Open `http://localhost:3000`. The admin interface is at
+`http://localhost:3000/admin`.
 
-## 📁 Project Structure
+## Connect Supabase
 
-```
-Portfolio-ai/
-├── index.php                 # Public homepage (entry point)
-├── database.sql              # Full MySQL schema + seed data
-├── README.md
-│
-├── includes/
-│   ├── db.php                # PDO singleton database connection
-│   ├── functions.php         # Shared utility functions
-│   ├── header.php            # Global HTML header & nav
-│   └── footer.php            # Global HTML footer & scripts
-│
-├── assets/
-│   ├── css/
-│   │   └── style.css         # Design system — tokens, layout, components
-│   └── js/
-│       └── main.js           # Nav, typed text, scroll-reveal, smooth scroll
-│
-└── uploads/
-    ├── profile/              # Profile avatar uploads
-    └── projects/             # Project thumbnail uploads
+1. Create a Supabase project.
+2. Open its SQL editor and run
+   [`supabase/migrations/001_initial_schema.sql`](./supabase/migrations/001_initial_schema.sql).
+3. Run [`supabase/seed.sql`](./supabase/seed.sql).
+4. In **Authentication → Users**, create the account that should manage the portfolio.
+5. Replace `YOUR_ADMIN_EMAIL` in the final statement of `supabase/seed.sql` with
+   that account's email and run only that statement.
+6. Copy the project values into `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
+SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY
 ```
 
----
+The service-role key is server-only. Never expose it in browser code or commit
+`.env.local`.
 
-## 🎨 Design System
+The schema creates a public `portfolio-media` Storage bucket. Content editors can
+upload the profile image and project images from the admin interface.
 
-| Token | Value |
-|---|---|
-| Primary Accent | `#7c3aed` (Violet) |
-| Secondary Accent | `#06b6d4` (Cyan) |
-| Base Background | `#080810` |
-| Font (Headings) | Space Grotesk |
-| Font (Body) | Inter |
-| Font (Code) | JetBrains Mono |
+## Deploy to Vercel
 
----
+1. Push the repository to GitHub.
+2. Import it in Vercel as a Next.js project.
+3. Add the three environment variables above to Production, Preview, and Development.
+4. Deploy.
+5. Open `/admin/login` on the deployed domain and sign in with the Supabase user.
 
-## 🗄️ Database Tables
+## Data migration
 
-| Table | Purpose |
-|---|---|
-| `users` | Admin accounts |
-| `profile` | Bio, avatar, contact info |
-| `skills` | Skills with proficiency levels |
-| `projects` | Portfolio projects |
-| `experience` | Work history |
-| `contact_messages` | Contact form submissions |
-| `settings` | Key-value site configuration |
+- The raw MySQL export is intentionally kept outside this repository because it
+  contains legacy account and contact data.
+- Existing site images are in [`public/media`](./public/media).
+- Supabase seed data has been normalized for PostgreSQL and excludes the legacy
+  PHP password hash.
 
----
+## Checks
 
-## 🛣️ Build Roadmap
-
-- [x] **Phase 1** — Project foundation (current)
-  - File structure, DB schema, design system, homepage
-- [ ] **Phase 2** — Full portfolio sections
-  - About, Skills, Projects, Experience, Contact
-- [ ] **Phase 3** — Admin panel
-  - Login, dashboard, CRUD for all content
-- [ ] **Phase 4** — AI features
-  - AI bio writer, project summariser, chatbot assistant
-
----
-
-## 🔒 Security Notes
-
-- All user output is escaped via `e()` (htmlspecialchars)
-- CSRF protection via session tokens (`csrf_token()`)
-- Database queries use PDO prepared statements exclusively
-- Upload directories should be restricted from direct PHP execution (configure `.htaccess` in production)
-
----
-
-## 📄 License
-
-MIT — feel free to adapt for your own portfolio.
-
----
-
-*Built with 💜 by Sarthak Bhandari*
+```bash
+npm run lint
+npm run build
+```

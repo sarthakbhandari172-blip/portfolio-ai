@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { submitContact } from "@/app/actions";
+import { CosmicLobby } from "@/app/cosmic-lobby";
 import { getPortfolioData } from "@/lib/data";
 import type { SectionContent } from "@/lib/types";
 
@@ -58,63 +59,18 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         </Link>
       </nav>
 
-      <section className="hero shell" id="home">
-        <div className="hero-copy">
-          <p className="eyebrow">Software // Hardware // Interfaces</p>
-          <h1>
-            Sarthak
-            <br />
-            <span>Bhandari</span>
-          </h1>
-          <p className="hero-tagline">
-            {data.profile.tagline ?? "Technology enthusiast based in Nepal"}
-          </p>
-          <p className="hero-bio">
-            {data.profile.bio ??
-              "Exploring the space between an idea and its execution."}
-          </p>
-          <div className="hero-actions">
-            <a className="button button-primary" href="#work">
-              View selected work
-            </a>
-            <a className="button button-secondary" href="#contact">
-              Start a conversation
-            </a>
-          </div>
-          {heroLinks.length ? (
-            <div className="social-row" aria-label="Featured social links">
-              {heroLinks.map((link) => (
-                <a key={link.id} href={link.url} target="_blank" rel="noreferrer">
-                  <span>{link.icon_text}</span>
-                  {link.label}
-                </a>
-              ))}
-            </div>
-          ) : null}
-        </div>
-
-        <div className="hero-visual" aria-label="Profile image">
-          <div className="portrait-frame">
-            <div className="portrait-ring portrait-ring-one" />
-            <div className="portrait-ring portrait-ring-two" />
-            <Image
-              src={data.profile.avatar_url || "/media/profile/avatar.png"}
-              alt="Sarthak Bhandari"
-              width={620}
-              height={620}
-              priority
-            />
-            <div className="visual-label visual-label-top">
-              <span>BASE</span>
-              <strong>{data.profile.location ?? "Nepal"}</strong>
-            </div>
-            <div className="visual-label visual-label-bottom">
-              <span>FOCUS</span>
-              <strong>Software + Hardware</strong>
-            </div>
-          </div>
-        </div>
-      </section>
+      <CosmicLobby
+        fullName={data.profile.full_name}
+        location={data.profile.location ?? "Nepal"}
+        tagline={data.profile.tagline ?? "Software · Hardware · Interfaces"}
+        bio={data.profile.bio ?? "Exploring the space between an idea and its execution."}
+        links={heroLinks.map((link) => ({
+          id: link.id,
+          label: link.label,
+          url: link.url,
+          icon_text: link.icon_text,
+        }))}
+      />
 
       <section className="section shell" id="about">
         <div className="about-grid">
@@ -327,4 +283,3 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
     </main>
   );
 }
-

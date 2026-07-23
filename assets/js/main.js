@@ -62,6 +62,12 @@ const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
   });
 })();
 
+/* ── 2b. Force Dark Lobby Theme ──────────────────────────── */
+(function initDarkLobbyTheme() {
+  document.documentElement.classList.remove('theme-light');
+  localStorage.removeItem('portfolio-theme');
+})();
+
 /* ── 3. Active Nav Link ───────────────────────────────────── */
 (function initActiveNav() {
   const sections = qsa('section[id]');
@@ -337,17 +343,6 @@ const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
   panel.addEventListener('pointerleave', onPointerLeave);
   window.addEventListener('resize', refreshBounds, { passive: true });
 
-  const portalButton = qs('#cta-enter-portal');
-  if (portalButton) {
-    portalButton.addEventListener('click', (event) => {
-      event.preventDefault();
-      const workSection = document.querySelector('#work');
-      if (workSection) {
-        workSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    });
-  }
-
   refreshBounds();
   requestAnimationFrame(tick);
 })();
@@ -536,53 +531,202 @@ const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
   animateCursor();
 })();
 
-/* ── 8. Section Transition System ────────────────────────── */
+/* ── 8. First Entry Portal Gate ─────────────────────────── */
+(function initFirstEntryPortalGate() {
+  if (window.__portalGateActive) return;
+  if (!document.querySelector('.hero')) return;
+  if (location.pathname.includes('/admin/')) return;
+
+  window.__portalGateActive = true;
+
+  const gate = document.createElement('div');
+  gate.className = 'portal-gate';
+  gate.setAttribute('role', 'dialog');
+  gate.setAttribute('aria-modal', 'true');
+  gate.setAttribute('aria-label', 'Enter portfolio lobby');
+  gate.innerHTML = `
+    <div class="portal-gate__panel">
+      <span class="portal-gate__kicker">Portfolio Gate Online</span>
+      <strong class="portal-gate__title">Enter Portal</strong>
+      <p class="portal-gate__copy">Step into the Void Lobby to view builds, quests, services, and contact links.</p>
+      <button class="btn btn--portal portal-gate__button" type="button">Enter Portfolio Lobby</button>
+    </div>
+  `;
+
+  document.body.appendChild(gate);
+  document.body.classList.add('portal-locked');
+
+  const button = qs('.portal-gate__button', gate);
+  const openGate = () => {
+    gate.classList.add('is-opening');
+    document.body.classList.remove('portal-locked');
+    setTimeout(() => gate.remove(), 820);
+  };
+
+  button?.focus({ preventScroll: true });
+  button?.addEventListener('click', openGate);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && document.body.contains(gate)) {
+      event.preventDefault();
+      openGate();
+    }
+  });
+})();
+
+/* ── 8b. Lobby Music Loop ────────────────────────────────── */
+(function initLobbyMusicLoop() {
+  const toggle = qs('#musicToggle');
+  if (!toggle) return;
+
+  const playerEl = document.createElement('div');
+  playerEl.id = 'lobbyMusicPlayer';
+  playerEl.className = 'nav-music-player';
+  playerEl.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(playerEl);
+
+  const videoId = toggle.dataset.youtubeId || '7q3X3_akMG0';
+  const start = parseInt(toggle.dataset.start || '0', 10);
+  const end = toggle.dataset.end ? parseInt(toggle.dataset.end, 10) : null;
+  const volume = Math.max(0, Math.min(100, parseInt(toggle.dataset.volume || '36', 10)));
+  let player = null;
+  let isPlaying = false;
+  let monitor = null;
+
+  const setPlaying = (playing) => {
+    isPlaying = playing;
+    toggle.classList.toggle('is-playing', playing);
+    toggle.setAttribute('aria-pressed', String(playing));
+    toggle.setAttribute('aria-label', playing ? 'Pause lobby music' : 'Play lobby music');
+  };
+
+  const monitorLoop = () => {
+    clearInterval(monitor);
+    if (!end || end <= start) return;
+    monitor = setInterval(() => {
+      if (!player || typeof player.getCurrentTime !== 'function') return;
+      if (player.getCurrentTime() >= end - 0.35) {
+        player.seekTo(start, true);
+        player.playVideo();
+      }
+    }, 500);
+  };
+
+  const createPlayer = () => {
+    player = new YT.Player('lobbyMusicPlayer', {
+      width: '1',
+      height: '1',
+      videoId,
+      playerVars: {
+        start,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        iv_load_policy: 3,
+        modestbranding: 1,
+        playsinline: 1,
+        rel: 0,
+      },
+      events: {
+        onReady: () => {
+          player.setVolume(volume);
+          player.seekTo(start, true);
+          player.playVideo();
+          setPlaying(true);
+          if (end) monitorLoop();
+        },
+        onStateChange: (event) => {
+          if (event.data === YT.PlayerState.ENDED) {
+            player.seekTo(start, true);
+            player.playVideo();
+          }
+        },
+      },
+    });
+  };
+
+  const loadApi = () => {
+    if (window.YT && window.YT.Player) {
+      createPlayer();
+      return;
+    }
+
+    const previous = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      if (typeof previous === 'function') previous();
+      createPlayer();
+    };
+
+    if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+      const script = document.createElement('script');
+      script.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(script);
+    }
+  };
+
+  toggle.addEventListener('click', () => {
+    if (!player) {
+      loadApi();
+      return;
+    }
+
+    if (isPlaying) {
+      player.pauseVideo();
+      setPlaying(false);
+      return;
+    }
+
+    player.seekTo(start, true);
+    player.setVolume(volume);
+    player.playVideo();
+    setPlaying(true);
+    if (end) monitorLoop();
+  });
+})();
+
+/* ── 9. Section Transition System ────────────────────────── */
 (function initSectionTransition() {
   if (window.__sectionTransitionActive) return;
   window.__sectionTransitionActive = true;
-  
+
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (prefersReducedMotion) return;
 
-  let transitionActive = false;
-  let transitionTimeout = null;
-
-  // Clean up old transition elements if they exist
-  document.querySelectorAll(
-    '.portal-transition, .scene-wipe-transition, .section-warp-transition, .quantum-gate, .hyper-cut'
-  ).forEach((el) => el.remove());
+  // remove legacy transition nodes
+  document.querySelectorAll('.section-tunnel-transition, .portal-transition').forEach((el) => el.remove());
 
   const overlay = document.createElement('div');
-  overlay.className = 'section-tunnel-transition';
+  overlay.className = 'lobby-transition';
   overlay.setAttribute('aria-hidden', 'true');
   overlay.innerHTML = `
-    <span class="section-tunnel__ring section-tunnel__ring--one"></span>
-    <span class="section-tunnel__ring section-tunnel__ring--two"></span>
-    <span class="section-tunnel__line"></span>
-    <span class="section-tunnel__flash"></span>
+    <span class="lobby-ring lobby-ring--one"></span>
+    <span class="lobby-ring lobby-ring--two"></span>
+    <span class="lobby-swipe"></span>
+    <span class="lobby-flash"></span>
   `;
   document.body.appendChild(overlay);
 
-  function startTransition(centerX, centerY) {
-    if (transitionActive) {
-      clearTimeout(transitionTimeout);
+  let active = false;
+  const ANIM_TOTAL = 700; // max total animation duration in ms
+  const SCROLL_DELAY = 420; // delay before scrolling (ms)
+
+  function triggerTransition(x, y) {
+    if (active) {
       overlay.classList.remove('is-active');
-      transitionActive = false;
+      void overlay.offsetWidth;
+      active = false;
     }
-
-    transitionActive = true;
-    overlay.style.setProperty('--tunnel-x', `${centerX}px`);
-    overlay.style.setProperty('--tunnel-y', `${centerY}px`);
-    
+    overlay.style.setProperty('--tx', `${x}px`);
+    overlay.style.setProperty('--ty', `${y}px`);
     overlay.classList.add('is-active');
-
-    transitionTimeout = setTimeout(() => {
+    active = true;
+    // ensure it will clear after ANIM_TOTAL
+    window.setTimeout(() => {
       overlay.classList.remove('is-active');
-      transitionActive = false;
-    }, 750);
+      active = false;
+    }, Math.min(ANIM_TOTAL, 880));
   }
 
-  // Intercept all hash link clicks using capture phase
+  // Capture-phase click handler for internal anchors
   document.addEventListener('click', (event) => {
     const link = event.target.closest('a[href^="#"]');
     if (!link) return;
@@ -594,27 +738,37 @@ const qsa = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
     const target = document.getElementById(targetId);
     if (!target) return;
 
+    // Do not intercept if modifier keys pressed (user wants new tab/navigation)
+    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
     event.preventDefault();
-    event.stopImmediatePropagation();
 
-    // Calculate transition center from link position
     const rect = link.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
+    const cx = Math.round(rect.left + rect.width / 2);
+    const cy = Math.round(rect.top + rect.height / 2);
 
-    startTransition(centerX, centerY);
+    if (prefersReducedMotion) {
+      // skip animation, smooth scroll instantly (or instant if user prefers reduced)
+      const header = document.querySelector('.site-header, header');
+      const headerHeight = header ? header.offsetHeight : 0;
+      const targetTop = target.getBoundingClientRect().top + window.scrollY - headerHeight;
+      window.scrollTo({ top: targetTop, behavior: 'auto' });
+      history.replaceState(null, '', `#${targetId}`);
+      return;
+    }
 
-    // Scroll to target after short delay (140-220ms for visibility)
+    triggerTransition(cx, cy);
+
+    // perform scroll after SCROLL_DELAY to let the slash animate
     setTimeout(() => {
       const header = document.querySelector('.site-header, header');
       const headerHeight = header ? header.offsetHeight : 0;
       const targetTop = target.getBoundingClientRect().top + window.scrollY - headerHeight;
 
-      window.scrollTo({
-        top: targetTop,
-        behavior: 'smooth'
-      });
-    }, 180);
+      window.scrollTo({ top: targetTop, behavior: 'smooth' });
+      // update URL hash without reload
+      history.replaceState(null, '', `#${targetId}`);
+    }, SCROLL_DELAY);
   }, true);
 })();
 

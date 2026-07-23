@@ -15,7 +15,7 @@ $current_year = date('Y');
         <div class="site-footer__brand">
             <span class="nav__logo-icon" aria-hidden="true">⬡</span>
             <span class="nav__logo-text">Sarthak<span class="accent"> Bhandari</span></span>
-            <span style="font-size:.7rem;font-family:var(--font-mono);color:var(--clr-text-muted);letter-spacing:.08em;margin-left:.5rem;">// Digital Portfolio</span>
+            <span style="font-size:.7rem;font-family:var(--mono);color:var(--t3);letter-spacing:.08em;margin-left:.5rem;">// Void Lobby</span>
         </div>
         <?php
         if (!function_exists('e')) {
@@ -33,9 +33,18 @@ $current_year = date('Y');
             }
         }
         ?>
-        <?php if (!empty($social_links)): ?>
+        <?php
+        $footer_social_links = array_values(array_filter($social_links, static function ($link) {
+            $url = trim((string) ($link['url'] ?? ''));
+            if ($url === '' || $url === '#') {
+                return false;
+            }
+            return !isset($link['show_in_footer']) || (int) $link['show_in_footer'] === 1;
+        }));
+        ?>
+        <?php if (!empty($footer_social_links)): ?>
         <div class="site-footer__socials" style="display:flex; gap:.75rem; align-items:center; flex-wrap:wrap;">
-            <?php foreach ($social_links as $link):
+            <?php foreach ($footer_social_links as $link):
                 $url = $link['url'] ?? '#';
                 $isMail = strpos($url, 'mailto:') === 0;
                 $a11yLabel = (string) ($link['label'] ?? $link['platform'] ?? 'Link');
@@ -59,7 +68,7 @@ $current_year = date('Y');
 
         <nav class="site-footer__nav" aria-label="Footer navigation">
             <a href="<?= BASE_URL ?>/#about"    class="footer-link">About</a>
-            <a href="<?= BASE_URL ?>/#projects" class="footer-link">Projects</a>
+            <a href="<?= BASE_URL ?>/#work" class="footer-link">Work</a>
             <a href="<?= BASE_URL ?>/#contact"  class="footer-link">Contact</a>
         </nav>
 

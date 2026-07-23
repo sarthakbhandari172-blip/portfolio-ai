@@ -55,6 +55,7 @@ try {
             </div>
             <div style="display:flex; flex-wrap:wrap; gap:0.75rem; align-items:center;">
                 <a href="<?= BASE_URL ?>/admin/projects.php" class="btn btn--primary">Work / Projects</a>
+                <a href="<?= BASE_URL ?>/admin/content.php" class="btn btn--primary">Content</a>
                 <a href="<?= BASE_URL ?>/admin/profile.php" class="btn btn--primary">Profile Photo</a>
                 <a href="<?= BASE_URL ?>/admin/social-links.php" class="btn btn--primary">Social Links</a>
                 <a href="<?= BASE_URL ?>/admin/logout.php" class="btn btn--outline">Logout</a>

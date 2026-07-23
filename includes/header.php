@@ -38,7 +38,7 @@ $page_description = defined('PAGE_DESCRIPTION') ? PAGE_DESCRIPTION : 'Sarthak Bh
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <!-- Global stylesheet -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css" />
@@ -62,6 +62,10 @@ $page_description = defined('PAGE_DESCRIPTION') ? PAGE_DESCRIPTION : 'Sarthak Bh
             <li><a href="<?= BASE_URL ?>/#skills"    class="nav__link">Skills</a></li>
             <li><a href="<?= BASE_URL ?>/#contact"   class="nav__link">Contact</a></li>
         </ul>
+
+        <button class="nav-icon-toggle music-nav-toggle" id="musicToggle" type="button" aria-label="Toggle lobby music" aria-pressed="false" data-youtube-id="7q3X3_akMG0" data-start="0" data-volume="90">
+            <span class="nav-icon-toggle__icon" aria-hidden="true">♪</span>
+        </button>
 
         <button class="nav__toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
             <span></span><span></span><span></span>

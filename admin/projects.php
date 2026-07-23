@@ -33,6 +33,8 @@ $form = [
     'sort_order' => '0',
     'is_active' => '1',
     'thumbnail_path' => '',
+    'thumbnail_fit' => 'cover',
+    'thumbnail_position' => 'center center',
 ];
 
 function resolve_admin_thumbnail_url(string $path): string {
@@ -110,6 +112,8 @@ if (is_post()) {
     $form['sort_order'] = trim((string) ($_POST['sort_order'] ?? '0'));
     $form['is_active'] = isset($_POST['is_active']) ? '1' : '0';
     $form['thumbnail_path'] = normalize_uploaded_path((string) ($_POST['existing_thumbnail'] ?? ''));
+    $form['thumbnail_fit'] = in_array(($_POST['thumbnail_fit'] ?? 'cover'), ['cover', 'contain'], true) ? $_POST['thumbnail_fit'] : 'cover';
+    $form['thumbnail_position'] = trim((string) ($_POST['thumbnail_position'] ?? 'center center')) ?: 'center center';
 
     if ($form['title'] === '') {
         $errors[] = 'A project title is required.';
@@ -157,6 +161,8 @@ if (is_post()) {
                 $form['icon_text'] !== '' ? $form['icon_text'] : null,
                 (int) $form['sort_order'],
                 (int) $form['is_active'],
+                $form['thumbnail_fit'],
+                $form['thumbnail_position'],
             ];
 
             if ($projectId !== null) {
@@ -165,14 +171,14 @@ if (is_post()) {
                 $existingProject = $existingStatement->fetch(PDO::FETCH_ASSOC);
 
                 $stmt = $db->prepare(
-                    'UPDATE projects SET title = ?, slug = ?, category = ?, description = ?, thumbnail_path = ?, external_url = ?, icon_text = ?, sort_order = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+                    'UPDATE projects SET title = ?, slug = ?, category = ?, description = ?, thumbnail_path = ?, external_url = ?, icon_text = ?, sort_order = ?, is_active = ?, thumbnail_fit = ?, thumbnail_position = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
                 );
                 $params[] = $projectId;
                 $stmt->execute($params);
                 flash('success', 'Project updated successfully.');
             } else {
                 $stmt = $db->prepare(
-                    'INSERT INTO projects (title, slug, category, description, thumbnail_path, external_url, icon_text, sort_order, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
+                    'INSERT INTO projects (title, slug, category, description, thumbnail_path, external_url, icon_text, sort_order, is_active, thumbnail_fit, thumbnail_position, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
                 );
                 $stmt->execute($params);
                 flash('success', 'Project created successfully.');
@@ -204,6 +210,8 @@ if (!$form['title'] && isset($_GET['edit']) && ctype_digit((string) $_GET['edit'
             'sort_order' => (string) ($project['sort_order'] ?? '0'),
             'is_active' => (isset($project['is_active']) && (int) $project['is_active'] === 1) ? '1' : '0',
             'thumbnail_path' => $project['thumbnail_path'] ?? $project['thumbnail'] ?? '',
+            'thumbnail_fit' => $project['thumbnail_fit'] ?? 'cover',
+            'thumbnail_position' => $project['thumbnail_position'] ?? 'center center',
         ];
     } else {
         flash('error', 'Requested project not found.');
@@ -405,6 +413,24 @@ require_once __DIR__ . '/../includes/header.php';
                         Thumbnail Upload
                         <input type="file" name="thumbnail" accept="image/jpeg,image/png,image/webp" style="width:100%; margin-top:.5rem; color:var(--t1);">
                     </label>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                        <label style="display:block; font-family:var(--mono); font-size:.8rem; text-transform:uppercase; letter-spacing:.08em; color:var(--t2);">
+                            Thumbnail Fit
+                            <select name="thumbnail_fit" style="width:100%; margin-top:.5rem; padding:.85rem 1rem; border-radius:var(--r1); border:1px solid rgba(124,58,237,.18); background:rgba(6,6,18,.85); color:var(--t1);">
+                                <option value="cover" <?= $form['thumbnail_fit'] === 'cover' ? 'selected' : '' ?>>Cover / crop</option>
+                                <option value="contain" <?= $form['thumbnail_fit'] === 'contain' ? 'selected' : '' ?>>Contain / full image</option>
+                            </select>
+                        </label>
+                        <label style="display:block; font-family:var(--mono); font-size:.8rem; text-transform:uppercase; letter-spacing:.08em; color:var(--t2);">
+                            Focus Position
+                            <select name="thumbnail_position" style="width:100%; margin-top:.5rem; padding:.85rem 1rem; border-radius:var(--r1); border:1px solid rgba(124,58,237,.18); background:rgba(6,6,18,.85); color:var(--t1);">
+                                <?php foreach (['center center','top center','bottom center','center left','center right'] as $pos): ?>
+                                    <option value="<?= e($pos) ?>" <?= $form['thumbnail_position'] === $pos ? 'selected' : '' ?>><?= e($pos) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                    </div>
 
                     <?php if ($form['thumbnail_path'] !== ''): ?>
                         <div style="display:flex; align-items:center; gap:1rem; margin-top:-0.5rem; margin-bottom:1rem;">

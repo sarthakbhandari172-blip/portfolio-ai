@@ -28,6 +28,9 @@ $tableError = null;
 $editLink = null;
 
 function is_social_url(string $url): bool {
+    if ($url === '#') {
+        return true;
+    }
     return preg_match('/^(https?:\/\/|mailto:)[^\s]+$/i', $url) === 1;
 }
 
@@ -55,7 +58,7 @@ if (is_post()) {
             flash('error', 'Platform, URL, and icon text are required.');
             $editLink = compact('id', 'platform', 'url', 'label', 'icon_text', 'sort_order', 'is_active', 'show_in_hero', 'show_in_contact', 'show_in_footer');
         } elseif (!is_social_url($url)) {
-            flash('error', 'URL must begin with https://, http://, or mailto:.');
+            flash('error', 'URL must begin with https://, http://, mailto:, or use # as a placeholder.');
             $editLink = compact('id', 'platform', 'url', 'label', 'icon_text', 'sort_order', 'is_active', 'show_in_hero', 'show_in_contact', 'show_in_footer');
         } else {
             try {

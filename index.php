@@ -59,6 +59,17 @@ try {
     $stmt = $db->query('SELECT * FROM experience ORDER BY sort_order ASC, start_date DESC');
     $experience = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Fetch Services
+    $stmt = $db->query('SELECT * FROM services WHERE is_active = 1 ORDER BY sort_order ASC, id ASC');
+    $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Fetch editable section copy
+    $stmt = $db->query('SELECT * FROM section_content');
+    $section_content = [];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $section_content[$row['section_key']] = $row;
+    }
+
     // Fetch profile avatar for hero lobby display
     $stmt = $db->query('SELECT avatar FROM profile WHERE avatar <> "" ORDER BY updated_at DESC, id DESC LIMIT 1');
     $profileAvatarRow = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -70,8 +81,20 @@ try {
     $skills = [];
     $projects = [];
     $experience = [];
+    $services = [];
+    $section_content = [];
     $profileAvatarUrl = '';
     $social_links = [];
+}
+
+function section_copy(array $sections, string $key, string $field, string $default = ''): string {
+    return (string) ($sections[$key][$field] ?? $default);
+}
+
+function section_title_html(array $sections, string $key, string $title, string $accent = ''): string {
+    $main = section_copy($sections, $key, 'title', $title);
+    $accentText = section_copy($sections, $key, 'accent', $accent);
+    return e($main) . ($accentText !== '' ? ' <span class="accent">' . e($accentText) . '</span>' : '');
 }
 
 // Fetch public social/contact links
@@ -420,140 +443,23 @@ require_once __DIR__ . '/includes/header.php';
 <!-- ── Services Details Section ───────────────────────────── -->
 <section class="section" id="services" aria-label="Services Offering">
     <div class="container">
-        <p class="section-label">Services</p>
-        <h2 class="section-title">Service <span class="accent">Catalogue</span></h2>
-        <p style="margin-bottom: 2.5rem; max-width: 65ch;">
-            Comprehensive web services including custom websites, automation workflows, and design solutions. Each project is delivered with professional quality and attention to detail.
-        </p>
-
+        <p class="section-label"><?= e(section_copy($section_content, 'services', 'label', 'Services')) ?></p>
+        <h2 class="section-title"><?= section_title_html($section_content, 'services', 'Service', 'Catalogue') ?></h2>
+        <p style="margin-bottom: 2.5rem; max-width: 65ch;"><?= e(section_copy($section_content, 'services', 'description', 'Comprehensive web services including custom websites, automation workflows, and design solutions.')) ?></p>
         <div class="grid3">
-            <!-- Business Websites -->
+            <?php foreach ($services as $service): ?>
+            <?php $badgeStyle = (($service['badge_style'] ?? 'cyan') === 'ok') ? 'ok' : 'cyan'; ?>
             <div class="card reveal">
-                <span class="card-corner card-corner--tl"></span>
-                <span class="card-corner card-corner--tr"></span>
-                <span class="card-corner card-corner--bl"></span>
-                <span class="card-corner card-corner--br"></span>
-
+                <span class="card-corner card-corner--tl"></span><span class="card-corner card-corner--tr"></span><span class="card-corner card-corner--bl"></span><span class="card-corner card-corner--br"></span>
                 <div class="card__header">
-                    <span class="card__icon">🏢</span>
-                    <span class="badge badge--ok">Service</span>
+                    <span class="card__icon"><?= e((string) ($service['icon_text'] ?? '◆')) ?></span>
+                    <span class="badge badge--<?= e($badgeStyle) ?>"><?= e((string) ($service['badge_text'] ?? 'Service')) ?></span>
                 </div>
-                <h3 class="card__title">Business Websites</h3>
-                <p class="card__desc">Professional, high-performing websites designed to establish your business online. Includes responsive design, fast loading, and clear calls-to-action.</p>
-                <a href="#contact" style="display: inline-block; margin-top: 1rem; padding: 0.6rem 1rem; background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(124, 58, 237, 0.3); border-radius: var(--r1); color: var(--acc2); font-size: 0.8rem; text-decoration: none; transition: all 0.3s; font-family: var(--mono);">Contact →</a>
+                <h3 class="card__title"><?= e((string) $service['title']) ?></h3>
+                <p class="card__desc"><?= e((string) ($service['description'] ?? '')) ?></p>
+                <a href="<?= e((string) ($service['cta_url'] ?? '#contact')) ?>" style="display:inline-block;margin-top:1rem;padding:.6rem 1rem;background:rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.3);border-radius:var(--r1);color:var(--acc2);font-size:.8rem;text-decoration:none;font-family:var(--mono);"><?= e((string) ($service['cta_text'] ?? 'Contact ->')) ?></a>
             </div>
-
-            <!-- Portfolio Websites -->
-            <div class="card reveal">
-                <span class="card-corner card-corner--tl"></span>
-                <span class="card-corner card-corner--tr"></span>
-                <span class="card-corner card-corner--bl"></span>
-                <span class="card-corner card-corner--br"></span>
-
-                <div class="card__header">
-                    <span class="card__icon">🎯</span>
-                    <span class="badge badge--cyan">Service</span>
-                </div>
-                <h3 class="card__title">Portfolio Websites</h3>
-                <p class="card__desc">Showcase your work with a custom portfolio site. Clean layout, project galleries, and professional presentation to attract clients and opportunities.</p>
-                <a href="#contact" style="display: inline-block; margin-top: 1rem; padding: 0.6rem 1rem; background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--r1); color: var(--acc2); font-size: 0.8rem; text-decoration: none; transition: all 0.3s; font-family: var(--mono);">Contact →</a>
-            </div>
-
-            <!-- Landing Pages -->
-            <div class="card reveal">
-                <span class="card-corner card-corner--tl"></span>
-                <span class="card-corner card-corner--tr"></span>
-                <span class="card-corner card-corner--bl"></span>
-                <span class="card-corner card-corner--br"></span>
-
-                <div class="card__header">
-                    <span class="card__icon">🚀</span>
-                    <span class="badge badge--ok">Service</span>
-                </div>
-                <h3 class="card__title">Landing Pages</h3>
-                <p class="card__desc">Conversion-focused landing pages designed to drive action. Optimized headlines, compelling messaging, and strategic layout to maximize engagement.</p>
-                <a href="#contact" style="display: inline-block; margin-top: 1rem; padding: 0.6rem 1rem; background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(124, 58, 237, 0.3); border-radius: var(--r1); color: var(--acc2); font-size: 0.8rem; text-decoration: none; transition: all 0.3s; font-family: var(--mono);">Contact →</a>
-            </div>
-
-            <!-- Website Redesign -->
-            <div class="card reveal">
-                <span class="card-corner card-corner--tl"></span>
-                <span class="card-corner card-corner--tr"></span>
-                <span class="card-corner card-corner--bl"></span>
-                <span class="card-corner card-corner--br"></span>
-
-                <div class="card__header">
-                    <span class="card__icon">🎨</span>
-                    <span class="badge badge--cyan">Service</span>
-                </div>
-                <h3 class="card__title">Website Redesign</h3>
-                <p class="card__desc">Refresh your existing website with modern design and improved functionality. Preserve valuable content while upgrading the user experience and visual appeal.</p>
-                <a href="#contact" style="display: inline-block; margin-top: 1rem; padding: 0.6rem 1rem; background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--r1); color: var(--acc2); font-size: 0.8rem; text-decoration: none; transition: all 0.3s; font-family: var(--mono);">Contact →</a>
-            </div>
-
-            <!-- n8n Automation Workflows -->
-            <div class="card reveal">
-                <span class="card-corner card-corner--tl"></span>
-                <span class="card-corner card-corner--tr"></span>
-                <span class="card-corner card-corner--bl"></span>
-                <span class="card-corner card-corner--br"></span>
-
-                <div class="card__header">
-                    <span class="card__icon">⚙️</span>
-                    <span class="badge badge--ok">Service</span>
-                </div>
-                <h3 class="card__title">n8n Automation</h3>
-                <p class="card__desc">Custom workflow automation using n8n to connect your tools and systems. Save time on repetitive tasks and streamline business processes efficiently.</p>
-                <a href="#contact" style="display: inline-block; margin-top: 1rem; padding: 0.6rem 1rem; background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(124, 58, 237, 0.3); border-radius: var(--r1); color: var(--acc2); font-size: 0.8rem; text-decoration: none; transition: all 0.3s; font-family: var(--mono);">Contact →</a>
-            </div>
-
-            <!-- AI-Assisted Web Builds -->
-            <div class="card reveal">
-                <span class="card-corner card-corner--tl"></span>
-                <span class="card-corner card-corner--tr"></span>
-                <span class="card-corner card-corner--bl"></span>
-                <span class="card-corner card-corner--br"></span>
-
-                <div class="card__header">
-                    <span class="card__icon">✨</span>
-                    <span class="badge badge--cyan">Service</span>
-                </div>
-                <h3 class="card__title">AI-Assisted Builds</h3>
-                <p class="card__desc">Leverage AI tools to accelerate website development and content creation. Combining human direction with AI efficiency for faster, intelligent project delivery.</p>
-                <a href="#contact" style="display: inline-block; margin-top: 1rem; padding: 0.6rem 1rem; background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--r1); color: var(--acc2); font-size: 0.8rem; text-decoration: none; transition: all 0.3s; font-family: var(--mono);">Contact →</a>
-            </div>
-
-            <!-- Thumbnail Design -->
-            <div class="card reveal">
-                <span class="card-corner card-corner--tl"></span>
-                <span class="card-corner card-corner--tr"></span>
-                <span class="card-corner card-corner--bl"></span>
-                <span class="card-corner card-corner--br"></span>
-
-                <div class="card__header">
-                    <span class="card__icon">🖼️</span>
-                    <span class="badge badge--ok">Service</span>
-                </div>
-                <h3 class="card__title">Thumbnail Design</h3>
-                <p class="card__desc">Custom-designed thumbnails and graphics for your web projects, social media, and marketing. Professionally crafted visuals that capture attention and convey your message.</p>
-                <a href="#contact" style="display: inline-block; margin-top: 1rem; padding: 0.6rem 1rem; background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(124, 58, 237, 0.3); border-radius: var(--r1); color: var(--acc2); font-size: 0.8rem; text-decoration: none; transition: all 0.3s; font-family: var(--mono);">Contact →</a>
-            </div>
-
-            <!-- Basic Brand/Web Presence Setup -->
-            <div class="card reveal">
-                <span class="card-corner card-corner--tl"></span>
-                <span class="card-corner card-corner--tr"></span>
-                <span class="card-corner card-corner--bl"></span>
-                <span class="card-corner card-corner--br"></span>
-
-                <div class="card__header">
-                    <span class="card__icon">🌐</span>
-                    <span class="badge badge--cyan">Service</span>
-                </div>
-                <h3 class="card__title">Brand/Web Setup</h3>
-                <p class="card__desc">Essential web presence foundation for new businesses. Includes basic website, essential pages, and setup guidance to establish your online footprint.</p>
-                <a href="#contact" style="display: inline-block; margin-top: 1rem; padding: 0.6rem 1rem; background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: var(--r1); color: var(--acc2); font-size: 0.8rem; text-decoration: none; transition: all 0.3s; font-family: var(--mono);">Contact →</a>
-            </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
@@ -561,11 +467,9 @@ require_once __DIR__ . '/includes/header.php';
 <!-- ── Work Showcase Section ───────────────────────────── -->
         <section class="section" id="work" aria-label="Work Showcase">
             <div class="container">
-                <p class="section-label">Work Showcase</p>
-                <h2 class="section-title">Featured <span class="accent">Work</span></h2>
-                <p style="margin-bottom: 2.5rem; max-width: 65ch;">
-                    A selection of recent work that highlights websites, automation tools, and design-driven digital experiences.
-                </p>
+                <p class="section-label"><?= e(section_copy($section_content, 'work', 'label', 'Work Showcase')) ?></p>
+                <h2 class="section-title"><?= section_title_html($section_content, 'work', 'Featured', 'Work') ?></h2>
+                <p style="margin-bottom: 2.5rem; max-width: 65ch;"><?= e(section_copy($section_content, 'work', 'description', 'A selection of recent work that highlights websites, automation tools, and design-driven digital experiences.')) ?></p>
 
                 <div class="grid3">
                     <?php
@@ -579,6 +483,8 @@ require_once __DIR__ . '/includes/header.php';
                                 $category = trim((string)($project['category'] ?? 'Project'));
                                 $desc = trim((string)($project['description'] ?? ''));
                                 $icon_text = trim((string)($project['icon_text'] ?? '📁'));
+                                $thumb_fit = in_array(($project['thumbnail_fit'] ?? 'cover'), ['cover', 'contain'], true) ? $project['thumbnail_fit'] : 'cover';
+                                $thumb_pos = trim((string)($project['thumbnail_position'] ?? 'center center')) ?: 'center center';
 
                                 $thumb_src = trim((string)(
                                     $project['thumbnail_path']
@@ -622,7 +528,7 @@ require_once __DIR__ . '/includes/header.php';
                                                     src="<?= e($thumb_src) ?>"
                                                     alt="<?= e($title !== '' ? $title : 'Project thumbnail') ?>"
                                                     loading="lazy"
-                                                    style="width:100%; height:100%; object-fit:cover; display:block;"
+                                                    style="width:100%; height:100%; object-fit:<?= e($thumb_fit) ?>; object-position:<?= e($thumb_pos) ?>; display:block;"
                                                 />
                                             </a>
                                         <?php else: ?>
@@ -630,7 +536,7 @@ require_once __DIR__ . '/includes/header.php';
                                                 src="<?= e($thumb_src) ?>"
                                                 alt="<?= e($title !== '' ? $title : 'Project thumbnail') ?>"
                                                 loading="lazy"
-                                                style="width:100%; height:100%; object-fit:cover; display:block;"
+                                                style="width:100%; height:100%; object-fit:<?= e($thumb_fit) ?>; object-position:<?= e($thumb_pos) ?>; display:block;"
                                             />
                                         <?php endif; ?>
                                     </div>
@@ -687,11 +593,9 @@ require_once __DIR__ . '/includes/header.php';
         </section>
 <section class="section" id="journey" aria-label="Journey Chronology">
     <div class="container">
-        <p class="section-label">Journey</p>
-        <h2 class="section-title">Journey</h2>
-        <p style="margin-bottom: 2.5rem; max-width: 65ch;">
-            A timeline of the journey through tools, design learning, and digital system development.
-        </p>
+        <p class="section-label"><?= e(section_copy($section_content, 'journey', 'label', 'Journey')) ?></p>
+        <h2 class="section-title"><?= section_title_html($section_content, 'journey', 'Journey') ?></h2>
+        <p style="margin-bottom: 2.5rem; max-width: 65ch;"><?= e(section_copy($section_content, 'journey', 'description', 'A timeline of the journey through tools, design learning, and digital system development.')) ?></p>
 
         <div class="grid3">
             <?php foreach ($experience as $exp): ?>
@@ -723,11 +627,9 @@ require_once __DIR__ . '/includes/header.php';
 <!-- ── Contact / Social Section ───────────────────────────── -->
 <section class="section" id="contact" aria-label="Contact and Social">
     <div class="container">
-        <p class="section-label">Contact / Social</p>
-        <h2 class="section-title">Contact <span class="accent">Social</span></h2>
-        <p style="margin-bottom: 2.5rem; max-width: 65ch;">
-            Reach out for web work, automation projects, or creative collaborations through email or social links.
-        </p>
+        <p class="section-label"><?= e(section_copy($section_content, 'contact', 'label', 'Contact / Social')) ?></p>
+        <h2 class="section-title"><?= section_title_html($section_content, 'contact', 'Contact', 'Social') ?></h2>
+        <p style="margin-bottom: 2.5rem; max-width: 65ch;"><?= e(section_copy($section_content, 'contact', 'description', 'Reach out for web work, automation projects, or creative collaborations through email or social links.')) ?></p>
 
         <div class="grid2">
             <!-- Info Panel -->
@@ -886,4 +788,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
-

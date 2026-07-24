@@ -23,6 +23,7 @@ export function InterfaceCursor() {
     let currentSpeed = 0;
     let lastTarget: EventTarget | null = null;
     let frame = 0;
+    let scrollTimer = 0;
 
     const interactiveSelector =
       'a, button, [role="button"], .project-card, .service-card, .skill-card, .character-deck';
@@ -60,6 +61,13 @@ export function InterfaceCursor() {
     const onPointerUp = () => cursor.classList.remove("is-active");
     const onPointerLeave = () => cursor.classList.remove("is-visible");
     const onPointerEnter = () => cursor.classList.add("is-visible");
+    const onScroll = () => {
+      cursor.classList.add("is-processing");
+      window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => {
+        cursor.classList.remove("is-processing");
+      }, 420);
+    };
     const animate = () => {
       currentX += (targetX - currentX) * 0.58;
       currentY += (targetY - currentY) * 0.58;
@@ -74,6 +82,7 @@ export function InterfaceCursor() {
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerdown", onPointerDown, { passive: true });
     window.addEventListener("pointerup", onPointerUp, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
     document.documentElement.addEventListener("mouseleave", onPointerLeave);
     document.documentElement.addEventListener("mouseenter", onPointerEnter);
     frame = window.requestAnimationFrame(animate);
@@ -81,9 +90,11 @@ export function InterfaceCursor() {
     return () => {
       document.documentElement.classList.remove("interface-cursor-ready");
       window.cancelAnimationFrame(frame);
+      window.clearTimeout(scrollTimer);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("scroll", onScroll);
       document.documentElement.removeEventListener("mouseleave", onPointerLeave);
       document.documentElement.removeEventListener("mouseenter", onPointerEnter);
     };
@@ -97,6 +108,7 @@ export function InterfaceCursor() {
         <b />
       </span>
       <span className="interface-cursor__dot" />
+      <span className="interface-cursor__status">PROCESSING</span>
     </div>
   );
 }

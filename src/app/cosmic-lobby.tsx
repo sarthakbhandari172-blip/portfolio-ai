@@ -26,9 +26,7 @@ type CharacterDeckProps = {
   roles: string[];
   primaryCta: { text: string; url: string };
   secondaryCta: { text: string; url: string };
-  characterClass: string;
   region: string;
-  systemState: string;
   statusText: string;
   links: HeroLink[];
 };
@@ -38,8 +36,6 @@ type DeckStyle = CSSProperties & {
   "--panel-ry": string;
   "--panel-x": string;
   "--panel-y": string;
-  "--portrait-x": string;
-  "--portrait-y": string;
   "--aura-x": string;
   "--aura-y": string;
   "--ring-x": string;
@@ -70,9 +66,7 @@ export function CosmicLobby({
   roles,
   primaryCta,
   secondaryCta,
-  characterClass,
   region,
-  systemState,
   statusText,
   links,
 }: CharacterDeckProps) {
@@ -119,8 +113,6 @@ export function CosmicLobby({
       scene.style.setProperty("--panel-ry", `${(x * (touch ? 12 : 23) * activeScale).toFixed(2)}deg`);
       scene.style.setProperty("--panel-x", `${(x * 11).toFixed(2)}px`);
       scene.style.setProperty("--panel-y", `${(y * 8).toFixed(2)}px`);
-      scene.style.setProperty("--portrait-x", `${(x * 28 * activeScale).toFixed(2)}px`);
-      scene.style.setProperty("--portrait-y", `${(y * 22 * activeScale).toFixed(2)}px`);
       scene.style.setProperty("--aura-x", `${(x * 38 * activeScale).toFixed(2)}px`);
       scene.style.setProperty("--aura-y", `${(y * 30 * activeScale).toFixed(2)}px`);
       scene.style.setProperty("--ring-x", `${(-x * 18).toFixed(2)}px`);
@@ -194,8 +186,6 @@ export function CosmicLobby({
           "--panel-ry": "0deg",
           "--panel-x": "0px",
           "--panel-y": "0px",
-          "--portrait-x": "0px",
-          "--portrait-y": "0px",
           "--aura-x": "0px",
           "--aura-y": "0px",
           "--ring-x": "0px",
@@ -292,22 +282,10 @@ export function CosmicLobby({
             <span className="frame-grade" />
             <span className="frame-scan" />
             <span className="frame-shine" />
-            <i className="frame-bracket frame-bracket--tl" />
-            <i className="frame-bracket frame-bracket--tr" />
-            <i className="frame-bracket frame-bracket--bl" />
-            <i className="frame-bracket frame-bracket--br" />
-          </div>
-          <div className="character-node character-node--class">
-            <span>Class</span>
-            <strong>{characterClass}</strong>
           </div>
           <div className="character-node character-node--region">
             <span>Region</span>
             <strong>{region}</strong>
-          </div>
-          <div className="character-node character-node--state">
-            <span className="node-pulse" />
-            <strong>{systemState}</strong>
           </div>
         </div>
       </div>

@@ -2468,9 +2468,8 @@ a {
   height: 100%;
   object-fit: cover;
   object-position: center 44%;
-  scale: 1.09;
-  transform: translate3d(var(--portrait-x), var(--portrait-y), 18px);
-  will-change: transform;
+  scale: 1.04;
+  transform: translateZ(18px);
   filter: saturate(0.95) contrast(1.05);
 }
 

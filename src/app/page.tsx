@@ -1,11 +1,67 @@
 import Image from "next/image";
-import Link from "next/link";
 import { submitContact } from "@/app/actions";
 import { CosmicLobby } from "@/app/cosmic-lobby";
 import { getPortfolioData } from "@/lib/data";
 import type { SectionContent } from "@/lib/types";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+function SocialIcon({ platform }: { platform: string }) {
+  const name = platform.toLowerCase();
+  const common = {
+    viewBox: "0 0 24 24",
+    width: 22,
+    height: 22,
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.8,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+  };
+
+  if (name.includes("github")) {
+    return (
+      <svg {...common} fill="currentColor" stroke="none">
+        <path d="M12 .8a11.4 11.4 0 0 0-3.6 22.2c.6.1.8-.3.8-.6v-2.2c-3.4.7-4.1-1.4-4.1-1.4-.6-1.4-1.4-1.8-1.4-1.8-1.1-.8.1-.8.1-.8 1.3.1 1.9 1.3 1.9 1.3 1.1 1.9 2.9 1.4 3.6 1.1.1-.8.4-1.4.8-1.7-2.7-.3-5.5-1.3-5.5-6a4.7 4.7 0 0 1 1.2-3.2c-.1-.3-.5-1.6.1-3.2 0 0 1-.3 3.3 1.2a11.3 11.3 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.9.1 3.2a4.7 4.7 0 0 1 1.2 3.2c0 4.7-2.8 5.7-5.5 6 .5.4.9 1.2.9 2.4v3.5c0 .3.2.7.8.6A11.4 11.4 0 0 0 12 .8Z" />
+      </svg>
+    );
+  }
+
+  if (name.includes("linkedin")) {
+    return (
+      <svg {...common} fill="currentColor" stroke="none">
+        <path d="M5.3 3.5A2.3 2.3 0 1 1 .7 3.5a2.3 2.3 0 0 1 4.6 0ZM1.1 7.2h4.3V21H1.1V7.2Zm6.9 0h4.1v1.9h.1c.6-1.1 2-2.3 4-2.3 4.3 0 5.1 2.8 5.1 6.5V21H17v-6.8c0-1.6 0-3.7-2.3-3.7-2.3 0-2.6 1.8-2.6 3.6V21H8V7.2Z" />
+      </svg>
+    );
+  }
+
+  if (name.includes("instagram")) {
+    return (
+      <svg {...common}>
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4.2" />
+        <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+      </svg>
+    );
+  }
+
+  if (name.includes("whatsapp")) {
+    return (
+      <svg {...common}>
+        <path d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.5L3 20.5l1.3-4.7a8.5 8.5 0 1 1 16.2-4.1Z" />
+        <path d="M8.1 7.6c.2-.4.4-.4.7-.4h.5c.2 0 .4 0 .5.4l.8 2c.1.3 0 .5-.2.7l-.7.8c-.2.2-.1.4 0 .6.7 1.2 1.6 2.1 2.8 2.7.2.1.4.1.6-.1l.9-1.1c.2-.2.4-.3.7-.2l2 .9c.3.1.4.3.4.5 0 .5-.2 1.6-1.1 2.1-.6.4-1.4.6-2.3.3-1.3-.4-3-1.1-4.8-2.8-1.5-1.5-2.5-3.3-2.8-4.5-.3-.8 0-1.5.3-1.9Z" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg {...common}>
+      <rect x="2.5" y="5" width="19" height="14" rx="2" />
+      <path d="m4 7 8 6 8-6" />
+    </svg>
+  );
+}
 
 function SectionHeading({
   section,
@@ -57,9 +113,6 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
           <a href="#skills">Skills</a>
           <a href="#contact">Contact</a>
         </div>
-        <Link className="nav-admin" href="/admin">
-          Admin
-        </Link>
       </nav>
 
       <CosmicLobby
@@ -78,9 +131,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
           text: data.profile.hero_secondary_cta_text ?? "Enter Portal",
           url: data.profile.hero_secondary_cta_url ?? "#services",
         }}
-        characterClass={data.settings.hero_class ?? "Digital creative"}
         region={data.settings.hero_region ?? data.profile.location ?? "Nepal"}
-        systemState={data.settings.hero_system_state ?? "Portfolio system online"}
         statusText={data.profile.status_text ?? "Available for selected projects"}
         links={heroLinks.map((link) => ({
           id: link.id,
@@ -293,7 +344,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
           <div className="contact-links">
             {contactLinks.map((link) => (
               <a href={link.url} key={link.id} target="_blank" rel="noreferrer">
-                <span>{link.icon_text}</span>
+                <span><SocialIcon platform={link.platform} /></span>
                 <div>
                   <small>{link.platform}</small>
                   <strong>{link.label}</strong>

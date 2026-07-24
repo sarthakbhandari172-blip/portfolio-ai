@@ -3089,9 +3089,10 @@ a {
   }
 
   .interface-cursor.is-processing .interface-cursor__dot {
-    width: 9px;
-    height: 9px;
-    animation: cursor-process-pulse 0.55s ease-in-out infinite alternate;
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    animation: none;
   }
 
   .interface-cursor.is-processing .interface-cursor__status {
@@ -3101,13 +3102,6 @@ a {
 
 @keyframes cursor-orbit {
   to { rotate: 360deg; }
-}
-
-@keyframes cursor-process-pulse {
-  to {
-    scale: 1.65;
-    background: #9b5cff;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -8,6 +8,15 @@ export type Profile = {
   phone?: string | null;
   location: string | null;
   resume_url?: string | null;
+  hero_label?: string | null;
+  hero_display_title?: string | null;
+  hero_accent_title?: string | null;
+  hero_roles?: string[];
+  hero_primary_cta_text?: string | null;
+  hero_primary_cta_url?: string | null;
+  hero_secondary_cta_text?: string | null;
+  hero_secondary_cta_url?: string | null;
+  status_text?: string | null;
 };
 
 export type Skill = {
@@ -17,6 +26,9 @@ export type Skill = {
   proficiency: number;
   icon: string | null;
   sort_order: number;
+  description?: string | null;
+  link_url?: string | null;
+  is_active?: boolean;
 };
 
 export type Project = {
@@ -47,6 +59,8 @@ export type Experience = {
   icon: string | null;
   status: string | null;
   sort_order: number;
+  link_url?: string | null;
+  is_active?: boolean;
 };
 
 export type Service = {
@@ -60,6 +74,9 @@ export type Service = {
   cta_url: string | null;
   sort_order: number;
   is_active: boolean;
+  thumbnail_url?: string | null;
+  thumbnail_fit?: "cover" | "contain";
+  thumbnail_position?: string;
 };
 
 export type SectionContent = {
@@ -68,6 +85,8 @@ export type SectionContent = {
   title: string | null;
   accent: string | null;
   description: string | null;
+  cta_text?: string | null;
+  cta_url?: string | null;
 };
 
 export type SocialLink = {
@@ -91,5 +110,5 @@ export type PortfolioData = {
   services: Service[];
   sections: Record<string, SectionContent>;
   socialLinks: SocialLink[];
+  settings: Record<string, string>;
 };
-

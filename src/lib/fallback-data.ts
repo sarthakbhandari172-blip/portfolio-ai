@@ -8,6 +8,15 @@ export const fallbackData: PortfolioData = {
     avatar_url: "/media/profile/avatar.png",
     email: "sarthakbhandari172@gmail.com",
     location: "Nepal",
+    hero_label: "System Online — Digital Portfolio",
+    hero_display_title: "Sarthak Bhandari",
+    hero_accent_title: "Digital Portfolio",
+    hero_roles: ["Web Builder", "Automation Explorer", "Visual Design Learner"],
+    hero_primary_cta_text: "View Work",
+    hero_primary_cta_url: "#work",
+    hero_secondary_cta_text: "Enter Portal",
+    hero_secondary_cta_url: "#services",
+    status_text: "Available for selected projects",
   },
   skills: [
     { id: 1, name: "PHP & PDO", category: "Languages", proficiency: 85, icon: "PHP", sort_order: 1 },
@@ -101,6 +110,20 @@ export const fallbackData: PortfolioData = {
     is_active: true,
   })),
   sections: {
+    about: {
+      section_key: "about",
+      label: "Identity File",
+      title: "About",
+      accent: "Sarthak",
+      description: "A multidisciplinary builder exploring visual design, software, automation and the interfaces connecting them.",
+    },
+    skills: {
+      section_key: "skills",
+      label: "System Modules",
+      title: "Skills",
+      accent: "Inventory",
+      description: "Tools and technologies currently used across design, development and experimentation.",
+    },
     work: {
       section_key: "work",
       label: "Selected Work",
@@ -137,5 +160,13 @@ export const fallbackData: PortfolioData = {
     { id: 4, platform: "instagram", label: "Instagram", url: "https://www.instagram.com/_hell.spawn", icon_text: "IG", sort_order: 4, is_active: true, show_in_hero: false, show_in_contact: true, show_in_footer: true },
     { id: 5, platform: "whatsapp", label: "WhatsApp", url: "https://wa.me/9779769291674", icon_text: "WA", sort_order: 5, is_active: true, show_in_hero: false, show_in_contact: true, show_in_footer: true },
   ],
+  settings: {
+    about_approach: "Explore → prototype → refine",
+    about_mode: "Learning through practical projects",
+    about_tools: "Design, web, automation and physical computing",
+    hero_class: "Digital creative",
+    hero_region: "Kathmandu, Nepal",
+    hero_system_state: "Portfolio system online",
+    footer_signature: "Built across design, code and curiosity",
+  },
 };
-

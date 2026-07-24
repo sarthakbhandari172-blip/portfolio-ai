@@ -49,9 +49,12 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
           <small>Portfolio</small>
         </a>
         <div className="nav-links">
+          <a href="#home">Home</a>
           <a href="#about">About</a>
           <a href="#work">Work</a>
-          <a href="#capabilities">Capabilities</a>
+          <a href="#services">Services</a>
+          <a href="#journey">Journey</a>
+          <a href="#skills">Skills</a>
           <a href="#contact">Contact</a>
         </div>
         <Link className="nav-admin" href="/admin">
@@ -60,10 +63,25 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
       </nav>
 
       <CosmicLobby
-        fullName={data.profile.full_name}
-        location={data.profile.location ?? "Nepal"}
+        displayTitle={data.profile.hero_display_title ?? data.profile.full_name}
+        accentTitle={data.profile.hero_accent_title ?? "Digital Portfolio"}
+        label={data.profile.hero_label ?? "System Online — Digital Portfolio"}
         tagline={data.profile.tagline ?? "Software · Hardware · Interfaces"}
         bio={data.profile.bio ?? "Exploring the space between an idea and its execution."}
+        imageUrl={data.profile.avatar_url ?? "/media/profile/cosmic-avatar.png"}
+        roles={data.profile.hero_roles ?? []}
+        primaryCta={{
+          text: data.profile.hero_primary_cta_text ?? "View Work",
+          url: data.profile.hero_primary_cta_url ?? "#work",
+        }}
+        secondaryCta={{
+          text: data.profile.hero_secondary_cta_text ?? "Enter Portal",
+          url: data.profile.hero_secondary_cta_url ?? "#services",
+        }}
+        characterClass={data.settings.hero_class ?? "Digital creative"}
+        region={data.settings.hero_region ?? data.profile.location ?? "Nepal"}
+        systemState={data.settings.hero_system_state ?? "Portfolio system online"}
+        statusText={data.profile.status_text ?? "Available for selected projects"}
         links={heroLinks.map((link) => ({
           id: link.id,
           label: link.label,
@@ -75,48 +93,32 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
       <section className="section shell" id="about">
         <div className="about-grid">
           <div>
-            <p className="eyebrow">Profile / 01</p>
+            <p className="eyebrow">{data.sections.about?.label ?? "Identity File"}</p>
             <h2 className="display-heading">
-              Ideas become useful
-              <span> through execution.</span>
+              {data.sections.about?.title ?? "About"}
+              <span> {data.sections.about?.accent ?? "Sarthak"}</span>
             </h2>
           </div>
           <div className="about-copy">
             <p>
-              I&apos;m {data.profile.full_name}, a technology enthusiast in{" "}
-              {data.profile.location ?? "Nepal"}. My interests sit across
-              software, hardware and the interfaces connecting them.
+              {data.sections.about?.description ??
+                `I'm ${data.profile.full_name}, a multidisciplinary builder in ${data.profile.location ?? "Nepal"}.`}
             </p>
             <dl className="identity-list">
               <div>
                 <dt>Approach</dt>
-                <dd>Explore → prototype → refine</dd>
+                <dd>{data.settings.about_approach ?? "Explore → prototype → refine"}</dd>
               </div>
               <div>
                 <dt>Current mode</dt>
-                <dd>Learning through practical projects</dd>
+                <dd>{data.settings.about_mode ?? "Learning through practical projects"}</dd>
               </div>
               <div>
                 <dt>Primary tools</dt>
-                <dd>Web, data, automation and physical computing</dd>
+                <dd>{data.settings.about_tools ?? "Design, web and automation"}</dd>
               </div>
             </dl>
           </div>
-        </div>
-
-        <div className="skills-grid">
-          {data.skills.map((skill) => (
-            <article className="skill-card" key={skill.id}>
-              <div>
-                <span className="skill-icon">{skill.icon ?? "—"}</span>
-                <small>{skill.category ?? "Technology"}</small>
-              </div>
-              <h3>{skill.name}</h3>
-              <div className="skill-meter" aria-label={`${skill.proficiency}% proficiency`}>
-                <span style={{ width: `${skill.proficiency}%` }} />
-              </div>
-            </article>
-          ))}
         </div>
       </section>
 
@@ -127,8 +129,20 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
           fallbackTitle="Featured Projects"
         />
         <div className="projects-grid">
-          {data.projects.map((project, index) => (
+          {data.projects.map((project, index) => {
+            const projectUrl =
+              project.external_url || project.live_url || project.github_url;
+            return (
             <article className="project-card" key={project.id}>
+              {projectUrl && projectUrl !== "#" ? (
+                <a
+                  className="card-hit-target"
+                  href={projectUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Open ${project.title}`}
+                />
+              ) : null}
               <div className="project-media">
                 {project.thumbnail_url ? (
                   <Image
@@ -158,24 +172,15 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                   ))}
                 </div>
                 <div className="project-links">
-                  {project.live_url && project.live_url !== "#" ? (
-                    <a href={project.live_url} target="_blank" rel="noreferrer">
-                      Live project ↗
-                    </a>
-                  ) : null}
-                  {project.github_url ? (
-                    <a href={project.github_url} target="_blank" rel="noreferrer">
-                      Source ↗
-                    </a>
-                  ) : null}
+                  <span>{projectUrl && projectUrl !== "#" ? "Open project ↗" : "Project archive"}</span>
                 </div>
               </div>
             </article>
-          ))}
+          )})}
         </div>
       </section>
 
-      <section className="section shell" id="capabilities">
+      <section className="section shell" id="services">
         <SectionHeading
           section={data.sections.services}
           fallbackLabel="Capabilities"
@@ -184,19 +189,38 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         <div className="services-grid">
           {data.services.map((service) => (
             <article className="service-card" key={service.id}>
+              {service.cta_url ? (
+                <a
+                  className="card-hit-target"
+                  href={service.cta_url}
+                  aria-label={`${service.cta_text ?? "Open"} ${service.title}`}
+                />
+              ) : null}
               <span className="service-index">{String(service.sort_order).padStart(2, "0")}</span>
+              {service.thumbnail_url ? (
+                <div className="service-media">
+                  <Image
+                    src={service.thumbnail_url}
+                    alt=""
+                    width={600}
+                    height={360}
+                    style={{
+                      objectFit: service.thumbnail_fit ?? "cover",
+                      objectPosition: service.thumbnail_position ?? "center center",
+                    }}
+                  />
+                </div>
+              ) : null}
               <div className="service-icon">{service.icon_text}</div>
               <h3>{service.title}</h3>
               <p>{service.description}</p>
-              <a href={service.cta_url ?? "#contact"}>
-                {service.cta_text ?? "Discuss project"} ↗
-              </a>
+              <span className="service-cta">{service.cta_text ?? "Discuss project"} ↗</span>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="section shell">
+      <section className="section shell" id="journey">
         <SectionHeading
           section={data.sections.journey}
           fallbackLabel="Journey"
@@ -213,6 +237,47 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                 <p>{item.description}</p>
               </div>
               <small>{item.status}</small>
+              {item.link_url ? (
+                <a
+                  className="card-hit-target"
+                  href={item.link_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Open ${item.role}`}
+                />
+              ) : null}
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section shell" id="skills">
+        <SectionHeading
+          section={data.sections.skills}
+          fallbackLabel="System Modules"
+          fallbackTitle="Skills Inventory"
+        />
+        <div className="skills-grid">
+          {data.skills.map((skill) => (
+            <article className="skill-card" key={skill.id}>
+              {skill.link_url ? (
+                <a
+                  className="card-hit-target"
+                  href={skill.link_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Open ${skill.name}`}
+                />
+              ) : null}
+              <div>
+                <span className="skill-icon">{skill.icon ?? "—"}</span>
+                <small>{skill.category ?? "Technology"}</small>
+              </div>
+              <h3>{skill.name}</h3>
+              {skill.description ? <p>{skill.description}</p> : null}
+              <div className="skill-meter" aria-label={`${skill.proficiency}% proficiency`}>
+                <span style={{ width: `${skill.proficiency}%` }} />
+              </div>
             </article>
           ))}
         </div>
@@ -277,7 +342,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
 
       <footer className="footer shell">
         <p>© {new Date().getFullYear()} Sarthak Bhandari</p>
-        <p>Software · Hardware · Interfaces</p>
+        <p>{data.settings.footer_signature ?? "Software · Hardware · Interfaces"}</p>
         <a href="#home">Back to top ↑</a>
       </footer>
     </main>

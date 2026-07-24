@@ -11,6 +11,23 @@ values
   )
 on conflict do nothing;
 
+update public.profile
+set
+  avatar_url = '/media/profile/cosmic-avatar.png',
+  hero_label = coalesce(hero_label, 'System Online — Digital Portfolio'),
+  hero_display_title = coalesce(hero_display_title, full_name),
+  hero_accent_title = coalesce(hero_accent_title, 'Digital Portfolio'),
+  hero_roles = case
+    when cardinality(hero_roles) = 0
+      then array['Web Builder', 'Automation Explorer', 'Visual Design Learner']
+    else hero_roles
+  end,
+  hero_primary_cta_text = coalesce(hero_primary_cta_text, 'View Work'),
+  hero_primary_cta_url = coalesce(hero_primary_cta_url, '#work'),
+  hero_secondary_cta_text = coalesce(hero_secondary_cta_text, 'Enter Portal'),
+  hero_secondary_cta_url = coalesce(hero_secondary_cta_url, '#services'),
+  status_text = coalesce(status_text, 'Available for selected projects');
+
 insert into public.skills (name, category, proficiency, icon, sort_order) values
   ('PHP & PDO', 'Languages', 85, 'PHP', 1),
   ('MySQL / PostgreSQL', 'Data', 80, 'DB', 2),
@@ -79,9 +96,11 @@ values
 on conflict do nothing;
 
 insert into public.section_content (section_key, label, title, accent, description) values
+  ('about', 'Identity File', 'About', 'Sarthak', 'A multidisciplinary builder exploring visual design, software, automation and the interfaces connecting them.'),
   ('contact', 'Contact', 'Start a', 'Conversation', 'Reach out for a project, collaboration or technical discussion.'),
   ('journey', 'Journey', 'Experience', '', 'A concise view of practical work and ongoing technical exploration.'),
   ('services', 'Capabilities', 'What I', 'Build', 'Focused digital work across software, interfaces and automation.'),
+  ('skills', 'System Modules', 'Skills', 'Inventory', 'Tools and technologies currently used across design, development and experimentation.'),
   ('work', 'Selected Work', 'Featured', 'Projects', 'Projects that connect ideas, implementation and clear interface design.')
 on conflict (section_key) do update set
   label = excluded.label,
@@ -103,7 +122,14 @@ values
 on conflict do nothing;
 
 insert into public.settings (setting_key, setting_value) values
+  ('about_approach', 'Explore → prototype → refine'),
+  ('about_mode', 'Learning through practical projects'),
+  ('about_tools', 'Design, web, automation and physical computing'),
   ('ai_enabled', '1'),
+  ('footer_signature', 'Built across design, code and curiosity'),
+  ('hero_class', 'Digital creative'),
+  ('hero_region', 'Kathmandu, Nepal'),
+  ('hero_system_state', 'Portfolio system online'),
   ('maintenance_mode', '0'),
   ('site_tagline', 'Software · Hardware · Interfaces'),
   ('site_title', 'Sarthak Bhandari | Portfolio')

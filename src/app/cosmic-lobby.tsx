@@ -1,7 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, type CSSProperties, type PointerEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent,
+} from "react";
 
 type HeroLink = {
   id: number;
@@ -10,196 +16,200 @@ type HeroLink = {
   icon_text: string;
 };
 
-type CosmicLobbyProps = {
-  fullName: string;
-  location: string;
+type CharacterDeckProps = {
+  displayTitle: string;
+  accentTitle: string;
+  label: string;
   tagline: string;
   bio: string;
+  imageUrl: string;
+  roles: string[];
+  primaryCta: { text: string; url: string };
+  secondaryCta: { text: string; url: string };
+  characterClass: string;
+  region: string;
+  systemState: string;
+  statusText: string;
   links: HeroLink[];
 };
 
-type LobbyStyle = CSSProperties & {
-  "--pointer-x": string;
-  "--pointer-y": string;
-  "--tilt-x": string;
-  "--tilt-y": string;
-  "--copy-x": string;
-  "--copy-y": string;
-  "--nebula-x": string;
-  "--nebula-y": string;
+type DeckStyle = CSSProperties & {
+  "--deck-rx": string;
+  "--deck-ry": string;
+  "--deck-x": string;
+  "--deck-y": string;
+  "--scene-x": string;
+  "--scene-y": string;
 };
 
 export function CosmicLobby({
-  fullName,
-  location,
+  displayTitle,
+  accentTitle,
+  label,
   tagline,
   bio,
+  imageUrl,
+  roles,
+  primaryCta,
+  secondaryCta,
+  characterClass,
+  region,
+  systemState,
+  statusText,
   links,
-}: CosmicLobbyProps) {
-  const lobbyRef = useRef<HTMLElement>(null);
-  const [firstName, ...rest] = fullName.split(" ");
-  const lastName = rest.join(" ") || "Bhandari";
+}: CharacterDeckProps) {
+  const sceneRef = useRef<HTMLElement>(null);
+  const safeRoles = roles.length ? roles : ["Digital Creative"];
+  const [roleIndex, setRoleIndex] = useState(0);
 
-  function updatePerspective(event: PointerEvent<HTMLElement>) {
-    const lobby = lobbyRef.current;
-    if (!lobby) return;
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setRoleIndex((current) => (current + 1) % safeRoles.length);
+    }, 2400);
+    return () => window.clearInterval(timer);
+  }, [safeRoles.length]);
 
-    const bounds = lobby.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) / bounds.width;
-    const y = (event.clientY - bounds.top) / bounds.height;
-
-    lobby.style.setProperty("--pointer-x", `${x * 100}%`);
-    lobby.style.setProperty("--pointer-y", `${y * 100}%`);
-    lobby.style.setProperty("--tilt-x", `${(0.5 - y) * 7}deg`);
-    lobby.style.setProperty("--tilt-y", `${(x - 0.5) * 9}deg`);
-    lobby.style.setProperty("--copy-x", `${(0.5 - x) * 14}px`);
-    lobby.style.setProperty("--copy-y", `${(0.5 - y) * 10}px`);
-    lobby.style.setProperty("--nebula-x", `${(0.5 - x) * 30}px`);
-    lobby.style.setProperty("--nebula-y", `${(0.5 - y) * 22}px`);
+  function moveDeck(event: PointerEvent<HTMLElement>) {
+    const scene = sceneRef.current;
+    if (!scene) return;
+    const bounds = scene.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+    scene.style.setProperty("--deck-rx", `${y * -5}deg`);
+    scene.style.setProperty("--deck-ry", `${x * 7}deg`);
+    scene.style.setProperty("--deck-x", `${x * 13}px`);
+    scene.style.setProperty("--deck-y", `${y * 10}px`);
+    scene.style.setProperty("--scene-x", `${x * -20}px`);
+    scene.style.setProperty("--scene-y", `${y * -14}px`);
   }
 
-  function resetPerspective() {
-    const lobby = lobbyRef.current;
-    if (!lobby) return;
-    lobby.style.setProperty("--pointer-x", "62%");
-    lobby.style.setProperty("--pointer-y", "42%");
-    lobby.style.setProperty("--tilt-x", "0deg");
-    lobby.style.setProperty("--tilt-y", "0deg");
-    lobby.style.setProperty("--copy-x", "0px");
-    lobby.style.setProperty("--copy-y", "0px");
-    lobby.style.setProperty("--nebula-x", "0px");
-    lobby.style.setProperty("--nebula-y", "0px");
+  function resetDeck() {
+    const scene = sceneRef.current;
+    if (!scene) return;
+    ["--deck-rx", "--deck-ry"].forEach((property) =>
+      scene.style.setProperty(property, "0deg"),
+    );
+    ["--deck-x", "--deck-y", "--scene-x", "--scene-y"].forEach((property) =>
+      scene.style.setProperty(property, "0px"),
+    );
   }
 
   return (
     <section
-      className="cosmic-lobby shell"
+      className="character-lobby"
       id="home"
-      ref={lobbyRef}
-      onPointerMove={updatePerspective}
-      onPointerLeave={resetPerspective}
+      ref={sceneRef}
+      onPointerMove={moveDeck}
+      onPointerLeave={resetDeck}
       style={
         {
-          "--pointer-x": "62%",
-          "--pointer-y": "42%",
-          "--tilt-x": "0deg",
-          "--tilt-y": "0deg",
-          "--copy-x": "0px",
-          "--copy-y": "0px",
-          "--nebula-x": "0px",
-          "--nebula-y": "0px",
-        } as LobbyStyle
+          "--deck-rx": "0deg",
+          "--deck-ry": "0deg",
+          "--deck-x": "0px",
+          "--deck-y": "0px",
+          "--scene-x": "0px",
+          "--scene-y": "0px",
+        } as DeckStyle
       }
     >
-      <div className="lobby-depth" aria-hidden="true">
-        <div className="lobby-nebula" />
-        <div className="lobby-stars lobby-stars-near" />
-        <div className="lobby-stars lobby-stars-far" />
-        <div className="lobby-horizon" />
-        <div className="lobby-scan" />
+      <div className="character-lobby__world" aria-hidden="true">
+        <span className="world-grid" />
+        <span className="world-orbit world-orbit--one" />
+        <span className="world-orbit world-orbit--two" />
+        <span className="world-flare" />
+        <span className="world-scan" />
       </div>
 
-      <div className="lobby-frame" aria-hidden="true">
-        <i className="frame-corner frame-corner-tl" />
-        <i className="frame-corner frame-corner-tr" />
-        <i className="frame-corner frame-corner-bl" />
-        <i className="frame-corner frame-corner-br" />
-      </div>
-
-      <header className="lobby-telemetry">
-        <p>
-          <span className="telemetry-pulse" />
-          SB // COMMAND LOBBY
-        </p>
-        <div>
-          <span>SECTOR NP-977</span>
-          <span>CORE ONLINE</span>
-        </div>
-      </header>
-
-      <div className="lobby-main">
-        <div className="lobby-copy">
-          <p className="lobby-kicker">Developer profile // Player 01</p>
+      <div className="character-lobby__grid shell">
+        <div className="character-copy">
+          <p className="character-label">
+            <span />
+            {label}
+          </p>
           <h1>
-            <span>{firstName}</span>
-            <strong>{lastName}</strong>
+            <span>{displayTitle}</span>
+            <strong>{accentTitle}</strong>
           </h1>
-          <div className="lobby-rule">
+          <p className="character-tagline">{tagline}</p>
+          <p className="character-bio">{bio}</p>
+
+          <div className="role-terminal" aria-live="polite">
+            <span>&gt;</span>
+            <strong key={roleIndex}>{safeRoles[roleIndex]}</strong>
             <i />
-            <span>Interface initialized</span>
           </div>
-          <p className="lobby-tagline">{tagline}</p>
-          <p className="lobby-bio">{bio}</p>
-          <div className="hero-actions">
-            <a className="button button-primary" href="#work">
-              <span>Enter selected work</span>
+
+          <div className="character-actions">
+            <a className="deck-button deck-button--primary" href={primaryCta.url}>
+              <span>▦</span>
+              {primaryCta.text}
             </a>
-            <a className="button button-secondary" href="#contact">
-              <span>Open communication</span>
+            <a className="deck-button deck-button--portal" href={secondaryCta.url}>
+              <span>＋</span>
+              {secondaryCta.text}
+            </a>
+            <a className="deck-button deck-button--quiet" href="#contact">
+              <span>✉</span>
+              Contact
             </a>
           </div>
+
           {links.length ? (
-            <div className="social-row" aria-label="Featured social links">
-              {links.map((link) => (
-                <a key={link.id} href={link.url} target="_blank" rel="noreferrer">
-                  <span>{link.icon_text}</span>
-                  {link.label}
-                </a>
-              ))}
+            <div className="character-uplinks">
+              <small>Channel uplinks:</small>
+              <div>
+                {links.map((link) => (
+                  <a key={link.id} href={link.url} target="_blank" rel="noreferrer">
+                    <span>{link.icon_text}</span>
+                    {link.label}
+                  </a>
+                ))}
+              </div>
             </div>
           ) : null}
         </div>
 
-        <div className="avatar-deck" aria-label={`${fullName} profile image`}>
-          <div className="deck-orbit deck-orbit-outer">
-            <i />
-            <i />
-            <i />
-          </div>
-          <div className="deck-orbit deck-orbit-middle" />
-          <div className="deck-crosshair deck-crosshair-x" />
-          <div className="deck-crosshair deck-crosshair-y" />
-          <div className="avatar-energy" />
-          <div className="avatar-portal">
+        <div className="character-deck">
+          <span className="deck-aura" />
+          <span className="deck-ring deck-ring--outer" />
+          <span className="deck-ring deck-ring--inner" />
+          <span className="deck-reticle" />
+          <div className="character-frame">
+            <div className="frame-particles" aria-hidden="true" />
             <Image
-              src="/media/profile/cosmic-avatar.png"
-              alt={fullName}
+              src={imageUrl}
+              alt={`${displayTitle} character portrait`}
               width={1085}
               height={1449}
               priority
             />
-            <div className="avatar-vignette" />
+            <span className="frame-grade" />
+            <span className="frame-scan" />
+            <i className="frame-bracket frame-bracket--tl" />
+            <i className="frame-bracket frame-bracket--tr" />
+            <i className="frame-bracket frame-bracket--bl" />
+            <i className="frame-bracket frame-bracket--br" />
           </div>
-          <div className="deck-label deck-label-origin">
-            <span>ORIGIN</span>
-            <strong>{location}</strong>
+          <div className="character-node character-node--class">
+            <span>Class</span>
+            <strong>{characterClass}</strong>
           </div>
-          <div className="deck-label deck-label-class">
-            <span>CLASS</span>
-            <strong>Tech explorer</strong>
+          <div className="character-node character-node--region">
+            <span>Region</span>
+            <strong>{region}</strong>
           </div>
-          <div className="deck-label deck-label-status">
-            <span>STATUS</span>
-            <strong>Building</strong>
+          <div className="character-node character-node--state">
+            <span className="node-pulse" />
+            <strong>{systemState}</strong>
           </div>
         </div>
       </div>
 
-      <footer className="lobby-status">
-        <div>
-          <span>01 / DOMAIN</span>
-          <strong>Software systems</strong>
-        </div>
-        <div>
-          <span>02 / SIGNAL</span>
-          <strong>Hardware interfaces</strong>
-        </div>
-        <div>
-          <span>03 / LOOP</span>
-          <strong>Learn · Build · Iterate</strong>
-        </div>
-        <a href="#about">Descend into profile ↓</a>
-      </footer>
+      <div className="character-status shell">
+        <span>SB // CHARACTER INTERFACE</span>
+        <strong>{statusText}</strong>
+        <a href="#about">Scroll to initialise ↓</a>
+      </div>
     </section>
   );
 }

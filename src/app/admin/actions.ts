@@ -28,7 +28,7 @@ function slugify(value: string) {
 
 async function uploadMedia(
   file: File | null,
-  folder: "profile" | "projects",
+  folder: "profile" | "projects" | "services",
 ) {
   if (!file || file.size === 0) return null;
   if (!file.type.startsWith("image/") || file.size > 8 * 1024 * 1024) {
@@ -84,6 +84,18 @@ export async function saveProfile(formData: FormData) {
     phone: text(formData, "phone") || null,
     location: text(formData, "location") || null,
     resume_url: text(formData, "resume_url") || null,
+    hero_label: text(formData, "hero_label") || null,
+    hero_display_title: text(formData, "hero_display_title") || null,
+    hero_accent_title: text(formData, "hero_accent_title") || null,
+    hero_roles: text(formData, "hero_roles")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
+    hero_primary_cta_text: text(formData, "hero_primary_cta_text") || null,
+    hero_primary_cta_url: text(formData, "hero_primary_cta_url") || null,
+    hero_secondary_cta_text: text(formData, "hero_secondary_cta_text") || null,
+    hero_secondary_cta_url: text(formData, "hero_secondary_cta_url") || null,
+    status_text: text(formData, "status_text") || null,
   };
 
   if (id) {
@@ -149,6 +161,10 @@ export async function deleteProject(formData: FormData) {
 export async function saveService(formData: FormData) {
   const { supabase } = await requireAdmin();
   const id = integer(formData, "id");
+  const uploadedThumbnail = await uploadMedia(
+    formData.get("thumbnail") as File | null,
+    "services",
+  );
   const payload = {
     title: text(formData, "title"),
     description: text(formData, "description") || null,
@@ -159,6 +175,10 @@ export async function saveService(formData: FormData) {
     cta_url: text(formData, "cta_url") || null,
     sort_order: integer(formData, "sort_order"),
     is_active: checkbox(formData, "is_active"),
+    thumbnail_url:
+      uploadedThumbnail || text(formData, "existing_thumbnail") || null,
+    thumbnail_fit: text(formData, "thumbnail_fit") === "contain" ? "contain" : "cover",
+    thumbnail_position: text(formData, "thumbnail_position") || "center center",
   };
 
   if (id) {
@@ -167,6 +187,79 @@ export async function saveService(formData: FormData) {
     await supabase.from("services").insert(payload);
   }
 
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+export async function deleteService(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = integer(formData, "id");
+  if (id) await supabase.from("services").delete().eq("id", id);
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+export async function saveSkill(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = integer(formData, "id");
+  const payload = {
+    name: text(formData, "name"),
+    category: text(formData, "category") || null,
+    proficiency: Math.min(100, Math.max(0, integer(formData, "proficiency", 50))),
+    icon: text(formData, "icon") || null,
+    description: text(formData, "description") || null,
+    link_url: text(formData, "link_url") || null,
+    sort_order: integer(formData, "sort_order"),
+    is_active: checkbox(formData, "is_active"),
+  };
+  if (!payload.name) return;
+
+  if (id) {
+    await supabase.from("skills").update(payload).eq("id", id);
+  } else {
+    await supabase.from("skills").insert(payload);
+  }
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+export async function deleteSkill(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = integer(formData, "id");
+  if (id) await supabase.from("skills").delete().eq("id", id);
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+export async function saveExperience(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = integer(formData, "id");
+  const payload = {
+    company: text(formData, "company"),
+    role: text(formData, "role"),
+    period: text(formData, "period") || null,
+    description: text(formData, "description") || null,
+    icon: text(formData, "icon") || null,
+    status: text(formData, "status") || null,
+    link_url: text(formData, "link_url") || null,
+    sort_order: integer(formData, "sort_order"),
+    is_active: checkbox(formData, "is_active"),
+  };
+  if (!payload.company || !payload.role) return;
+
+  if (id) {
+    await supabase.from("experience").update(payload).eq("id", id);
+  } else {
+    await supabase.from("experience").insert(payload);
+  }
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+export async function deleteExperience(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = integer(formData, "id");
+  if (id) await supabase.from("experience").delete().eq("id", id);
   revalidatePath("/");
   revalidatePath("/admin");
 }
@@ -182,8 +275,22 @@ export async function saveSection(formData: FormData) {
     title: text(formData, "title") || null,
     accent: text(formData, "accent") || null,
     description: text(formData, "description") || null,
+    cta_text: text(formData, "cta_text") || null,
+    cta_url: text(formData, "cta_url") || null,
   });
 
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+export async function saveSetting(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const settingKey = text(formData, "setting_key");
+  if (!settingKey) return;
+  await supabase.from("settings").upsert({
+    setting_key: settingKey,
+    setting_value: text(formData, "setting_value"),
+  });
   revalidatePath("/");
   revalidatePath("/admin");
 }
@@ -213,6 +320,14 @@ export async function saveSocialLink(formData: FormData) {
   revalidatePath("/admin");
 }
 
+export async function deleteSocialLink(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = integer(formData, "id");
+  if (id) await supabase.from("social_links").delete().eq("id", id);
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
 export async function markMessageRead(formData: FormData) {
   const { supabase } = await requireAdmin();
   const id = integer(formData, "id");
@@ -221,4 +336,3 @@ export async function markMessageRead(formData: FormData) {
   }
   revalidatePath("/admin");
 }
-

@@ -1,4 +1,4 @@
-@import url("https://api.fontshare.com/v2/css?f%5B%5D=segment%40400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&display=swap");
 
 :root {
   --bg: #03020a;
@@ -17,7 +17,7 @@
   --font-ui: "Avenir Next", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
   --font-editorial: Charter, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
   --font-block: "Arial Black", "Avenir Next", Impact, sans-serif;
-  --font-hud: "Segment", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-hud: "Chakra Petch", "Avenir Next Condensed", ui-sans-serif, system-ui, sans-serif;
 }
 
 * {
@@ -2734,6 +2734,7 @@ a {
 .project-links span,
 .service-cta {
   font-family: var(--font-hud);
+  font-weight: 600;
 }
 
 .section-heading > p,

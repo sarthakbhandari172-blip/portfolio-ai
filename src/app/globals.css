@@ -2343,19 +2343,27 @@ a {
 }
 
 .character-deck {
-  width: min(100%, 560px);
-  aspect-ratio: 0.82;
+  width: min(100%, 510px);
+  aspect-ratio: 0.74;
   justify-self: center;
   position: relative;
   display: grid;
   place-items: center;
-  perspective: 1100px;
+  perspective: 1300px;
   transform-style: preserve-3d;
   transform:
-    translate3d(var(--deck-x), var(--deck-y), 0)
-    rotateX(var(--deck-rx))
-    rotateY(var(--deck-ry));
-  transition: transform 150ms ease-out;
+    translate3d(var(--panel-x), var(--panel-y), 0)
+    rotateX(var(--panel-rx))
+    rotateY(var(--panel-ry));
+  transform-origin: 50% 50%;
+  will-change: transform;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.character-deck--dragging {
+  cursor: grabbing;
 }
 
 .deck-aura {
@@ -2367,6 +2375,8 @@ a {
     radial-gradient(circle, rgba(112, 67, 255, 0.38), transparent 61%),
     conic-gradient(from 90deg, transparent, rgba(75, 218, 255, 0.14), transparent 33%, rgba(173, 61, 255, 0.16), transparent 70%);
   filter: blur(24px);
+  transform: translate3d(var(--aura-x), var(--aura-y), -60px);
+  will-change: transform;
   animation: deck-breathe 4.5s ease-in-out infinite;
 }
 
@@ -2374,6 +2384,8 @@ a {
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
+  translate: var(--ring-x) var(--ring-y);
+  will-change: translate, rotate;
 }
 
 .deck-ring--outer {
@@ -2407,19 +2419,48 @@ a {
 }
 
 .character-frame {
-  width: 86%;
-  height: 91%;
+  width: 100%;
+  height: 100%;
   position: relative;
   z-index: 3;
   overflow: hidden;
   border: 1px solid rgba(77, 222, 255, 0.44);
-  border-radius: 34px 70px 34px 70px;
+  border-radius: 30px;
   background: #050313;
   box-shadow:
     0 0 0 1px rgba(124, 71, 255, 0.2) inset,
     0 30px 70px rgba(0, 0, 0, 0.43),
     0 0 60px rgba(56, 151, 255, 0.13);
-  transform: translateZ(26px);
+  transform: translateZ(34px);
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+}
+
+.character-frame::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: 6;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--aura-angle, 0deg),
+    transparent 0deg,
+    rgba(103, 239, 255, 0.16) 48deg,
+    rgba(74, 174, 255, 0.92) 102deg,
+    rgba(155, 92, 255, 0.92) 164deg,
+    transparent 226deg,
+    rgba(103, 239, 255, 0.74) 306deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 16px rgba(82, 219, 255, 0.5));
+  pointer-events: none;
+  animation: frame-aura-spin 7s linear infinite;
 }
 
 .character-frame img {
@@ -2427,13 +2468,16 @@ a {
   height: 100%;
   object-fit: cover;
   object-position: center 44%;
-  scale: 1.015;
+  scale: 1.09;
+  transform: translate3d(var(--portrait-x), var(--portrait-y), 18px);
+  will-change: transform;
   filter: saturate(0.95) contrast(1.05);
 }
 
 .frame-grade,
 .frame-scan,
-.frame-particles {
+.frame-particles,
+.frame-shine {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -2461,7 +2505,33 @@ a {
   background-position: 20px 40px, 80px 100px;
   background-size: 140px 140px, 190px 190px;
   opacity: 0.45;
+  transform: translate3d(var(--ring-x), var(--ring-y), 35px);
+  will-change: transform;
   animation: frame-particles 28s linear infinite;
+}
+
+.frame-shine {
+  z-index: 4;
+  background:
+    radial-gradient(circle at var(--shine-x) var(--shine-y), rgba(126, 240, 255, 0.2), transparent 19%),
+    linear-gradient(118deg, transparent 28%, rgba(255, 255, 255, 0.12) 46%, transparent 61%);
+  background-size: 100% 100%, 230% 230%;
+  background-position: center, var(--shine-x) var(--shine-y);
+  mix-blend-mode: screen;
+  opacity: 0.7;
+  will-change: background-position;
+}
+
+.character-deck:hover .character-frame,
+.character-deck--dragging .character-frame {
+  box-shadow:
+    0 0 0 1px rgba(124, 71, 255, 0.28) inset,
+    0 38px 92px rgba(0, 0, 0, 0.58),
+    0 0 72px rgba(56, 202, 255, 0.24);
+}
+
+.character-deck--dragging .character-frame {
+  filter: saturate(1.08) brightness(1.03);
 }
 
 .frame-bracket {
@@ -2677,6 +2747,16 @@ a {
   to { background-position: 160px 180px, -110px 290px; }
 }
 
+@keyframes frame-aura-spin {
+  to { --aura-angle: 360deg; }
+}
+
+@property --aura-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
 @media (max-width: 1100px) {
   .character-lobby__grid {
     grid-template-columns: minmax(0, 1fr);
@@ -2703,6 +2783,10 @@ a {
     font-size: clamp(39px, 12.6vw, 58px);
   }
 
+  .character-copy {
+    order: 2;
+  }
+
   .character-copy h1 strong {
     margin-top: 10px;
   }
@@ -2720,11 +2804,12 @@ a {
   }
 
   .character-deck {
-    width: min(92vw, 480px);
+    width: min(90vw, 440px);
+    order: 1;
   }
 
   .character-node {
-    min-width: 104px;
+    display: none;
   }
 
   .character-node--class {
@@ -2735,10 +2820,6 @@ a {
     right: 0;
   }
 
-  .character-node--state {
-    display: none;
-  }
-
   .character-status {
     grid-template-columns: 1fr;
     padding-block: 17px;
@@ -2747,6 +2828,177 @@ a {
   .character-status a {
     justify-self: start;
   }
+}
+
+/* Precision HUD cursor: desktop/fine pointers only, native cursor remains the fallback. */
+.interface-cursor {
+  --cursor-dot-x: -80px;
+  --cursor-dot-y: -80px;
+  --cursor-ring-x: -80px;
+  --cursor-ring-y: -80px;
+  display: none;
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html.interface-cursor-ready,
+  html.interface-cursor-ready body,
+  html.interface-cursor-ready body * {
+    cursor: none !important;
+  }
+
+  html.interface-cursor-ready input,
+  html.interface-cursor-ready textarea,
+  html.interface-cursor-ready select,
+  html.interface-cursor-ready option {
+    cursor: text !important;
+  }
+
+  .interface-cursor {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    opacity: 0;
+    transition: opacity 140ms ease;
+  }
+
+  .interface-cursor.is-visible {
+    opacity: 1;
+  }
+
+  .interface-cursor__dot,
+  .interface-cursor__ring,
+  .interface-cursor__trail {
+    position: fixed;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .interface-cursor__dot {
+    width: 6px;
+    height: 6px;
+    z-index: 3;
+    border-radius: 50%;
+    background: #eaffff;
+    box-shadow:
+      0 0 8px #67efff,
+      0 0 20px rgba(103, 239, 255, 0.9),
+      0 0 34px rgba(155, 92, 255, 0.7);
+    transform: translate3d(var(--cursor-dot-x), var(--cursor-dot-y), 0) translate(-50%, -50%);
+    transition: width 120ms ease, height 120ms ease, background 120ms ease;
+  }
+
+  .interface-cursor__trail {
+    width: 54px;
+    height: 2px;
+    z-index: 1;
+    opacity: 0.45;
+    background: linear-gradient(90deg, transparent, rgba(103, 239, 255, 0.8));
+    filter: blur(1px);
+    transform:
+      translate3d(var(--cursor-ring-x), var(--cursor-ring-y), 0)
+      translate(-100%, -50%);
+  }
+
+  .interface-cursor__ring {
+    width: 34px;
+    height: 34px;
+    z-index: 2;
+    border: 1px solid rgba(103, 239, 255, 0.76);
+    border-radius: 50%;
+    box-shadow:
+      0 0 18px rgba(103, 239, 255, 0.3),
+      inset 0 0 16px rgba(155, 92, 255, 0.2);
+    transform: translate3d(var(--cursor-ring-x), var(--cursor-ring-y), 0) translate(-50%, -50%);
+    transition:
+      width 150ms ease,
+      height 150ms ease,
+      border-radius 150ms ease,
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .interface-cursor__ring::before,
+  .interface-cursor__ring::after {
+    content: "";
+    position: absolute;
+    inset: -5px;
+    border-top: 2px solid #67efff;
+    border-bottom: 2px solid #9b5cff;
+    border-radius: inherit;
+    animation: cursor-orbit 4s linear infinite;
+  }
+
+  .interface-cursor__ring::after {
+    inset: 7px;
+    border: 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.75);
+    border-right: 1px solid rgba(255, 255, 255, 0.75);
+    animation-direction: reverse;
+    animation-duration: 2.2s;
+  }
+
+  .interface-cursor__ring i,
+  .interface-cursor__ring b {
+    position: absolute;
+    background: rgba(103, 239, 255, 0.9);
+  }
+
+  .interface-cursor__ring i {
+    width: 48px;
+    height: 1px;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+  }
+
+  .interface-cursor__ring b {
+    width: 1px;
+    height: 48px;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+  }
+
+  .interface-cursor.is-hovering .interface-cursor__ring {
+    width: 50px;
+    height: 50px;
+    border-color: rgba(155, 92, 255, 0.95);
+    box-shadow:
+      0 0 28px rgba(103, 239, 255, 0.48),
+      0 0 48px rgba(155, 92, 255, 0.3),
+      inset 0 0 22px rgba(103, 239, 255, 0.18);
+  }
+
+  .interface-cursor.is-inspecting .interface-cursor__ring {
+    width: 62px;
+    height: 62px;
+    border-radius: 10px;
+    rotate: 45deg;
+  }
+
+  .interface-cursor.is-active .interface-cursor__ring {
+    width: 25px;
+    height: 25px;
+    rotate: 135deg;
+  }
+
+  .interface-cursor.is-active .interface-cursor__dot {
+    width: 10px;
+    height: 10px;
+    background: #9b5cff;
+  }
+
+  .interface-cursor.is-typing {
+    opacity: 0;
+  }
+}
+
+@keyframes cursor-orbit {
+  to { rotate: 360deg; }
 }
 
 @media (prefers-reduced-motion: reduce) {

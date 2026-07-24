@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { InterfaceCursor } from "@/app/interface-cursor";
 
 export const metadata: Metadata = {
   title: "Sarthak Bhandari | Software · Hardware · Interfaces",
@@ -14,8 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <InterfaceCursor />
+      </body>
     </html>
   );
 }
-

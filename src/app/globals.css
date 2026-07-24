@@ -1,3 +1,5 @@
+@import url("https://api.fontshare.com/v2/css?f%5B%5D=segment%40400&display=swap");
+
 :root {
   --bg: #03020a;
   --panel: rgba(11, 8, 26, 0.82);
@@ -12,6 +14,10 @@
   --magenta: #e253ff;
   --danger: #ff8793;
   --max: 1460px;
+  --font-ui: "Avenir Next", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+  --font-editorial: Charter, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-block: "Arial Black", "Avenir Next", Impact, sans-serif;
+  --font-hud: "Segment", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 * {
@@ -30,7 +36,7 @@ body {
     radial-gradient(circle at 75% 8%, rgba(111, 44, 255, 0.2), transparent 32%),
     radial-gradient(circle at 8% 42%, rgba(18, 121, 214, 0.1), transparent 28%),
     var(--bg);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-ui);
   line-height: 1.6;
 }
 
@@ -2156,7 +2162,7 @@ a {
   align-items: center;
   gap: 10px;
   color: var(--accent);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-hud);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -2174,8 +2180,8 @@ a {
 .character-copy h1 {
   max-width: 800px;
   margin: 0;
-  font-family: "Arial Black", "Avenir Next", Impact, sans-serif;
-  font-size: clamp(68px, 7.1vw, 126px);
+  font-family: var(--font-block);
+  font-size: clamp(64px, 6.4vw, 112px);
   font-weight: 950;
   line-height: 0.85;
   letter-spacing: -0.055em;
@@ -2196,6 +2202,12 @@ a {
 
 .character-copy h1 strong {
   margin-top: 16px;
+  max-width: 100%;
+  font-size: 0.7em;
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+  overflow-wrap: normal;
+  word-break: keep-all;
   color: transparent;
   background: linear-gradient(100deg, #45dfff, #6e8dff 48%, #9e4fff);
   background-clip: text;
@@ -2206,7 +2218,7 @@ a {
 .character-tagline {
   margin: 36px 0 0;
   color: #cbc7db;
-  font-family: "Avenir Next", Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-ui);
   font-size: clamp(16px, 1.55vw, 22px);
   font-weight: 650;
   letter-spacing: -0.02em;
@@ -2216,7 +2228,7 @@ a {
   max-width: 690px;
   margin: 9px 0 0;
   color: #9d98b2;
-  font-family: "Avenir Next", Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-editorial);
   font-size: clamp(14px, 1.15vw, 17px);
   line-height: 1.65;
 }
@@ -2228,7 +2240,7 @@ a {
   align-items: center;
   gap: 10px;
   color: var(--accent);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-hud);
   font-size: 14px;
 }
 
@@ -2315,7 +2327,7 @@ a {
 
 .character-uplinks small {
   color: #77718d;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-hud);
   font-size: 8px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -2714,6 +2726,24 @@ a {
   font-size: 11px;
 }
 
+/* Typography roles: block display, technical Segment HUD, Claude-like editorial copy. */
+.eyebrow,
+.deck-button,
+.character-node span,
+.character-status,
+.project-links span,
+.service-cta {
+  font-family: var(--font-hud);
+}
+
+.section-heading > p,
+.about-copy > p,
+.project-content > p,
+.service-card > p,
+.contact-copy .section-heading > p {
+  font-family: var(--font-editorial);
+}
+
 @keyframes interface-orbit {
   to { rotate: 360deg; }
 }
@@ -2774,12 +2804,12 @@ a {
 @media (max-width: 700px) {
   .character-lobby__grid {
     min-height: 0;
-    padding-block: 58px 50px;
-    gap: 66px;
+    padding-block: 42px 46px;
+    gap: 48px;
   }
 
   .character-copy h1 {
-    font-size: clamp(39px, 12.6vw, 58px);
+    font-size: clamp(38px, 12vw, 54px);
   }
 
   .character-copy {
@@ -2787,11 +2817,21 @@ a {
   }
 
   .character-copy h1 strong {
-    margin-top: 10px;
+    margin-top: 12px;
+    font-size: 0.76em;
+    line-height: 0.96;
   }
 
   .character-tagline {
-    margin-top: 28px;
+    margin-top: 24px;
+    font-size: clamp(14px, 4vw, 17px);
+    line-height: 1.45;
+  }
+
+  .character-bio {
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.6;
   }
 
   .character-actions {
@@ -2803,7 +2843,7 @@ a {
   }
 
   .character-deck {
-    width: min(90vw, 440px);
+    width: min(88vw, 410px);
     order: 1;
   }
 

@@ -2835,6 +2835,8 @@ a {
   --cursor-dot-y: -80px;
   --cursor-ring-x: -80px;
   --cursor-ring-y: -80px;
+  --cursor-angle: 0deg;
+  --cursor-speed: 0;
   display: none;
   pointer-events: none;
 }
@@ -2859,7 +2861,9 @@ a {
     inset: 0;
     z-index: 2147483647;
     opacity: 0;
-    transition: opacity 140ms ease;
+    contain: strict;
+    isolation: isolate;
+    transition: opacity 90ms ease;
   }
 
   .interface-cursor.is-visible {
@@ -2891,15 +2895,19 @@ a {
   }
 
   .interface-cursor__trail {
-    width: 54px;
+    width: 72px;
     height: 2px;
     z-index: 1;
-    opacity: 0.45;
-    background: linear-gradient(90deg, transparent, rgba(103, 239, 255, 0.8));
-    filter: blur(1px);
+    opacity: calc(0.18 + var(--cursor-speed) * 0.72);
+    transform-origin: 100% 50%;
+    background:
+      linear-gradient(90deg, transparent, rgba(155, 92, 255, 0.42) 42%, rgba(103, 239, 255, 0.95));
+    box-shadow: 0 0 8px rgba(103, 239, 255, 0.5);
     transform:
       translate3d(var(--cursor-ring-x), var(--cursor-ring-y), 0)
-      translate(-100%, -50%);
+      rotate(var(--cursor-angle))
+      translate(-100%, -50%)
+      scaleX(calc(0.35 + var(--cursor-speed) * 1.65));
   }
 
   .interface-cursor__ring {
@@ -2911,7 +2919,10 @@ a {
     box-shadow:
       0 0 18px rgba(103, 239, 255, 0.3),
       inset 0 0 16px rgba(155, 92, 255, 0.2);
-    transform: translate3d(var(--cursor-ring-x), var(--cursor-ring-y), 0) translate(-50%, -50%);
+    transform:
+      translate3d(var(--cursor-ring-x), var(--cursor-ring-y), 0)
+      translate(-50%, -50%)
+      scale(calc(1 + var(--cursor-speed) * 0.1));
     transition:
       width 150ms ease,
       height 150ms ease,
@@ -2928,7 +2939,7 @@ a {
     border-top: 2px solid #67efff;
     border-bottom: 2px solid #9b5cff;
     border-radius: inherit;
-    animation: cursor-orbit 4s linear infinite;
+    animation: cursor-orbit 1.8s linear infinite;
   }
 
   .interface-cursor__ring::after {
@@ -2937,7 +2948,7 @@ a {
     border-left: 1px solid rgba(255, 255, 255, 0.75);
     border-right: 1px solid rgba(255, 255, 255, 0.75);
     animation-direction: reverse;
-    animation-duration: 2.2s;
+    animation-duration: 1.05s;
   }
 
   .interface-cursor__ring i,

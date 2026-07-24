@@ -17,6 +17,11 @@ export function InterfaceCursor() {
     let targetY = window.innerHeight / 2;
     let currentX = targetX;
     let currentY = targetY;
+    let previousX = targetX;
+    let previousY = targetY;
+    let targetSpeed = 0;
+    let currentSpeed = 0;
+    let lastTarget: EventTarget | null = null;
     let frame = 0;
 
     const interactiveSelector =
@@ -26,17 +31,29 @@ export function InterfaceCursor() {
     const onPointerMove = (event: PointerEvent) => {
       targetX = event.clientX;
       targetY = event.clientY;
+      const deltaX = targetX - previousX;
+      const deltaY = targetY - previousY;
+      targetSpeed = Math.min(Math.hypot(deltaX, deltaY) / 28, 1);
+      cursor.style.setProperty(
+        "--cursor-angle",
+        `${Math.atan2(deltaY, deltaX) * (180 / Math.PI)}deg`,
+      );
+      previousX = targetX;
+      previousY = targetY;
       cursor.style.setProperty("--cursor-dot-x", `${targetX}px`);
       cursor.style.setProperty("--cursor-dot-y", `${targetY}px`);
       cursor.classList.add("is-visible");
 
-      const target = event.target instanceof Element ? event.target : null;
-      cursor.classList.toggle("is-hovering", Boolean(target?.closest(interactiveSelector)));
-      cursor.classList.toggle("is-typing", Boolean(target?.closest(typingSelector)));
-      cursor.classList.toggle(
-        "is-inspecting",
-        Boolean(target?.closest('[data-cursor="inspect"]')),
-      );
+      if (event.target !== lastTarget) {
+        lastTarget = event.target;
+        const target = event.target instanceof Element ? event.target : null;
+        cursor.classList.toggle("is-hovering", Boolean(target?.closest(interactiveSelector)));
+        cursor.classList.toggle("is-typing", Boolean(target?.closest(typingSelector)));
+        cursor.classList.toggle(
+          "is-inspecting",
+          Boolean(target?.closest('[data-cursor="inspect"]')),
+        );
+      }
     };
 
     const onPointerDown = () => cursor.classList.add("is-active");
@@ -44,10 +61,13 @@ export function InterfaceCursor() {
     const onPointerLeave = () => cursor.classList.remove("is-visible");
     const onPointerEnter = () => cursor.classList.add("is-visible");
     const animate = () => {
-      currentX += (targetX - currentX) * 0.22;
-      currentY += (targetY - currentY) * 0.22;
+      currentX += (targetX - currentX) * 0.58;
+      currentY += (targetY - currentY) * 0.58;
+      currentSpeed += (targetSpeed - currentSpeed) * 0.38;
+      targetSpeed *= 0.78;
       cursor.style.setProperty("--cursor-ring-x", `${currentX}px`);
       cursor.style.setProperty("--cursor-ring-y", `${currentY}px`);
+      cursor.style.setProperty("--cursor-speed", currentSpeed.toFixed(3));
       frame = window.requestAnimationFrame(animate);
     };
 

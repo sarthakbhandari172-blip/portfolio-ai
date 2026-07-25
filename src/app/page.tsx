@@ -92,13 +92,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   const contactStatus = typeof params.contact === "string" ? params.contact : "";
 
   return (
-    <main>
-      <div className="dimension-wipe" aria-hidden="true">
-        <i />
-        <i />
-        <i />
-      </div>
-
+    <main className="hybrid-ui">
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
         <div className="ambient-orb ambient-orb-one" />

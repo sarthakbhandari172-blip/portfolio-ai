@@ -3084,6 +3084,64 @@ a {
   to { rotate: 360deg; }
 }
 
+.dimension-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483645;
+  overflow: hidden;
+  pointer-events: none;
+  animation: dimension-wipe-clear 1.45s steps(1, end) forwards;
+}
+
+.dimension-wipe i {
+  position: absolute;
+  left: -22vw;
+  width: 144vw;
+  height: 19vh;
+  opacity: 0;
+  background:
+    linear-gradient(180deg, rgba(103, 239, 255, 0.38), transparent 2px),
+    linear-gradient(100deg, #02030a 6%, #090419 50%, #02030a 94%);
+  clip-path: polygon(0 18%, 82% 0, 100% 33%, 96% 84%, 14% 100%, 3% 72%);
+  box-shadow:
+    0 0 22px rgba(103, 239, 255, 0.2),
+    0 0 50px rgba(155, 92, 255, 0.14);
+  transform: translate3d(-115%, 0, 0) rotate(-3deg);
+  animation: dimension-band 1.08s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
+.dimension-wipe i:nth-child(1) {
+  top: 8%;
+}
+
+.dimension-wipe i:nth-child(2) {
+  top: 40%;
+  animation-delay: 80ms;
+}
+
+.dimension-wipe i:nth-child(3) {
+  top: 72%;
+  animation-delay: 160ms;
+}
+
+@keyframes dimension-band {
+  0% {
+    opacity: 0;
+    transform: translate3d(-115%, 0, 0) rotate(-3deg) scaleX(0.78);
+  }
+  18%, 66% {
+    opacity: 0.96;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(112%, 0, 0) rotate(-3deg) scaleX(1);
+  }
+}
+
+@keyframes dimension-wipe-clear {
+  to { visibility: hidden; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -3095,5 +3153,9 @@ a {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .dimension-wipe {
+    display: none;
   }
 }

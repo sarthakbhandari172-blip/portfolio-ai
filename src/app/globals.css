@@ -2876,7 +2876,6 @@ a {
   --cursor-dot-y: -80px;
   --cursor-ring-x: -80px;
   --cursor-ring-y: -80px;
-  --cursor-angle: 0deg;
   --cursor-speed: 0;
   display: none;
   pointer-events: none;
@@ -2913,7 +2912,6 @@ a {
 
   .interface-cursor__dot,
   .interface-cursor__ring,
-  .interface-cursor__trail,
   .interface-cursor__status {
     position: fixed;
     left: 0;
@@ -2923,8 +2921,8 @@ a {
   }
 
   .interface-cursor__dot {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     z-index: 3;
     border-radius: 50%;
     background: #eaffff;
@@ -2936,31 +2934,16 @@ a {
     transition: width 120ms ease, height 120ms ease, background 120ms ease;
   }
 
-  .interface-cursor__trail {
-    width: 72px;
-    height: 2px;
-    z-index: 1;
-    opacity: calc(0.18 + var(--cursor-speed) * 0.72);
-    transform-origin: 100% 50%;
-    background:
-      linear-gradient(90deg, transparent, rgba(155, 92, 255, 0.42) 42%, rgba(103, 239, 255, 0.95));
-    box-shadow: 0 0 8px rgba(103, 239, 255, 0.5);
-    transform:
-      translate3d(var(--cursor-ring-x), var(--cursor-ring-y), 0)
-      rotate(var(--cursor-angle))
-      translate(-100%, -50%)
-      scaleX(calc(0.35 + var(--cursor-speed) * 1.65));
-  }
-
   .interface-cursor__ring {
-    width: 34px;
-    height: 34px;
+    width: 28px;
+    height: 28px;
     z-index: 2;
     border: 1px solid rgba(103, 239, 255, 0.76);
     border-radius: 50%;
     box-shadow:
-      0 0 18px rgba(103, 239, 255, 0.3),
-      inset 0 0 16px rgba(155, 92, 255, 0.2);
+      0 0 10px rgba(103, 239, 255, 0.34),
+      0 0 22px rgba(120, 93, 255, 0.18),
+      inset 0 0 12px rgba(155, 92, 255, 0.18);
     transform:
       translate3d(var(--cursor-ring-x), var(--cursor-ring-y), 0)
       translate(-50%, -50%)
@@ -2985,10 +2968,10 @@ a {
   }
 
   .interface-cursor__ring::after {
-    inset: 7px;
+    inset: 6px;
     border: 0;
-    border-left: 1px solid rgba(255, 255, 255, 0.75);
-    border-right: 1px solid rgba(255, 255, 255, 0.75);
+    border-left: 1px solid rgba(103, 239, 255, 0.72);
+    border-right: 1px solid rgba(155, 92, 255, 0.64);
     animation-direction: reverse;
     animation-duration: 1.05s;
   }
@@ -3000,7 +2983,7 @@ a {
   }
 
   .interface-cursor__ring i {
-    width: 48px;
+    width: 38px;
     height: 1px;
     top: 50%;
     left: 50%;
@@ -3009,15 +2992,15 @@ a {
 
   .interface-cursor__ring b {
     width: 1px;
-    height: 48px;
+    height: 38px;
     top: 50%;
     left: 50%;
     translate: -50% -50%;
   }
 
   .interface-cursor.is-hovering .interface-cursor__ring {
-    width: 50px;
-    height: 50px;
+    width: 42px;
+    height: 42px;
     border-color: rgba(155, 92, 255, 0.95);
     box-shadow:
       0 0 28px rgba(103, 239, 255, 0.48),
@@ -3026,8 +3009,8 @@ a {
   }
 
   .interface-cursor.is-inspecting .interface-cursor__ring {
-    width: 62px;
-    height: 62px;
+    width: 52px;
+    height: 52px;
     border-radius: 10px;
     rotate: 45deg;
   }
@@ -3062,41 +3045,38 @@ a {
     transition: opacity 100ms ease;
   }
 
-  .interface-cursor.is-processing .interface-cursor__trail {
-    opacity: 0;
-  }
-
   .interface-cursor.is-processing .interface-cursor__ring {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border-style: dashed;
     border-color: rgba(103, 239, 255, 0.95);
     border-radius: 50%;
     box-shadow:
-      0 0 24px rgba(103, 239, 255, 0.55),
-      0 0 46px rgba(155, 92, 255, 0.36),
-      inset 0 0 18px rgba(103, 239, 255, 0.2);
+      0 0 14px rgba(103, 239, 255, 0.55),
+      0 0 30px rgba(103, 239, 255, 0.24),
+      0 0 42px rgba(155, 92, 255, 0.22),
+      inset 0 0 15px rgba(103, 239, 255, 0.2);
   }
 
   .interface-cursor.is-processing .interface-cursor__ring::before {
-    inset: -10px;
-    animation-duration: 0.48s;
+    inset: -8px;
+    animation-duration: 0.3s;
   }
 
   .interface-cursor.is-processing .interface-cursor__ring::after {
-    inset: 8px;
-    animation-duration: 0.72s;
+    inset: 7px;
+    animation-duration: 0.55s;
   }
 
   .interface-cursor.is-processing .interface-cursor__dot {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     background: var(--accent);
     animation: none;
   }
 
   .interface-cursor.is-processing .interface-cursor__status {
-    opacity: 0.88;
+    opacity: 0.58;
   }
 }
 

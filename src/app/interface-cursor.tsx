@@ -35,10 +35,6 @@ export function InterfaceCursor() {
       const deltaX = targetX - previousX;
       const deltaY = targetY - previousY;
       targetSpeed = Math.min(Math.hypot(deltaX, deltaY) / 28, 1);
-      cursor.style.setProperty(
-        "--cursor-angle",
-        `${Math.atan2(deltaY, deltaX) * (180 / Math.PI)}deg`,
-      );
       previousX = targetX;
       previousY = targetY;
       cursor.style.setProperty("--cursor-dot-x", `${targetX}px`);
@@ -66,7 +62,7 @@ export function InterfaceCursor() {
       window.clearTimeout(scrollTimer);
       scrollTimer = window.setTimeout(() => {
         cursor.classList.remove("is-processing");
-      }, 420);
+      }, 300);
     };
     const animate = () => {
       currentX += (targetX - currentX) * 0.58;
@@ -102,7 +98,6 @@ export function InterfaceCursor() {
 
   return (
     <div className="interface-cursor" ref={cursorRef} aria-hidden="true">
-      <span className="interface-cursor__trail" />
       <span className="interface-cursor__ring">
         <i />
         <b />

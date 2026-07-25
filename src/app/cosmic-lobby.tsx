@@ -199,7 +199,6 @@ export function CosmicLobby({
     >
       <div className="character-lobby__world" aria-hidden="true">
         <span className="world-grid" />
-        <span className="world-cuts" />
         <span className="world-orbit world-orbit--one" />
         <span className="world-orbit world-orbit--two" />
         <span className="world-flare" />

@@ -102,11 +102,6 @@ export function InterfaceCursor() {
         <i />
         <b />
       </span>
-      <span className="interface-cursor__shards">
-        <i />
-        <i />
-        <i />
-      </span>
       <span className="interface-cursor__dot" />
       <span className="interface-cursor__status">PROCESSING</span>
     </div>

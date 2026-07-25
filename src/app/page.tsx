@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { submitContact } from "@/app/actions";
 import { CosmicLobby } from "@/app/cosmic-lobby";
+import { KineticInterface } from "@/app/kinetic-interface";
 import { getPortfolioData } from "@/lib/data";
 import type { SectionContent } from "@/lib/types";
 
@@ -93,11 +94,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
 
   return (
     <main>
-      <div className="dimension-wipe" aria-hidden="true">
-        <i />
-        <i />
-        <i />
-      </div>
+      <KineticInterface />
 
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />

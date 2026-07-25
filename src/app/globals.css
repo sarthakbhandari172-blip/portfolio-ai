@@ -1823,6 +1823,16 @@ a {
   letter-spacing: -0.055em;
 }
 
+.section-heading h2 span,
+.display-heading span {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  text-transform: none;
+  text-shadow: 0 0 28px rgba(103, 239, 255, 0.12);
+}
+
 .skill-card,
 .service-card,
 .project-card,
@@ -1853,6 +1863,28 @@ a {
   left: 0;
   background: linear-gradient(90deg, var(--accent-2), transparent);
   transition: width 280ms ease;
+}
+
+.skill-card::after,
+.service-card::after,
+.project-card::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  opacity: 0.48;
+  pointer-events: none;
+  background:
+    linear-gradient(158deg, transparent 0 74%, rgba(0, 1, 8, 0.82) 74.4% 79%, transparent 79.4%),
+    linear-gradient(172deg, transparent 0 28%, rgba(103, 239, 255, 0.08) 28.2%, transparent 28.7%);
+  transition: translate 420ms cubic-bezier(0.2, 0.72, 0.2, 1), opacity 420ms ease;
+}
+
+.skill-card:hover::after,
+.service-card:hover::after,
+.project-card:hover::after {
+  opacity: 0.76;
+  translate: 0 -8px;
 }
 
 .skill-card:hover,
@@ -2085,6 +2117,21 @@ a {
   background-size: 62px 62px, 62px 62px, 100% 4px;
   transform: translate3d(var(--scene-x), var(--scene-y), 0) scale(1.05);
   transition: transform 180ms ease-out;
+}
+
+.world-cuts {
+  inset: -8% !important;
+  opacity: 0.72;
+  background:
+    linear-gradient(174deg, transparent 0 19%, rgba(0, 1, 7, 0.88) 19.3% 22.4%, transparent 22.8%),
+    linear-gradient(169deg, transparent 0 61%, rgba(1, 2, 10, 0.78) 61.3% 64.4%, transparent 64.8%),
+    linear-gradient(102deg, transparent 0 77%, rgba(2, 3, 11, 0.72) 77.3% 80%, transparent 80.4%);
+  filter: drop-shadow(0 -1px 0 rgba(103, 239, 255, 0.13));
+  transform: translate3d(var(--scene-x), var(--scene-y), 0);
+  clip-path: inset(0);
+  animation:
+    world-cuts-reveal 1.2s cubic-bezier(0.76, 0, 0.24, 1) both,
+    world-cuts-drift 16s 1.2s ease-in-out infinite alternate;
 }
 
 .world-orbit {
@@ -2759,6 +2806,16 @@ a {
   50% { opacity: 1; scale: 1.05; }
 }
 
+@keyframes world-cuts-drift {
+  from { translate: -1.5% -0.8%; }
+  to { translate: 1.5% 0.8%; }
+}
+
+@keyframes world-cuts-reveal {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); }
+  to { opacity: 0.72; clip-path: inset(0); }
+}
+
 @keyframes terminal-role {
   from { opacity: 0; translate: 0 5px; filter: blur(4px); }
   to { opacity: 1; translate: 0; filter: blur(0); }
@@ -2912,6 +2969,7 @@ a {
 
   .interface-cursor__dot,
   .interface-cursor__ring,
+  .interface-cursor__shards,
   .interface-cursor__status {
     position: fixed;
     left: 0;
@@ -2954,6 +3012,42 @@ a {
       border-radius 150ms ease,
       border-color 150ms ease,
       box-shadow 150ms ease;
+  }
+
+  .interface-cursor__shards {
+    width: 42px;
+    height: 42px;
+    z-index: 1;
+    opacity: 0.34;
+    transform:
+      translate3d(var(--cursor-ring-x), var(--cursor-ring-y), 0)
+      translate(-50%, -50%);
+    transition: opacity 140ms ease, scale 140ms ease;
+    animation: cursor-shard-orbit 3.8s linear infinite;
+  }
+
+  .interface-cursor__shards i {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 11px;
+    height: 4px;
+    background: #03040a;
+    border-top: 1px solid rgba(103, 239, 255, 0.72);
+    clip-path: polygon(0 0, 100% 0, 76% 100%, 14% 72%);
+    transform-origin: 0 0;
+  }
+
+  .interface-cursor__shards i:nth-child(1) {
+    transform: rotate(8deg) translate(15px, -2px);
+  }
+
+  .interface-cursor__shards i:nth-child(2) {
+    transform: rotate(128deg) translate(15px, -2px);
+  }
+
+  .interface-cursor__shards i:nth-child(3) {
+    transform: rotate(248deg) translate(15px, -2px);
   }
 
   .interface-cursor__ring::before,
@@ -3006,6 +3100,13 @@ a {
       0 0 28px rgba(103, 239, 255, 0.48),
       0 0 48px rgba(155, 92, 255, 0.3),
       inset 0 0 22px rgba(103, 239, 255, 0.18);
+  }
+
+  .interface-cursor.is-hovering .interface-cursor__shards,
+  .interface-cursor.is-processing .interface-cursor__shards {
+    opacity: 0.82;
+    scale: 1.08;
+    animation-duration: 0.9s;
   }
 
   .interface-cursor.is-inspecting .interface-cursor__ring {
@@ -3084,62 +3185,107 @@ a {
   to { rotate: 360deg; }
 }
 
-.dimension-wipe {
+.kinetic-field {
   position: fixed;
   inset: 0;
-  z-index: 2147483645;
+  z-index: 1;
   overflow: hidden;
   pointer-events: none;
-  animation: dimension-wipe-clear 1.45s steps(1, end) forwards;
 }
 
-.dimension-wipe i {
+.kinetic-field i {
   position: absolute;
-  left: -22vw;
-  width: 144vw;
-  height: 19vh;
+  width: min(36vw, 620px);
+  height: 11px;
+  opacity: 0.28;
+  background:
+    linear-gradient(180deg, rgba(103, 239, 255, 0.42), transparent 1px),
+    linear-gradient(100deg, transparent, #02030a 12%, #080417 82%, transparent);
+  clip-path: polygon(0 24%, 88% 0, 100% 44%, 92% 100%, 8% 72%);
+  box-shadow:
+    0 0 18px rgba(103, 239, 255, 0.12),
+    0 0 34px rgba(155, 92, 255, 0.08);
+  will-change: transform;
+}
+
+.kinetic-field i:nth-child(1) {
+  top: 18%;
+  right: -8%;
+  transform: translate3d(0, var(--kinetic-a, 0px), 0) rotate(-7deg);
+}
+
+.kinetic-field i:nth-child(2) {
+  top: 52%;
+  left: -9%;
+  transform: translate3d(0, var(--kinetic-b, 0px), 0) rotate(6deg);
+}
+
+.kinetic-field i:nth-child(3) {
+  bottom: 9%;
+  right: 6%;
+  width: min(24vw, 420px);
+  transform: translate3d(0, var(--kinetic-c, 0px), 0) rotate(-3deg);
+}
+
+.motion-ui-ready .section::after {
+  content: "";
+  position: absolute;
+  z-index: 18;
+  top: 14%;
+  left: -28%;
+  width: 156%;
+  height: clamp(54px, 8vw, 112px);
+  pointer-events: none;
   opacity: 0;
   background:
-    linear-gradient(180deg, rgba(103, 239, 255, 0.38), transparent 2px),
-    linear-gradient(100deg, #02030a 6%, #090419 50%, #02030a 94%);
-  clip-path: polygon(0 18%, 82% 0, 100% 33%, 96% 84%, 14% 100%, 3% 72%);
-  box-shadow:
-    0 0 22px rgba(103, 239, 255, 0.2),
-    0 0 50px rgba(155, 92, 255, 0.14);
-  transform: translate3d(-115%, 0, 0) rotate(-3deg);
-  animation: dimension-band 1.08s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+    linear-gradient(180deg, rgba(103, 239, 255, 0.36), transparent 2px),
+    linear-gradient(100deg, transparent 2%, #02030a 15%, #0a0518 78%, transparent 96%);
+  clip-path: polygon(0 22%, 84% 0, 100% 30%, 94% 86%, 10% 100%, 2% 70%);
+  transform: translate3d(-92%, 0, 0) rotate(-2deg);
 }
 
-.dimension-wipe i:nth-child(1) {
-  top: 8%;
+.motion-ui-ready .section.is-motion-visible::after {
+  animation: kinetic-section-cut 0.92s cubic-bezier(0.76, 0, 0.24, 1) both;
 }
 
-.dimension-wipe i:nth-child(2) {
-  top: 40%;
-  animation-delay: 80ms;
+.motion-ui-ready .is-motion-visible.section-heading,
+.motion-ui-ready .is-motion-visible.about-grid > *,
+.motion-ui-ready .project-card.is-motion-visible,
+.motion-ui-ready .service-card.is-motion-visible,
+.motion-ui-ready .skill-card.is-motion-visible,
+.motion-ui-ready .timeline article.is-motion-visible,
+.motion-ui-ready .contact-links a.is-motion-visible,
+.motion-ui-ready .contact-form.is-motion-visible,
+.motion-ui-ready .section.is-motion-visible .section-heading,
+.motion-ui-ready .section.is-motion-visible .about-grid > *,
+.motion-ui-ready .section.is-motion-visible .contact-form {
+  animation: kinetic-content-in 0.72s cubic-bezier(0.2, 0.72, 0.2, 1) both;
+  animation-delay: calc(var(--motion-order, 0) * 55ms);
 }
 
-.dimension-wipe i:nth-child(3) {
-  top: 72%;
-  animation-delay: 160ms;
+.motion-ui-ready .project-card.is-motion-visible .project-media img,
+.motion-ui-ready .service-card.is-motion-visible .service-media img {
+  animation: kinetic-image-decode 0.9s cubic-bezier(0.2, 0.72, 0.2, 1) both;
 }
 
-@keyframes dimension-band {
-  0% {
-    opacity: 0;
-    transform: translate3d(-115%, 0, 0) rotate(-3deg) scaleX(0.78);
-  }
-  18%, 66% {
-    opacity: 0.96;
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(112%, 0, 0) rotate(-3deg) scaleX(1);
-  }
+@keyframes kinetic-section-cut {
+  0% { opacity: 0; transform: translate3d(-92%, 0, 0) rotate(-2deg); }
+  18%, 58% { opacity: 0.96; }
+  100% { opacity: 0; transform: translate3d(88%, 0, 0) rotate(-2deg); }
 }
 
-@keyframes dimension-wipe-clear {
-  to { visibility: hidden; }
+@keyframes kinetic-content-in {
+  from { opacity: 0; translate: 0 28px; clip-path: inset(0 0 34% 0); }
+  to { opacity: 1; translate: 0; clip-path: inset(0); }
+}
+
+@keyframes kinetic-image-decode {
+  from { scale: 1.08; filter: saturate(0) contrast(1.35) brightness(0.55); }
+  to { scale: 1; }
+}
+
+@keyframes cursor-shard-orbit {
+  to { rotate: 360deg; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3155,7 +3301,8 @@ a {
     transition-duration: 0.01ms !important;
   }
 
-  .dimension-wipe {
+  .kinetic-field {
     display: none;
   }
+
 }

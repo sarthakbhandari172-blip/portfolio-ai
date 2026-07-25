@@ -51,6 +51,14 @@ type MotionState = {
   targetY: number;
   currentX: number;
   currentY: number;
+  targetRotationX: number;
+  targetRotationY: number;
+  currentRotationX: number;
+  currentRotationY: number;
+  velocityX: number;
+  velocityY: number;
+  lastPointerX: number;
+  lastPointerY: number;
   hovering: boolean;
   dragging: boolean;
   pointerType: string;
@@ -77,6 +85,14 @@ export function CosmicLobby({
     targetY: 0,
     currentX: 0,
     currentY: 0,
+    targetRotationX: 0,
+    targetRotationY: 0,
+    currentRotationX: 0,
+    currentRotationY: 0,
+    velocityX: 0,
+    velocityY: 0,
+    lastPointerX: 0,
+    lastPointerY: 0,
     hovering: false,
     dragging: false,
     pointerType: "mouse",
@@ -104,13 +120,35 @@ export function CosmicLobby({
       motion.currentX += (motion.targetX - motion.currentX) * ease;
       motion.currentY += (motion.targetY - motion.currentY) * ease;
 
+      if (!motion.dragging) {
+        motion.targetRotationX += motion.velocityX;
+        motion.targetRotationY += motion.velocityY;
+        motion.velocityX *= 0.925;
+        motion.velocityY *= 0.925;
+        if (Math.abs(motion.velocityX) < 0.002) motion.velocityX = 0;
+        if (Math.abs(motion.velocityY) < 0.002) motion.velocityY = 0;
+      }
+
+      motion.currentRotationX +=
+        (motion.targetRotationX - motion.currentRotationX) * (motion.dragging ? 0.34 : 0.16);
+      motion.currentRotationY +=
+        (motion.targetRotationY - motion.currentRotationY) * (motion.dragging ? 0.34 : 0.16);
+
       const touch = motion.pointerType === "touch";
       const activeScale = motion.dragging ? 1.22 : 1;
       const x = motion.currentX;
       const y = motion.currentY;
 
-      scene.style.setProperty("--panel-rx", `${(-y * (touch ? 8 : 14) * activeScale).toFixed(2)}deg`);
-      scene.style.setProperty("--panel-ry", `${(x * (touch ? 12 : 23) * activeScale).toFixed(2)}deg`);
+      const hoverTiltX = motion.dragging ? 0 : -y * (touch ? 3 : 7);
+      const hoverTiltY = motion.dragging ? 0 : x * (touch ? 4 : 9);
+      scene.style.setProperty(
+        "--panel-rx",
+        `${(motion.currentRotationX + hoverTiltX).toFixed(2)}deg`,
+      );
+      scene.style.setProperty(
+        "--panel-ry",
+        `${(motion.currentRotationY + hoverTiltY).toFixed(2)}deg`,
+      );
       scene.style.setProperty("--panel-x", `${(x * 11).toFixed(2)}px`);
       scene.style.setProperty("--panel-y", `${(y * 8).toFixed(2)}px`);
       scene.style.setProperty("--aura-x", `${(x * 38 * activeScale).toFixed(2)}px`);
@@ -146,12 +184,28 @@ export function CosmicLobby({
 
   function moveDeck(event: ReactPointerEvent<HTMLDivElement>) {
     if (!motionRef.current.hovering && !motionRef.current.dragging) return;
+    const motion = motionRef.current;
+    if (motion.dragging) {
+      const deltaX = event.clientX - motion.lastPointerX;
+      const deltaY = event.clientY - motion.lastPointerY;
+      const sensitivity = event.pointerType === "touch" ? 0.48 : 0.62;
+      motion.targetRotationY += deltaX * sensitivity;
+      motion.targetRotationX -= deltaY * sensitivity;
+      motion.velocityY = deltaX * sensitivity * 0.72;
+      motion.velocityX = -deltaY * sensitivity * 0.72;
+      motion.lastPointerX = event.clientX;
+      motion.lastPointerY = event.clientY;
+    }
     setMotionTarget(event);
   }
 
   function pressDeck(event: ReactPointerEvent<HTMLDivElement>) {
     motionRef.current.dragging = true;
     motionRef.current.pointerType = event.pointerType;
+    motionRef.current.lastPointerX = event.clientX;
+    motionRef.current.lastPointerY = event.clientY;
+    motionRef.current.velocityX = 0;
+    motionRef.current.velocityY = 0;
     deckRef.current?.setPointerCapture(event.pointerId);
     deckRef.current?.classList.add("character-deck--dragging");
     setMotionTarget(event);
@@ -278,6 +332,7 @@ export function CosmicLobby({
               width={1085}
               height={1449}
               priority
+              draggable={false}
             />
             <span className="frame-grade" />
             <span className="frame-scan" />

@@ -362,18 +362,24 @@ export function CosmicLobby({
                 >
                   <feColorMatrix
                     in="SourceGraphic"
-                    type="luminanceToAlpha"
-                    result="energyLuma"
+                    type="matrix"
+                    values="
+                      0 0 0 0 0
+                      0 0 0 0 0
+                      0 0 0 0 0
+                      0.55 -0.45 0.85 0 -0.08
+                    "
+                    result="energyChroma"
                   />
-                  <feComponentTransfer in="energyLuma" result="energyMask">
+                  <feComponentTransfer in="energyChroma" result="energyMask">
                     <feFuncA
                       type="table"
-                      tableValues="0 0 0 0 0 0.06 0.42 0.92 1"
+                      tableValues="0 0 0 0 0 0.12 0.55 0.9 1 1"
                     />
                   </feComponentTransfer>
                   <feFlood
-                    floodColor="#a84dff"
-                    floodOpacity="0.96"
+                    floodColor="#b759ff"
+                    floodOpacity="1"
                     result="violetEnergy"
                   />
                   <feComposite
@@ -384,12 +390,20 @@ export function CosmicLobby({
                   />
                   <feGaussianBlur
                     in="violetCore"
-                    stdDeviation="3.2"
-                    result="violetGlow"
+                    stdDeviation="2.6"
+                    result="closeGlow"
                   />
+                  <feGaussianBlur
+                    in="violetCore"
+                    stdDeviation="8"
+                    result="wideGlow"
+                  />
+                  <feComponentTransfer in="wideGlow" result="boostedWideGlow">
+                    <feFuncA type="linear" slope="1.8" />
+                  </feComponentTransfer>
                   <feFlood
                     floodColor="#f5deff"
-                    floodOpacity="0.92"
+                    floodOpacity="1"
                     result="hotEnergy"
                   />
                   <feComposite
@@ -399,7 +413,8 @@ export function CosmicLobby({
                     result="hotCore"
                   />
                   <feMerge>
-                    <feMergeNode in="violetGlow" />
+                    <feMergeNode in="boostedWideGlow" />
+                    <feMergeNode in="closeGlow" />
                     <feMergeNode in="violetCore" />
                     <feMergeNode in="hotCore" />
                   </feMerge>

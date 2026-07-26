@@ -2624,8 +2624,8 @@ a {
 
 .character-frame img.frame-eye-aura--trail,
 .character-frame img.frame-eye-aura--core {
-  --eye-flow-width: 24%;
-  --eye-flow-height: 10%;
+  --eye-flow-width: 30%;
+  --eye-flow-height: 16%;
   opacity: 0;
   -webkit-mask-image:
     radial-gradient(
@@ -2673,18 +2673,18 @@ a {
 .character-frame img.frame-eye-aura--trail {
   filter:
     url("#original-energy-flow")
-    blur(3.2px)
+    blur(1.4px)
     drop-shadow(0 0 12px rgba(222, 146, 255, 0.94))
     drop-shadow(0 0 30px rgba(137, 61, 255, 0.82));
   animation: original-lightning-trail 2.7s cubic-bezier(0.18, 0.62, 0.35, 1) infinite -1.35s;
 }
 
 .character-frame img.frame-eye-aura--core {
-  --eye-flow-width: 13%;
-  --eye-flow-height: 7%;
+  --eye-flow-width: 18%;
+  --eye-flow-height: 11%;
   filter:
     url("#original-energy-flow")
-    blur(0.15px)
+    blur(0.05px)
     drop-shadow(0 0 5px rgba(255, 239, 255, 0.98))
     drop-shadow(0 0 16px rgba(190, 98, 255, 0.94));
   animation: original-lightning-flow 2.7s cubic-bezier(0.18, 0.62, 0.35, 1) infinite;
@@ -3015,17 +3015,17 @@ a {
     opacity: 0;
   }
   9% {
-    opacity: 0.48;
+    opacity: 0.62;
   }
   46% {
     -webkit-mask-position: 24% 35%, 76% 35%;
     mask-position: 24% 35%, 76% 35%;
-    opacity: 0.88;
+    opacity: 1;
   }
   88% {
     -webkit-mask-position: 8% 35%, 92% 35%;
     mask-position: 8% 35%, 92% 35%;
-    opacity: 0.38;
+    opacity: 0.5;
   }
   100% {
     -webkit-mask-position: 5% 35%, 95% 35%;
@@ -3041,17 +3041,17 @@ a {
     opacity: 0;
   }
   10% {
-    opacity: 0.3;
+    opacity: 0.42;
   }
   48% {
     -webkit-mask-position: 24% 35%, 76% 35%;
     mask-position: 24% 35%, 76% 35%;
-    opacity: 0.62;
+    opacity: 0.78;
   }
   88% {
     -webkit-mask-position: 8% 35%, 92% 35%;
     mask-position: 8% 35%, 92% 35%;
-    opacity: 0.27;
+    opacity: 0.38;
   }
   100% {
     -webkit-mask-position: 5% 35%, 95% 35%;

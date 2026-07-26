@@ -114,25 +114,33 @@ export function CosmicLobby({
     }
 
     let animationFrame = 0;
-    const animate = () => {
+    let previousTime = performance.now();
+    const animate = (time: number) => {
       const motion = motionRef.current;
-      const ease = motion.dragging ? 0.3 : motion.hovering ? 0.18 : 0.1;
+      const frameRatio = Math.min(2, Math.max(0.25, (time - previousTime) / 16.667));
+      const deltaSeconds = frameRatio / 60;
+      previousTime = time;
+      const followRate = motion.dragging ? 22 : motion.hovering ? 13 : 8;
+      const ease = 1 - Math.exp(-followRate * deltaSeconds);
       motion.currentX += (motion.targetX - motion.currentX) * ease;
       motion.currentY += (motion.targetY - motion.currentY) * ease;
 
       if (!motion.dragging) {
-        motion.targetRotationX += motion.velocityX;
-        motion.targetRotationY += motion.velocityY;
-        motion.velocityX *= 0.925;
-        motion.velocityY *= 0.925;
+        motion.targetRotationX += motion.velocityX * frameRatio;
+        motion.targetRotationY += motion.velocityY * frameRatio;
+        const friction = Math.pow(0.94, frameRatio);
+        motion.velocityX *= friction;
+        motion.velocityY *= friction;
         if (Math.abs(motion.velocityX) < 0.002) motion.velocityX = 0;
         if (Math.abs(motion.velocityY) < 0.002) motion.velocityY = 0;
       }
 
+      const rotationRate = motion.dragging ? 24 : 11;
+      const rotationEase = 1 - Math.exp(-rotationRate * deltaSeconds);
       motion.currentRotationX +=
-        (motion.targetRotationX - motion.currentRotationX) * (motion.dragging ? 0.34 : 0.16);
+        (motion.targetRotationX - motion.currentRotationX) * rotationEase;
       motion.currentRotationY +=
-        (motion.targetRotationY - motion.currentRotationY) * (motion.dragging ? 0.34 : 0.16);
+        (motion.targetRotationY - motion.currentRotationY) * rotationEase;
 
       const touch = motion.pointerType === "touch";
       const activeScale = motion.dragging ? 1.22 : 1;
@@ -143,11 +151,11 @@ export function CosmicLobby({
       const hoverTiltY = motion.dragging ? 0 : x * (touch ? 4 : 9);
       scene.style.setProperty(
         "--panel-rx",
-        `${(motion.currentRotationX + hoverTiltX).toFixed(2)}deg`,
+        `${(motion.currentRotationX + hoverTiltX).toFixed(3)}deg`,
       );
       scene.style.setProperty(
         "--panel-ry",
-        `${(motion.currentRotationY + hoverTiltY).toFixed(2)}deg`,
+        `${(motion.currentRotationY + hoverTiltY).toFixed(3)}deg`,
       );
       scene.style.setProperty("--panel-x", `${(x * 11).toFixed(2)}px`);
       scene.style.setProperty("--panel-y", `${(y * 8).toFixed(2)}px`);
@@ -331,6 +339,8 @@ export function CosmicLobby({
               alt={`${displayTitle} character portrait`}
               width={1085}
               height={1449}
+              quality={95}
+              sizes="(max-width: 700px) 86vw, (max-width: 1100px) 78vw, 510px"
               priority
               draggable={false}
             />

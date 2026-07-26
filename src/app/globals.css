@@ -2536,12 +2536,13 @@ a {
   z-index: 5;
   overflow: visible;
   mix-blend-mode: screen;
-  filter: saturate(1.18);
+  opacity: 0.76;
+  filter: saturate(1.08);
 }
 
 .eye-energy {
   fill: none;
-  stroke-width: 3.2;
+  stroke-width: 1.45;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -2555,34 +2556,31 @@ a {
 }
 
 .eye-energy path {
-  stroke-dasharray: 22 28 9 19;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 28 22 7 31;
   animation:
-    eye-energy-flow 1.15s linear infinite,
-    eye-energy-breathe 2.6s ease-in-out infinite;
+    eye-energy-flow 1.8s linear infinite,
+    eye-energy-breathe 3.6s ease-in-out infinite;
 }
 
 .eye-energy--right path {
-  animation-delay: -0.58s, -1.3s;
+  animation-delay: -0.9s, -1.8s;
 }
 
 .eye-energy path.eye-energy__branch {
-  stroke-width: 2.1;
-  stroke-dasharray: 12 22;
-  opacity: 0.66;
-  animation-duration: 0.92s, 3.1s;
+  stroke-width: 0.82;
+  stroke-dasharray: 9 27;
+  opacity: 0.46;
+  animation-duration: 1.45s, 4.2s;
 }
 
-.eye-energy ellipse {
-  fill: rgba(235, 254, 255, 0.92);
-  stroke: #a8f6ff;
-  stroke-width: 2;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: eye-core-pulse 1.9s ease-in-out infinite alternate;
-}
-
-.eye-energy--right ellipse {
-  animation-delay: -0.95s;
+.eye-energy__mote {
+  fill: rgba(203, 250, 255, 0.86);
+  stroke: none;
+  filter:
+    drop-shadow(0 0 3px rgba(112, 236, 255, 0.95))
+    drop-shadow(0 0 7px rgba(135, 89, 255, 0.72));
+  animation: eye-mote-pulse 0.9s ease-in-out infinite alternate;
 }
 
 .frame-grade {
@@ -2873,17 +2871,17 @@ a {
 }
 
 @keyframes eye-energy-flow {
-  to { stroke-dashoffset: -78; }
+  to { stroke-dashoffset: -88; }
 }
 
 @keyframes eye-energy-breathe {
-  0%, 100% { opacity: 0.38; }
-  50% { opacity: 0.96; }
+  0%, 100% { opacity: 0.22; }
+  50% { opacity: 0.7; }
 }
 
-@keyframes eye-core-pulse {
-  from { opacity: 0.56; scale: 0.88; }
-  to { opacity: 1; scale: 1.12; }
+@keyframes eye-mote-pulse {
+  from { opacity: 0.3; }
+  to { opacity: 0.82; }
 }
 
 @property --aura-angle {

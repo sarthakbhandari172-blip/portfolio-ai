@@ -344,6 +344,68 @@ export function CosmicLobby({
               priority
               draggable={false}
             />
+            <svg
+              className="frame-eye-filter-defs"
+              width="0"
+              height="0"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <defs>
+                <filter
+                  id="original-energy-flow"
+                  x="-35%"
+                  y="-35%"
+                  width="170%"
+                  height="170%"
+                  colorInterpolationFilters="sRGB"
+                >
+                  <feColorMatrix
+                    in="SourceGraphic"
+                    type="luminanceToAlpha"
+                    result="energyLuma"
+                  />
+                  <feComponentTransfer in="energyLuma" result="energyMask">
+                    <feFuncA
+                      type="table"
+                      tableValues="0 0 0 0 0 0.06 0.42 0.92 1"
+                    />
+                  </feComponentTransfer>
+                  <feFlood
+                    floodColor="#a84dff"
+                    floodOpacity="0.96"
+                    result="violetEnergy"
+                  />
+                  <feComposite
+                    in="violetEnergy"
+                    in2="energyMask"
+                    operator="in"
+                    result="violetCore"
+                  />
+                  <feGaussianBlur
+                    in="violetCore"
+                    stdDeviation="3.2"
+                    result="violetGlow"
+                  />
+                  <feFlood
+                    floodColor="#f5deff"
+                    floodOpacity="0.92"
+                    result="hotEnergy"
+                  />
+                  <feComposite
+                    in="hotEnergy"
+                    in2="energyMask"
+                    operator="in"
+                    result="hotCore"
+                  />
+                  <feMerge>
+                    <feMergeNode in="violetGlow" />
+                    <feMergeNode in="violetCore" />
+                    <feMergeNode in="hotCore" />
+                  </feMerge>
+                </filter>
+              </defs>
+            </svg>
             <Image
               className="frame-eye-aura frame-eye-aura--bloom"
               src={imageUrl}

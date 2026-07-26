@@ -64,6 +64,62 @@ type MotionState = {
   pointerType: string;
 };
 
+type EnergyPoint = { x: number; y: number };
+type EnergyBolt = { main: EnergyPoint[]; branches: EnergyPoint[][] };
+
+const ENERGY_WIDTH = 1085;
+const ENERGY_HEIGHT = 1449;
+
+function createEnergyBolt(side: "left" | "right"): EnergyBolt {
+  const direction = side === "left" ? -1 : 1;
+  const start = side === "left" ? { x: 455, y: 526 } : { x: 620, y: 526 };
+  const distance = side === "left" ? 360 : 370;
+  const points = 19;
+  const main = Array.from({ length: points }, (_, index) => {
+    const progress = index / (points - 1);
+    const envelope = Math.sin(progress * Math.PI);
+    return {
+      x:
+        start.x +
+        direction * distance * progress +
+        (Math.random() - 0.5) * 12 * envelope,
+      y:
+        start.y -
+        42 * progress +
+        Math.sin(progress * Math.PI * 5.2) * 9 * envelope +
+        (Math.random() - 0.5) * 22 * envelope,
+    };
+  });
+
+  const branches = [5, 9, 13].map((anchorIndex, branchIndex) => {
+    const anchor = main[anchorIndex];
+    const verticalDirection = branchIndex % 2 === 0 ? -1 : 1;
+    return Array.from({ length: 6 }, (_, index) => {
+      const progress = index / 5;
+      return {
+        x:
+          anchor.x +
+          direction * (72 + branchIndex * 11) * progress +
+          (Math.random() - 0.5) * 10 * progress,
+        y:
+          anchor.y +
+          verticalDirection * (48 + branchIndex * 9) * progress +
+          Math.sin(progress * Math.PI * 3) * 7 +
+          (Math.random() - 0.5) * 12 * progress,
+      };
+    });
+  });
+
+  return { main, branches };
+}
+
+function blendPoints(from: EnergyPoint[], to: EnergyPoint[], progress: number) {
+  return from.map((point, index) => ({
+    x: point.x + (to[index].x - point.x) * progress,
+    y: point.y + (to[index].y - point.y) * progress,
+  }));
+}
+
 export function CosmicLobby({
   displayTitle,
   accentTitle,
@@ -80,6 +136,7 @@ export function CosmicLobby({
 }: CharacterDeckProps) {
   const sceneRef = useRef<HTMLElement>(null);
   const deckRef = useRef<HTMLDivElement>(null);
+  const eyeEnergyRef = useRef<HTMLCanvasElement>(null);
   const motionRef = useRef<MotionState>({
     targetX: 0,
     targetY: 0,
@@ -172,6 +229,148 @@ export function CosmicLobby({
 
     animationFrame = window.requestAnimationFrame(animate);
     return () => window.cancelAnimationFrame(animationFrame);
+  }, []);
+
+  useEffect(() => {
+    const canvas = eyeEnergyRef.current;
+    const frame = canvas?.parentElement;
+    const context = canvas?.getContext("2d");
+    if (!canvas || !frame || !context) return;
+
+    let width = 0;
+    let height = 0;
+    let pixelRatio = 1;
+    let animationFrame = 0;
+    let morphStartedAt = performance.now();
+    let leftFrom = createEnergyBolt("left");
+    let leftTo = createEnergyBolt("left");
+    let rightFrom = createEnergyBolt("right");
+    let rightTo = createEnergyBolt("right");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const resize = () => {
+      const bounds = frame.getBoundingClientRect();
+      width = Math.max(1, bounds.width);
+      height = Math.max(1, bounds.height);
+      pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(width * pixelRatio);
+      canvas.height = Math.round(height * pixelRatio);
+    };
+
+    const trace = (
+      points: EnergyPoint[],
+      lineWidth: number,
+      strokeStyle: string,
+      shadowBlur = 0,
+      shadowColor = "transparent",
+    ) => {
+      context.beginPath();
+      context.moveTo(points[0].x, points[0].y);
+      points.slice(1).forEach((point) => context.lineTo(point.x, point.y));
+      context.lineWidth = lineWidth;
+      context.strokeStyle = strokeStyle;
+      context.shadowBlur = shadowBlur;
+      context.shadowColor = shadowColor;
+      context.stroke();
+      context.shadowBlur = 0;
+    };
+
+    const energyPoint = (points: EnergyPoint[], progress: number) => {
+      const position = progress * (points.length - 1);
+      const index = Math.min(points.length - 2, Math.floor(position));
+      const localProgress = position - index;
+      return {
+        x: points[index].x + (points[index + 1].x - points[index].x) * localProgress,
+        y: points[index].y + (points[index + 1].y - points[index].y) * localProgress,
+      };
+    };
+
+    const render = (time: number) => {
+      const morphDuration = 210;
+      let progress = Math.min(1, (time - morphStartedAt) / morphDuration);
+      const easedProgress = progress * progress * (3 - 2 * progress);
+
+      const left: EnergyBolt = {
+        main: blendPoints(leftFrom.main, leftTo.main, easedProgress),
+        branches: leftFrom.branches.map((branch, index) =>
+          blendPoints(branch, leftTo.branches[index], easedProgress),
+        ),
+      };
+      const right: EnergyBolt = {
+        main: blendPoints(rightFrom.main, rightTo.main, easedProgress),
+        branches: rightFrom.branches.map((branch, index) =>
+          blendPoints(branch, rightTo.branches[index], easedProgress),
+        ),
+      };
+
+      if (progress >= 1 && !reducedMotion) {
+        leftFrom = leftTo;
+        leftTo = createEnergyBolt("left");
+        rightFrom = rightTo;
+        rightTo = createEnergyBolt("right");
+        morphStartedAt = time;
+        progress = 0;
+      }
+
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      context.clearRect(0, 0, width, height);
+      context.save();
+      context.scale(width / ENERGY_WIDTH, height / ENERGY_HEIGHT);
+      context.globalCompositeOperation = "lighter";
+      context.lineCap = "round";
+      context.lineJoin = "round";
+
+      const pulse = reducedMotion ? 0.42 : 0.38 + (Math.sin(time * 0.006) + 1) * 0.12;
+      [left, right].forEach((bolt, boltIndex) => {
+        trace(
+          bolt.main,
+          12,
+          `rgba(89, 92, 255, ${0.07 * pulse})`,
+          24,
+          "rgba(93, 115, 255, 0.5)",
+        );
+        trace(
+          bolt.main,
+          3.2,
+          `rgba(91, 220, 255, ${0.62 * pulse})`,
+          10,
+          "rgba(95, 226, 255, 0.75)",
+        );
+        trace(bolt.main, 1.15, `rgba(226, 253, 255, ${0.92 * pulse})`);
+
+        bolt.branches.forEach((branch) => {
+          trace(branch, 4.5, `rgba(114, 82, 255, ${0.055 * pulse})`, 12, "#795dff");
+          trace(branch, 0.72, `rgba(119, 224, 255, ${0.48 * pulse})`);
+        });
+
+        if (!reducedMotion) {
+          const travel = ((time / 920 + boltIndex * 0.5) % 1 + 1) % 1;
+          const mote = energyPoint(bolt.main, travel);
+          const glow = context.createRadialGradient(mote.x, mote.y, 0, mote.x, mote.y, 14);
+          glow.addColorStop(0, "rgba(238, 255, 255, 0.9)");
+          glow.addColorStop(0.22, "rgba(101, 231, 255, 0.5)");
+          glow.addColorStop(1, "rgba(116, 76, 255, 0)");
+          context.fillStyle = glow;
+          context.beginPath();
+          context.arc(mote.x, mote.y, 14, 0, Math.PI * 2);
+          context.fill();
+        }
+      });
+
+      context.restore();
+      if (!reducedMotion) animationFrame = window.requestAnimationFrame(render);
+    };
+
+    resize();
+    const observer = new ResizeObserver(resize);
+    observer.observe(frame);
+    if (reducedMotion) render(performance.now());
+    else animationFrame = window.requestAnimationFrame(render);
+
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(animationFrame);
+    };
   }, []);
 
   function setMotionTarget(event: ReactPointerEvent<HTMLDivElement>) {
@@ -344,77 +543,11 @@ export function CosmicLobby({
               priority
               draggable={false}
             />
-            <svg
+            <canvas
+              ref={eyeEnergyRef}
               className="frame-eye-energy"
-              viewBox="0 0 1085 1449"
-              preserveAspectRatio="xMidYMid slice"
               aria-hidden="true"
-            >
-              <defs>
-                <linearGradient id="eye-energy-left" x1="1" y1="0" x2="0" y2="0">
-                  <stop offset="0" stopColor="#d8fbff" stopOpacity="0.92" />
-                  <stop offset="0.22" stopColor="#79eaff" stopOpacity="0.78" />
-                  <stop offset="0.62" stopColor="#9a6dff" stopOpacity="0.44" />
-                  <stop offset="1" stopColor="#865cff" stopOpacity="0" />
-                </linearGradient>
-                <linearGradient id="eye-energy-right" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0" stopColor="#d8fbff" stopOpacity="0.92" />
-                  <stop offset="0.22" stopColor="#79eaff" stopOpacity="0.78" />
-                  <stop offset="0.62" stopColor="#9a6dff" stopOpacity="0.44" />
-                  <stop offset="1" stopColor="#865cff" stopOpacity="0" />
-                </linearGradient>
-                <filter id="eye-energy-glow" x="-25%" y="-80%" width="150%" height="260%">
-                  <feTurbulence
-                    type="fractalNoise"
-                    baseFrequency="0.012 0.085"
-                    numOctaves="1"
-                    seed="7"
-                    result="noise"
-                  />
-                  <feDisplacementMap
-                    in="SourceGraphic"
-                    in2="noise"
-                    scale="3.5"
-                    xChannelSelector="R"
-                    yChannelSelector="B"
-                    result="distorted"
-                  />
-                  <feGaussianBlur in="distorted" stdDeviation="2.2" result="bloom" />
-                  <feMerge>
-                    <feMergeNode in="bloom" />
-                    <feMergeNode in="distorted" />
-                  </feMerge>
-                </filter>
-              </defs>
-
-              <g className="eye-energy eye-energy--left" filter="url(#eye-energy-glow)">
-                <path className="eye-energy__main" d="M455 526 L408 515 L372 532 L323 506 L279 521 L230 490 L170 505 L108 470" />
-                <path className="eye-energy__branch" d="M374 531 L344 564 L303 571 L276 599" />
-                <path className="eye-energy__branch" d="M279 520 L248 481 L208 466 L184 432" />
-              </g>
-
-              <g className="eye-energy eye-energy--right" filter="url(#eye-energy-glow)">
-                <path className="eye-energy__main" d="M620 526 L668 516 L705 535 L750 507 L797 524 L845 493 L907 507 L978 470" />
-                <path className="eye-energy__branch" d="M705 534 L731 567 L774 575 L805 603" />
-                <path className="eye-energy__branch" d="M798 523 L831 483 L872 468 L899 433" />
-              </g>
-
-              <circle className="eye-energy__mote" r="2.6">
-                <animateMotion
-                  dur="1.8s"
-                  repeatCount="indefinite"
-                  path="M455 526 L408 515 L372 532 L323 506 L279 521 L230 490 L170 505 L108 470"
-                />
-              </circle>
-              <circle className="eye-energy__mote" r="2.3">
-                <animateMotion
-                  begin="-0.9s"
-                  dur="1.8s"
-                  repeatCount="indefinite"
-                  path="M620 526 L668 516 L705 535 L750 507 L797 524 L845 493 L907 507 L978 470"
-                />
-              </circle>
-            </svg>
+            />
             <span className="frame-grade" />
             <span className="frame-scan" />
             <span className="frame-shine" />

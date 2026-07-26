@@ -2534,53 +2534,8 @@ a {
   width: 100%;
   height: 100%;
   z-index: 5;
-  overflow: visible;
   mix-blend-mode: screen;
-  opacity: 0.76;
-  filter: saturate(1.08);
-}
-
-.eye-energy {
-  fill: none;
-  stroke-width: 1.45;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.eye-energy--left {
-  stroke: url("#eye-energy-left");
-}
-
-.eye-energy--right {
-  stroke: url("#eye-energy-right");
-}
-
-.eye-energy path {
-  vector-effect: non-scaling-stroke;
-  stroke-dasharray: 28 22 7 31;
-  animation:
-    eye-energy-flow 1.8s linear infinite,
-    eye-energy-breathe 3.6s ease-in-out infinite;
-}
-
-.eye-energy--right path {
-  animation-delay: -0.9s, -1.8s;
-}
-
-.eye-energy path.eye-energy__branch {
-  stroke-width: 0.82;
-  stroke-dasharray: 9 27;
-  opacity: 0.46;
-  animation-duration: 1.45s, 4.2s;
-}
-
-.eye-energy__mote {
-  fill: rgba(203, 250, 255, 0.86);
-  stroke: none;
-  filter:
-    drop-shadow(0 0 3px rgba(112, 236, 255, 0.95))
-    drop-shadow(0 0 7px rgba(135, 89, 255, 0.72));
-  animation: eye-mote-pulse 0.9s ease-in-out infinite alternate;
+  opacity: 0.9;
 }
 
 .frame-grade {
@@ -2868,20 +2823,6 @@ a {
 
 @keyframes frame-aura-spin {
   to { --aura-angle: 360deg; }
-}
-
-@keyframes eye-energy-flow {
-  to { stroke-dashoffset: -88; }
-}
-
-@keyframes eye-energy-breathe {
-  0%, 100% { opacity: 0.22; }
-  50% { opacity: 0.7; }
-}
-
-@keyframes eye-mote-pulse {
-  from { opacity: 0.3; }
-  to { opacity: 0.82; }
 }
 
 @property --aura-angle {

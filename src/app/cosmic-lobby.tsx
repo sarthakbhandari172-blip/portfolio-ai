@@ -64,62 +64,6 @@ type MotionState = {
   pointerType: string;
 };
 
-type EnergyPoint = { x: number; y: number };
-type EnergyBolt = { main: EnergyPoint[]; branches: EnergyPoint[][] };
-
-const ENERGY_WIDTH = 1085;
-const ENERGY_HEIGHT = 1449;
-
-function createEnergyBolt(side: "left" | "right"): EnergyBolt {
-  const direction = side === "left" ? -1 : 1;
-  const start = side === "left" ? { x: 455, y: 526 } : { x: 620, y: 526 };
-  const distance = side === "left" ? 360 : 370;
-  const points = 19;
-  const main = Array.from({ length: points }, (_, index) => {
-    const progress = index / (points - 1);
-    const envelope = Math.sin(progress * Math.PI);
-    return {
-      x:
-        start.x +
-        direction * distance * progress +
-        (Math.random() - 0.5) * 12 * envelope,
-      y:
-        start.y -
-        42 * progress +
-        Math.sin(progress * Math.PI * 5.2) * 9 * envelope +
-        (Math.random() - 0.5) * 22 * envelope,
-    };
-  });
-
-  const branches = [5, 9, 13].map((anchorIndex, branchIndex) => {
-    const anchor = main[anchorIndex];
-    const verticalDirection = branchIndex % 2 === 0 ? -1 : 1;
-    return Array.from({ length: 6 }, (_, index) => {
-      const progress = index / 5;
-      return {
-        x:
-          anchor.x +
-          direction * (72 + branchIndex * 11) * progress +
-          (Math.random() - 0.5) * 10 * progress,
-        y:
-          anchor.y +
-          verticalDirection * (48 + branchIndex * 9) * progress +
-          Math.sin(progress * Math.PI * 3) * 7 +
-          (Math.random() - 0.5) * 12 * progress,
-      };
-    });
-  });
-
-  return { main, branches };
-}
-
-function blendPoints(from: EnergyPoint[], to: EnergyPoint[], progress: number) {
-  return from.map((point, index) => ({
-    x: point.x + (to[index].x - point.x) * progress,
-    y: point.y + (to[index].y - point.y) * progress,
-  }));
-}
-
 export function CosmicLobby({
   displayTitle,
   accentTitle,
@@ -136,7 +80,6 @@ export function CosmicLobby({
 }: CharacterDeckProps) {
   const sceneRef = useRef<HTMLElement>(null);
   const deckRef = useRef<HTMLDivElement>(null);
-  const eyeEnergyRef = useRef<HTMLCanvasElement>(null);
   const motionRef = useRef<MotionState>({
     targetX: 0,
     targetY: 0,
@@ -229,148 +172,6 @@ export function CosmicLobby({
 
     animationFrame = window.requestAnimationFrame(animate);
     return () => window.cancelAnimationFrame(animationFrame);
-  }, []);
-
-  useEffect(() => {
-    const canvas = eyeEnergyRef.current;
-    const frame = canvas?.parentElement;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !frame || !context) return;
-
-    let width = 0;
-    let height = 0;
-    let pixelRatio = 1;
-    let animationFrame = 0;
-    let morphStartedAt = performance.now();
-    let leftFrom = createEnergyBolt("left");
-    let leftTo = createEnergyBolt("left");
-    let rightFrom = createEnergyBolt("right");
-    let rightTo = createEnergyBolt("right");
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    const resize = () => {
-      const bounds = frame.getBoundingClientRect();
-      width = Math.max(1, bounds.width);
-      height = Math.max(1, bounds.height);
-      pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.round(width * pixelRatio);
-      canvas.height = Math.round(height * pixelRatio);
-    };
-
-    const trace = (
-      points: EnergyPoint[],
-      lineWidth: number,
-      strokeStyle: string,
-      shadowBlur = 0,
-      shadowColor = "transparent",
-    ) => {
-      context.beginPath();
-      context.moveTo(points[0].x, points[0].y);
-      points.slice(1).forEach((point) => context.lineTo(point.x, point.y));
-      context.lineWidth = lineWidth;
-      context.strokeStyle = strokeStyle;
-      context.shadowBlur = shadowBlur;
-      context.shadowColor = shadowColor;
-      context.stroke();
-      context.shadowBlur = 0;
-    };
-
-    const energyPoint = (points: EnergyPoint[], progress: number) => {
-      const position = progress * (points.length - 1);
-      const index = Math.min(points.length - 2, Math.floor(position));
-      const localProgress = position - index;
-      return {
-        x: points[index].x + (points[index + 1].x - points[index].x) * localProgress,
-        y: points[index].y + (points[index + 1].y - points[index].y) * localProgress,
-      };
-    };
-
-    const render = (time: number) => {
-      const morphDuration = 210;
-      let progress = Math.min(1, (time - morphStartedAt) / morphDuration);
-      const easedProgress = progress * progress * (3 - 2 * progress);
-
-      const left: EnergyBolt = {
-        main: blendPoints(leftFrom.main, leftTo.main, easedProgress),
-        branches: leftFrom.branches.map((branch, index) =>
-          blendPoints(branch, leftTo.branches[index], easedProgress),
-        ),
-      };
-      const right: EnergyBolt = {
-        main: blendPoints(rightFrom.main, rightTo.main, easedProgress),
-        branches: rightFrom.branches.map((branch, index) =>
-          blendPoints(branch, rightTo.branches[index], easedProgress),
-        ),
-      };
-
-      if (progress >= 1 && !reducedMotion) {
-        leftFrom = leftTo;
-        leftTo = createEnergyBolt("left");
-        rightFrom = rightTo;
-        rightTo = createEnergyBolt("right");
-        morphStartedAt = time;
-        progress = 0;
-      }
-
-      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-      context.clearRect(0, 0, width, height);
-      context.save();
-      context.scale(width / ENERGY_WIDTH, height / ENERGY_HEIGHT);
-      context.globalCompositeOperation = "lighter";
-      context.lineCap = "round";
-      context.lineJoin = "round";
-
-      const pulse = reducedMotion ? 0.42 : 0.38 + (Math.sin(time * 0.006) + 1) * 0.12;
-      [left, right].forEach((bolt, boltIndex) => {
-        trace(
-          bolt.main,
-          12,
-          `rgba(89, 92, 255, ${0.07 * pulse})`,
-          24,
-          "rgba(93, 115, 255, 0.5)",
-        );
-        trace(
-          bolt.main,
-          3.2,
-          `rgba(91, 220, 255, ${0.62 * pulse})`,
-          10,
-          "rgba(95, 226, 255, 0.75)",
-        );
-        trace(bolt.main, 1.15, `rgba(226, 253, 255, ${0.92 * pulse})`);
-
-        bolt.branches.forEach((branch) => {
-          trace(branch, 4.5, `rgba(114, 82, 255, ${0.055 * pulse})`, 12, "#795dff");
-          trace(branch, 0.72, `rgba(119, 224, 255, ${0.48 * pulse})`);
-        });
-
-        if (!reducedMotion) {
-          const travel = ((time / 920 + boltIndex * 0.5) % 1 + 1) % 1;
-          const mote = energyPoint(bolt.main, travel);
-          const glow = context.createRadialGradient(mote.x, mote.y, 0, mote.x, mote.y, 14);
-          glow.addColorStop(0, "rgba(238, 255, 255, 0.9)");
-          glow.addColorStop(0.22, "rgba(101, 231, 255, 0.5)");
-          glow.addColorStop(1, "rgba(116, 76, 255, 0)");
-          context.fillStyle = glow;
-          context.beginPath();
-          context.arc(mote.x, mote.y, 14, 0, Math.PI * 2);
-          context.fill();
-        }
-      });
-
-      context.restore();
-      if (!reducedMotion) animationFrame = window.requestAnimationFrame(render);
-    };
-
-    resize();
-    const observer = new ResizeObserver(resize);
-    observer.observe(frame);
-    if (reducedMotion) render(performance.now());
-    else animationFrame = window.requestAnimationFrame(render);
-
-    return () => {
-      observer.disconnect();
-      window.cancelAnimationFrame(animationFrame);
-    };
   }, []);
 
   function setMotionTarget(event: ReactPointerEvent<HTMLDivElement>) {
@@ -543,11 +344,69 @@ export function CosmicLobby({
               priority
               draggable={false}
             />
-            <canvas
-              ref={eyeEnergyRef}
-              className="frame-eye-energy"
+            <svg
+              className="frame-eye-filter-defs"
+              width="0"
+              height="0"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <defs>
+                <filter id="eye-aura-distort" x="-8%" y="-35%" width="116%" height="170%">
+                  <feTurbulence
+                    type="fractalNoise"
+                    baseFrequency="0.006 0.022"
+                    numOctaves="1"
+                    seed="11"
+                    result="eyeNoise"
+                  >
+                    <animate
+                      attributeName="baseFrequency"
+                      dur="5.4s"
+                      values="0.006 0.022;0.009 0.028;0.007 0.019;0.006 0.022"
+                      repeatCount="indefinite"
+                    />
+                  </feTurbulence>
+                  <feDisplacementMap
+                    in="SourceGraphic"
+                    in2="eyeNoise"
+                    scale="2.2"
+                    xChannelSelector="R"
+                    yChannelSelector="B"
+                  >
+                    <animate
+                      attributeName="scale"
+                      dur="4.6s"
+                      values="1.2;3.1;1.7;2.6;1.2"
+                      repeatCount="indefinite"
+                    />
+                  </feDisplacementMap>
+                </filter>
+              </defs>
+            </svg>
+            <Image
+              className="frame-eye-aura frame-eye-aura--bloom"
+              src={imageUrl}
+              alt=""
+              width={1085}
+              height={1449}
+              quality={95}
+              sizes="(max-width: 700px) 74vw, (max-width: 1100px) 72vw, 548px"
+              draggable={false}
               aria-hidden="true"
             />
+            <Image
+              className="frame-eye-aura frame-eye-aura--core"
+              src={imageUrl}
+              alt=""
+              width={1085}
+              height={1449}
+              quality={95}
+              sizes="(max-width: 700px) 74vw, (max-width: 1100px) 72vw, 548px"
+              draggable={false}
+              aria-hidden="true"
+            />
+            <span className="frame-eye-power" aria-hidden="true" />
             <span className="frame-grade" />
             <span className="frame-scan" />
             <span className="frame-shine" />

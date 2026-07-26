@@ -2524,18 +2524,103 @@ a {
 .frame-scan,
 .frame-particles,
 .frame-shine,
-.frame-eye-energy {
+.frame-eye-aura,
+.frame-eye-power {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.frame-eye-energy {
+.frame-eye-filter-defs {
+  position: absolute;
+  pointer-events: none;
+}
+
+.character-frame img.frame-eye-aura {
   width: 100%;
   height: 100%;
+  position: absolute;
+  inset: 0;
   z-index: 5;
+  object-fit: cover;
+  object-position: center 44%;
+  scale: 1.04;
+  transform: translateZ(20px);
   mix-blend-mode: screen;
-  opacity: 0.9;
+  pointer-events: none;
+  will-change: opacity, filter;
+}
+
+.character-frame img.frame-eye-aura--bloom {
+  opacity: 0.2;
+  filter:
+    url("#eye-aura-distort")
+    brightness(0.72)
+    contrast(2.55)
+    saturate(1.9)
+    hue-rotate(7deg)
+    blur(2.4px)
+    drop-shadow(0 0 10px rgba(156, 69, 255, 0.62))
+    drop-shadow(0 0 22px rgba(104, 66, 255, 0.38));
+  -webkit-mask-image: radial-gradient(
+    ellipse 64% 12% at 50% 36.3%,
+    #000 0 34%,
+    rgba(0, 0, 0, 0.82) 55%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 64% 12% at 50% 36.3%,
+    #000 0 34%,
+    rgba(0, 0, 0, 0.82) 55%,
+    transparent 100%
+  );
+  animation: existing-lightning-bloom 3.8s ease-in-out infinite;
+}
+
+.character-frame img.frame-eye-aura--core {
+  opacity: 0.15;
+  filter:
+    url("#eye-aura-distort")
+    brightness(0.82)
+    contrast(2.75)
+    saturate(1.7)
+    hue-rotate(5deg)
+    drop-shadow(0 0 5px rgba(215, 163, 255, 0.72));
+  -webkit-mask-image: radial-gradient(
+    ellipse 58% 8.5% at 50% 36.3%,
+    #000 0 38%,
+    rgba(0, 0, 0, 0.84) 60%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 58% 8.5% at 50% 36.3%,
+    #000 0 38%,
+    rgba(0, 0, 0, 0.84) 60%,
+    transparent 100%
+  );
+  animation: existing-lightning-core 3.1s ease-in-out infinite -0.7s;
+}
+
+.frame-eye-power {
+  z-index: 6;
+  background:
+    radial-gradient(
+      ellipse 10% 4.2% at 42% 36.3%,
+      rgba(239, 218, 255, 0.38),
+      rgba(164, 89, 255, 0.18) 38%,
+      transparent 74%
+    ),
+    radial-gradient(
+      ellipse 10% 4.2% at 57.2% 36.3%,
+      rgba(239, 218, 255, 0.38),
+      rgba(164, 89, 255, 0.18) 38%,
+      transparent 74%
+    );
+  mix-blend-mode: screen;
+  filter: blur(5px);
+  opacity: 0.34;
+  will-change: opacity, filter;
+  animation: eye-power-aura 4.2s ease-in-out infinite;
 }
 
 .frame-grade {
@@ -2823,6 +2908,30 @@ a {
 
 @keyframes frame-aura-spin {
   to { --aura-angle: 360deg; }
+}
+
+@keyframes existing-lightning-bloom {
+  0%, 100% { opacity: 0.12; }
+  16% { opacity: 0.28; }
+  31% { opacity: 0.17; }
+  52% { opacity: 0.38; }
+  69% { opacity: 0.2; }
+  84% { opacity: 0.32; }
+}
+
+@keyframes existing-lightning-core {
+  0%, 100% { opacity: 0.08; }
+  18% { opacity: 0.24; }
+  36% { opacity: 0.12; }
+  57% { opacity: 0.3; }
+  76% { opacity: 0.14; }
+  89% { opacity: 0.22; }
+}
+
+@keyframes eye-power-aura {
+  0%, 100% { opacity: 0.2; filter: blur(5px); }
+  46% { opacity: 0.46; filter: blur(7px); }
+  72% { opacity: 0.29; filter: blur(5.5px); }
 }
 
 @property --aura-angle {

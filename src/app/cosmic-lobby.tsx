@@ -344,6 +344,46 @@ export function CosmicLobby({
               priority
               draggable={false}
             />
+            <svg
+              className="frame-eye-energy"
+              viewBox="0 0 1085 1449"
+              preserveAspectRatio="xMidYMid slice"
+              aria-hidden="true"
+            >
+              <defs>
+                <linearGradient id="eye-energy-left" x1="1" y1="0" x2="0" y2="0">
+                  <stop offset="0" stopColor="#ffffff" />
+                  <stop offset="0.28" stopColor="#7defff" />
+                  <stop offset="1" stopColor="#865cff" stopOpacity="0" />
+                </linearGradient>
+                <linearGradient id="eye-energy-right" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" stopColor="#ffffff" />
+                  <stop offset="0.28" stopColor="#7defff" />
+                  <stop offset="1" stopColor="#865cff" stopOpacity="0" />
+                </linearGradient>
+                <filter id="eye-energy-glow" x="-40%" y="-100%" width="180%" height="300%">
+                  <feGaussianBlur stdDeviation="5" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <g className="eye-energy eye-energy--left" filter="url(#eye-energy-glow)">
+                <path d="M455 526 L408 515 L372 532 L323 506 L279 521 L230 490 L170 505 L108 470" />
+                <path className="eye-energy__branch" d="M374 531 L344 564 L303 571 L276 599" />
+                <path className="eye-energy__branch" d="M279 520 L248 481 L208 466 L184 432" />
+                <ellipse cx="455" cy="526" rx="31" ry="15" />
+              </g>
+
+              <g className="eye-energy eye-energy--right" filter="url(#eye-energy-glow)">
+                <path d="M620 526 L668 516 L705 535 L750 507 L797 524 L845 493 L907 507 L978 470" />
+                <path className="eye-energy__branch" d="M705 534 L731 567 L774 575 L805 603" />
+                <path className="eye-energy__branch" d="M798 523 L831 483 L872 468 L899 433" />
+                <ellipse cx="620" cy="526" rx="31" ry="15" />
+              </g>
+            </svg>
             <span className="frame-grade" />
             <span className="frame-scan" />
             <span className="frame-shine" />

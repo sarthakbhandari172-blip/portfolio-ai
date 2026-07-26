@@ -80,7 +80,6 @@ export function CosmicLobby({
 }: CharacterDeckProps) {
   const sceneRef = useRef<HTMLElement>(null);
   const deckRef = useRef<HTMLDivElement>(null);
-  const eyeEnergyRef = useRef<HTMLCanvasElement>(null);
   const motionRef = useRef<MotionState>({
     targetX: 0,
     targetY: 0,
@@ -173,207 +172,6 @@ export function CosmicLobby({
 
     animationFrame = window.requestAnimationFrame(animate);
     return () => window.cancelAnimationFrame(animationFrame);
-  }, []);
-
-  useEffect(() => {
-    const canvas = eyeEnergyRef.current;
-    const frame = canvas?.parentElement;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !frame || !context) return;
-
-    type Point = { x: number; y: number };
-    type Bolt = { side: "left" | "right"; points: Point[] };
-
-    const designWidth = 1086;
-    const designHeight = 1448;
-    const eyePositions = {
-      left: { x: 462, y: 531 },
-      right: { x: 612, y: 531 },
-    };
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let width = 1;
-    let height = 1;
-    let pixelRatio = 1;
-    let animationFrame = 0;
-    let morphStartedAt = performance.now();
-
-    const makeBolt = (side: Bolt["side"]): Bolt => {
-      const start = eyePositions[side];
-      const direction = side === "left" ? -1 : 1;
-      const endX = side === "left" ? 68 : 1018;
-      const endY = start.y - 12 + (Math.random() - 0.5) * 42;
-      let drift = 0;
-      const points = Array.from({ length: 25 }, (_, index) => {
-        const progress = index / 24;
-        const envelope = Math.sin(progress * Math.PI);
-        drift = drift * 0.28 + (Math.random() - 0.5) * 27;
-        return {
-          x:
-            start.x +
-            (endX - start.x) * progress +
-            direction * Math.sin(progress * Math.PI * 7) * 3.5 * envelope,
-          y:
-            start.y +
-            (endY - start.y) * progress +
-            drift * envelope +
-            Math.sin(progress * Math.PI * 5) * 5 * envelope,
-        };
-      });
-      points[0] = { ...start };
-      return { side, points };
-    };
-
-    const blendBolt = (from: Bolt, to: Bolt, progress: number): Bolt => ({
-      side: from.side,
-      points: from.points.map((point, index) => ({
-        x: point.x + (to.points[index].x - point.x) * progress,
-        y: point.y + (to.points[index].y - point.y) * progress,
-      })),
-    });
-
-    let leftFrom = makeBolt("left");
-    let leftTo = makeBolt("left");
-    let rightFrom = makeBolt("right");
-    let rightTo = makeBolt("right");
-
-    const resize = () => {
-      const bounds = frame.getBoundingClientRect();
-      width = Math.max(1, bounds.width);
-      height = Math.max(1, bounds.height);
-      pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.round(width * pixelRatio);
-      canvas.height = Math.round(height * pixelRatio);
-    };
-
-    const strokeBolt = (
-      bolt: Bolt,
-      lineWidth: number,
-      startColour: string,
-      middleColour: string,
-      shadowBlur = 0,
-      shadowColour = "transparent",
-      dash: number[] = [],
-      dashOffset = 0,
-    ) => {
-      const start = bolt.points[0];
-      const end = bolt.points[bolt.points.length - 1];
-      const gradient = context.createLinearGradient(start.x, start.y, end.x, end.y);
-      gradient.addColorStop(0, startColour);
-      gradient.addColorStop(0.58, middleColour);
-      gradient.addColorStop(1, "rgba(111, 38, 255, 0)");
-      context.beginPath();
-      context.moveTo(start.x, start.y);
-      bolt.points.slice(1).forEach((point) => context.lineTo(point.x, point.y));
-      context.lineWidth = lineWidth;
-      context.strokeStyle = gradient;
-      context.shadowBlur = shadowBlur;
-      context.shadowColor = shadowColour;
-      context.setLineDash(dash);
-      context.lineDashOffset = dashOffset;
-      context.stroke();
-      context.setLineDash([]);
-      context.shadowBlur = 0;
-    };
-
-    const drawEyeAura = (eye: Point, intensity: number) => {
-      context.save();
-      context.translate(eye.x, eye.y);
-      context.scale(1, 0.46);
-      const aura = context.createRadialGradient(0, 0, 0, 0, 0, 42);
-      aura.addColorStop(0, `rgba(250, 236, 255, ${0.55 * intensity})`);
-      aura.addColorStop(0.16, `rgba(213, 157, 255, ${0.5 * intensity})`);
-      aura.addColorStop(0.46, `rgba(144, 66, 255, ${0.25 * intensity})`);
-      aura.addColorStop(1, "rgba(103, 41, 255, 0)");
-      context.fillStyle = aura;
-      context.beginPath();
-      context.arc(0, 0, 42, 0, Math.PI * 2);
-      context.fill();
-      context.restore();
-    };
-
-    const render = (time: number) => {
-      const morphDuration = 260;
-      const rawProgress = Math.min(1, (time - morphStartedAt) / morphDuration);
-      const progress = rawProgress * rawProgress * (3 - 2 * rawProgress);
-      const left = blendBolt(leftFrom, leftTo, progress);
-      const right = blendBolt(rightFrom, rightTo, progress);
-
-      if (rawProgress >= 1 && !reducedMotion) {
-        leftFrom = leftTo;
-        leftTo = makeBolt("left");
-        rightFrom = rightTo;
-        rightTo = makeBolt("right");
-        morphStartedAt = time;
-      }
-
-      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-      context.clearRect(0, 0, width, height);
-      context.save();
-      context.scale(width / designWidth, height / designHeight);
-      context.globalCompositeOperation = "lighter";
-      context.lineCap = "round";
-      context.lineJoin = "round";
-
-      const slowPulse = reducedMotion
-        ? 0.62
-        : 0.62 + Math.sin(time * 0.0042) * 0.13 + Math.sin(time * 0.0097) * 0.07;
-
-      [left, right].forEach((bolt, index) => {
-        const phase = index === 0 ? 0 : Math.PI * 0.18;
-        const intensity = slowPulse + Math.sin(time * 0.005 + phase) * 0.05;
-        strokeBolt(
-          bolt,
-          19,
-          `rgba(123, 42, 255, ${0.12 * intensity})`,
-          `rgba(103, 32, 255, ${0.065 * intensity})`,
-          34,
-          "rgba(126, 48, 255, 0.82)",
-        );
-        strokeBolt(
-          bolt,
-          6.5,
-          `rgba(207, 125, 255, ${0.48 * intensity})`,
-          `rgba(143, 62, 255, ${0.28 * intensity})`,
-          17,
-          "rgba(167, 69, 255, 0.9)",
-        );
-        strokeBolt(
-          bolt,
-          1.35,
-          `rgba(255, 239, 255, ${0.92 * intensity})`,
-          `rgba(215, 158, 255, ${0.66 * intensity})`,
-          5,
-          "rgba(232, 191, 255, 0.9)",
-        );
-        if (!reducedMotion) {
-          strokeBolt(
-            bolt,
-            2.1,
-            "rgba(255, 250, 255, 0.92)",
-            "rgba(225, 181, 255, 0.48)",
-            8,
-            "rgba(220, 166, 255, 0.92)",
-            [19, 47, 8, 38],
-            -time * 0.075,
-          );
-        }
-        drawEyeAura(eyePositions[bolt.side], intensity);
-      });
-
-      context.restore();
-      if (!reducedMotion) animationFrame = window.requestAnimationFrame(render);
-    };
-
-    resize();
-    const observer = new ResizeObserver(resize);
-    observer.observe(frame);
-    if (reducedMotion) render(performance.now());
-    else animationFrame = window.requestAnimationFrame(render);
-
-    return () => {
-      observer.disconnect();
-      window.cancelAnimationFrame(animationFrame);
-    };
   }, []);
 
   function setMotionTarget(event: ReactPointerEvent<HTMLDivElement>) {
@@ -539,16 +337,33 @@ export function CosmicLobby({
             <Image
               src={imageUrl}
               alt={`${displayTitle} character portrait`}
-              width={1086}
-              height={1448}
+              width={1085}
+              height={1449}
               quality={95}
-              sizes="(max-width: 700px) 74vw, (max-width: 1100px) 72vw, 548px"
+              sizes="(max-width: 700px) 86vw, (max-width: 1100px) 78vw, 510px"
               priority
               draggable={false}
             />
-            <canvas
-              ref={eyeEnergyRef}
-              className="frame-eye-energy"
+            <Image
+              className="frame-eye-aura frame-eye-aura--bloom"
+              src={imageUrl}
+              alt=""
+              width={1085}
+              height={1449}
+              quality={95}
+              sizes="(max-width: 700px) 74vw, (max-width: 1100px) 72vw, 548px"
+              draggable={false}
+              aria-hidden="true"
+            />
+            <Image
+              className="frame-eye-aura frame-eye-aura--core"
+              src={imageUrl}
+              alt=""
+              width={1085}
+              height={1449}
+              quality={95}
+              sizes="(max-width: 700px) 74vw, (max-width: 1100px) 72vw, 548px"
+              draggable={false}
               aria-hidden="true"
             />
             <span className="frame-eye-power" aria-hidden="true" />

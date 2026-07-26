@@ -2524,41 +2524,114 @@ a {
 .frame-scan,
 .frame-particles,
 .frame-shine,
-.frame-eye-energy,
+.frame-eye-aura,
 .frame-eye-power {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.frame-eye-energy {
+.character-frame img.frame-eye-aura {
   width: 100%;
   height: 100%;
+  position: absolute;
+  inset: 0;
   z-index: 5;
+  object-fit: cover;
+  object-position: center 44%;
+  scale: 1.04;
+  transform: translateZ(20px);
   mix-blend-mode: screen;
-  opacity: 0.94;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+.character-frame img.frame-eye-aura--bloom {
+  opacity: 0.1;
+  filter:
+    brightness(0.66)
+    contrast(3.1)
+    saturate(1.72)
+    blur(1.6px)
+    drop-shadow(0 0 8px rgba(183, 105, 255, 0.5))
+    drop-shadow(0 0 18px rgba(123, 66, 255, 0.3));
+  -webkit-mask-image: radial-gradient(
+    ellipse 65% 9.5% at 50% 36.3%,
+    #000 0 32%,
+    rgba(0, 0, 0, 0.78) 54%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 65% 9.5% at 50% 36.3%,
+    #000 0 32%,
+    rgba(0, 0, 0, 0.78) 54%,
+    transparent 100%
+  );
+  animation: original-lightning-breathe 4.8s ease-in-out infinite;
+}
+
+.character-frame img.frame-eye-aura--core {
+  --eye-flow-left: 42%;
+  --eye-flow-right: 57.2%;
+  opacity: 0;
+  filter:
+    brightness(0.58)
+    contrast(3.7)
+    saturate(1.86)
+    blur(0.35px)
+    drop-shadow(0 0 4px rgba(233, 193, 255, 0.76))
+    drop-shadow(0 0 10px rgba(162, 79, 255, 0.52));
+  -webkit-mask-image:
+    radial-gradient(
+      ellipse 14% 5.8% at var(--eye-flow-left) 36.3%,
+      #000 0 24%,
+      rgba(0, 0, 0, 0.88) 48%,
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 14% 5.8% at var(--eye-flow-right) 36.3%,
+      #000 0 24%,
+      rgba(0, 0, 0, 0.88) 48%,
+      transparent 100%
+    );
+  mask-image:
+    radial-gradient(
+      ellipse 14% 5.8% at var(--eye-flow-left) 36.3%,
+      #000 0 24%,
+      rgba(0, 0, 0, 0.88) 48%,
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 14% 5.8% at var(--eye-flow-right) 36.3%,
+      #000 0 24%,
+      rgba(0, 0, 0, 0.88) 48%,
+      transparent 100%
+    );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation: original-lightning-flow 3.6s linear infinite;
 }
 
 .frame-eye-power {
   z-index: 6;
   background:
     radial-gradient(
-      ellipse 9% 3.8% at 42.5% 36.7%,
-      rgba(250, 232, 255, 0.34),
-      rgba(174, 92, 255, 0.2) 38%,
+      ellipse 10% 4.2% at 42% 36.3%,
+      rgba(239, 218, 255, 0.38),
+      rgba(164, 89, 255, 0.18) 38%,
       transparent 74%
     ),
     radial-gradient(
-      ellipse 9% 3.8% at 56.35% 36.7%,
-      rgba(250, 232, 255, 0.34),
-      rgba(174, 92, 255, 0.2) 38%,
+      ellipse 10% 4.2% at 57.2% 36.3%,
+      rgba(239, 218, 255, 0.38),
+      rgba(164, 89, 255, 0.18) 38%,
       transparent 74%
     );
   mix-blend-mode: screen;
-  filter: blur(6px);
-  opacity: 0.3;
+  filter: blur(4px);
+  opacity: 0.2;
   will-change: opacity, filter;
-  animation: eye-power-aura 4.2s ease-in-out infinite;
+  animation: original-eye-aura 4.8s ease-in-out infinite;
 }
 
 .frame-grade {
@@ -2848,15 +2921,55 @@ a {
   to { --aura-angle: 360deg; }
 }
 
-@keyframes eye-power-aura {
-  0%, 100% { opacity: 0.18; filter: blur(6px); }
-  46% { opacity: 0.44; filter: blur(8px); }
-  72% { opacity: 0.27; filter: blur(6.5px); }
+@keyframes original-lightning-breathe {
+  0%, 100% { opacity: 0.07; }
+  50% { opacity: 0.2; }
+}
+
+@keyframes original-lightning-flow {
+  0% {
+    --eye-flow-left: 42%;
+    --eye-flow-right: 57.2%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.16;
+  }
+  48% {
+    opacity: 0.3;
+  }
+  84% {
+    --eye-flow-left: 4%;
+    --eye-flow-right: 96%;
+    opacity: 0.14;
+  }
+  100% {
+    --eye-flow-left: 2%;
+    --eye-flow-right: 98%;
+    opacity: 0;
+  }
+}
+
+@keyframes original-eye-aura {
+  0%, 100% { opacity: 0.13; filter: blur(4px); }
+  50% { opacity: 0.27; filter: blur(5.5px); }
 }
 
 @property --aura-angle {
   syntax: "<angle>";
   initial-value: 0deg;
+  inherits: false;
+}
+
+@property --eye-flow-left {
+  syntax: "<percentage>";
+  initial-value: 42%;
+  inherits: false;
+}
+
+@property --eye-flow-right {
+  syntax: "<percentage>";
+  initial-value: 57.2%;
   inherits: false;
 }
 

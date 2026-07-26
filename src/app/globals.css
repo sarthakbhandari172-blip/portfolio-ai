@@ -2570,46 +2570,114 @@ a {
   animation: original-lightning-breathe 4.8s ease-in-out infinite;
 }
 
+.character-frame img.frame-eye-aura--field {
+  --energy-angle: 0deg;
+  opacity: 0.12;
+  filter:
+    brightness(0.5)
+    contrast(3.85)
+    saturate(2.15)
+    blur(0.9px)
+    drop-shadow(0 0 7px rgba(198, 118, 255, 0.62))
+    drop-shadow(0 0 16px rgba(119, 61, 255, 0.42));
+  -webkit-mask-image:
+    radial-gradient(
+      circle 54% at 50% 43%,
+      transparent 0 47%,
+      #000 60% 84%,
+      transparent 100%
+    ),
+    conic-gradient(
+      from var(--energy-angle) at 50% 43%,
+      transparent 0 7%,
+      #000 15%,
+      transparent 27% 52%,
+      #000 61%,
+      transparent 74% 100%
+    );
+  mask-image:
+    radial-gradient(
+      circle 54% at 50% 43%,
+      transparent 0 47%,
+      #000 60% 84%,
+      transparent 100%
+    ),
+    conic-gradient(
+      from var(--energy-angle) at 50% 43%,
+      transparent 0 7%,
+      #000 15%,
+      transparent 27% 52%,
+      #000 61%,
+      transparent 74% 100%
+    );
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  animation: original-energy-orbit 6.4s linear infinite;
+}
+
+.character-frame img.frame-eye-aura--trail,
 .character-frame img.frame-eye-aura--core {
   --eye-flow-left: 42%;
   --eye-flow-right: 57.2%;
+  --eye-flow-width: 18%;
+  --eye-flow-height: 7.4%;
   opacity: 0;
-  filter:
-    brightness(0.58)
-    contrast(3.7)
-    saturate(1.86)
-    blur(0.35px)
-    drop-shadow(0 0 4px rgba(233, 193, 255, 0.76))
-    drop-shadow(0 0 10px rgba(162, 79, 255, 0.52));
   -webkit-mask-image:
     radial-gradient(
-      ellipse 14% 5.8% at var(--eye-flow-left) 36.3%,
-      #000 0 24%,
-      rgba(0, 0, 0, 0.88) 48%,
+      ellipse var(--eye-flow-width) var(--eye-flow-height) at var(--eye-flow-left) 36.3%,
+      #000 0 22%,
+      rgba(0, 0, 0, 0.9) 46%,
+      rgba(0, 0, 0, 0.38) 70%,
       transparent 100%
     ),
     radial-gradient(
-      ellipse 14% 5.8% at var(--eye-flow-right) 36.3%,
-      #000 0 24%,
-      rgba(0, 0, 0, 0.88) 48%,
+      ellipse var(--eye-flow-width) var(--eye-flow-height) at var(--eye-flow-right) 36.3%,
+      #000 0 22%,
+      rgba(0, 0, 0, 0.9) 46%,
+      rgba(0, 0, 0, 0.38) 70%,
       transparent 100%
     );
   mask-image:
     radial-gradient(
-      ellipse 14% 5.8% at var(--eye-flow-left) 36.3%,
-      #000 0 24%,
-      rgba(0, 0, 0, 0.88) 48%,
+      ellipse var(--eye-flow-width) var(--eye-flow-height) at var(--eye-flow-left) 36.3%,
+      #000 0 22%,
+      rgba(0, 0, 0, 0.9) 46%,
+      rgba(0, 0, 0, 0.38) 70%,
       transparent 100%
     ),
     radial-gradient(
-      ellipse 14% 5.8% at var(--eye-flow-right) 36.3%,
-      #000 0 24%,
-      rgba(0, 0, 0, 0.88) 48%,
+      ellipse var(--eye-flow-width) var(--eye-flow-height) at var(--eye-flow-right) 36.3%,
+      #000 0 22%,
+      rgba(0, 0, 0, 0.9) 46%,
+      rgba(0, 0, 0, 0.38) 70%,
       transparent 100%
     );
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
-  animation: original-lightning-flow 3.6s linear infinite;
+}
+
+.character-frame img.frame-eye-aura--trail {
+  filter:
+    brightness(0.54)
+    contrast(3.55)
+    saturate(2)
+    blur(2px)
+    drop-shadow(0 0 8px rgba(204, 130, 255, 0.72))
+    drop-shadow(0 0 18px rgba(137, 62, 255, 0.52));
+  animation: original-lightning-trail 3.2s linear infinite -1.6s;
+}
+
+.character-frame img.frame-eye-aura--core {
+  --eye-flow-width: 10.5%;
+  --eye-flow-height: 5.1%;
+  filter:
+    brightness(0.54)
+    contrast(4.15)
+    saturate(1.92)
+    blur(0.25px)
+    drop-shadow(0 0 3px rgba(247, 220, 255, 0.86))
+    drop-shadow(0 0 9px rgba(177, 89, 255, 0.66));
+  animation: original-lightning-flow 3.2s linear infinite;
 }
 
 .frame-eye-power {
@@ -2631,7 +2699,7 @@ a {
   filter: blur(4px);
   opacity: 0.2;
   will-change: opacity, filter;
-  animation: original-eye-aura 4.8s ease-in-out infinite;
+  animation: original-eye-aura 3.2s ease-in-out infinite;
 }
 
 .frame-grade {
@@ -2926,33 +2994,62 @@ a {
   50% { opacity: 0.2; }
 }
 
+@keyframes original-energy-orbit {
+  to { --energy-angle: 360deg; }
+}
+
 @keyframes original-lightning-flow {
   0% {
     --eye-flow-left: 42%;
     --eye-flow-right: 57.2%;
     opacity: 0;
   }
-  12% {
-    opacity: 0.16;
+  10% {
+    opacity: 0.2;
   }
-  48% {
-    opacity: 0.3;
+  44% {
+    opacity: 0.46;
   }
-  84% {
-    --eye-flow-left: 4%;
-    --eye-flow-right: 96%;
-    opacity: 0.14;
+  86% {
+    --eye-flow-left: 17%;
+    --eye-flow-right: 83%;
+    opacity: 0.2;
   }
   100% {
-    --eye-flow-left: 2%;
-    --eye-flow-right: 98%;
+    --eye-flow-left: 15%;
+    --eye-flow-right: 85%;
+    opacity: 0;
+  }
+}
+
+@keyframes original-lightning-trail {
+  0% {
+    --eye-flow-left: 42%;
+    --eye-flow-right: 57.2%;
+    opacity: 0;
+  }
+  14% {
+    opacity: 0.1;
+  }
+  48% {
+    opacity: 0.25;
+  }
+  86% {
+    --eye-flow-left: 17%;
+    --eye-flow-right: 83%;
+    opacity: 0.12;
+  }
+  100% {
+    --eye-flow-left: 15%;
+    --eye-flow-right: 85%;
     opacity: 0;
   }
 }
 
 @keyframes original-eye-aura {
   0%, 100% { opacity: 0.13; filter: blur(4px); }
-  50% { opacity: 0.27; filter: blur(5.5px); }
+  38% { opacity: 0.32; filter: blur(5.8px); }
+  68% { opacity: 0.2; filter: blur(4.6px); }
 }
 
 @property --aura-angle {
@@ -2970,6 +3067,12 @@ a {
 @property --eye-flow-right {
   syntax: "<percentage>";
   initial-value: 57.2%;
+  inherits: false;
+}
+
+@property --energy-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
   inherits: false;
 }
 

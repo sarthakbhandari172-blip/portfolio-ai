@@ -65,9 +65,9 @@ export function InterfaceCursor() {
       }, 300);
     };
     const animate = () => {
-      currentX += (targetX - currentX) * 0.72;
-      currentY += (targetY - currentY) * 0.72;
-      currentSpeed += (targetSpeed - currentSpeed) * 0.38;
+      currentX += (targetX - currentX) * 0.82;
+      currentY += (targetY - currentY) * 0.82;
+      currentSpeed += (targetSpeed - currentSpeed) * 0.44;
       targetSpeed *= 0.78;
       cursor.style.setProperty("--cursor-ring-x", `${currentX}px`);
       cursor.style.setProperty("--cursor-ring-y", `${currentY}px`);

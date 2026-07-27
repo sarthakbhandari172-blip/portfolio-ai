@@ -422,28 +422,6 @@ export function CosmicLobby({
               </defs>
             </svg>
             <Image
-              className="frame-eye-aura frame-eye-aura--bloom"
-              src={imageUrl}
-              alt=""
-              width={1085}
-              height={1449}
-              quality={95}
-              sizes="(max-width: 700px) 74vw, (max-width: 1100px) 72vw, 548px"
-              draggable={false}
-              aria-hidden="true"
-            />
-            <Image
-              className="frame-eye-aura frame-eye-aura--field"
-              src={imageUrl}
-              alt=""
-              width={1085}
-              height={1449}
-              quality={95}
-              sizes="(max-width: 700px) 74vw, (max-width: 1100px) 72vw, 548px"
-              draggable={false}
-              aria-hidden="true"
-            />
-            <Image
               className="frame-eye-aura frame-eye-aura--trail"
               src={imageUrl}
               alt=""

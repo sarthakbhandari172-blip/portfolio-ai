@@ -2553,75 +2553,6 @@ a {
   will-change: opacity;
 }
 
-.character-frame img.frame-eye-aura--bloom {
-  opacity: 0.18;
-  filter:
-    brightness(0.68)
-    contrast(3.6)
-    saturate(2.05)
-    blur(2.4px)
-    drop-shadow(0 0 10px rgba(196, 112, 255, 0.68))
-    drop-shadow(0 0 24px rgba(125, 62, 255, 0.48));
-  -webkit-mask-image: radial-gradient(
-    ellipse 65% 9.5% at 50% 36.3%,
-    #000 0 32%,
-    rgba(0, 0, 0, 0.78) 54%,
-    transparent 100%
-  );
-  mask-image: radial-gradient(
-    ellipse 65% 9.5% at 50% 36.3%,
-    #000 0 32%,
-    rgba(0, 0, 0, 0.78) 54%,
-    transparent 100%
-  );
-  animation: original-lightning-breathe 3.8s ease-in-out infinite;
-}
-
-.character-frame img.frame-eye-aura--field {
-  --energy-angle: 0deg;
-  opacity: 0.28;
-  filter:
-    brightness(0.7)
-    contrast(3.9)
-    saturate(2.15)
-    blur(1.2px)
-    drop-shadow(0 0 9px rgba(206, 126, 255, 0.74))
-    drop-shadow(0 0 22px rgba(124, 61, 255, 0.56));
-  -webkit-mask-image:
-    radial-gradient(
-      circle 54% at 50% 43%,
-      transparent 0 47%,
-      #000 60% 84%,
-      transparent 100%
-    ),
-    conic-gradient(
-      from var(--energy-angle) at 50% 43%,
-      transparent 0 7%,
-      #000 15%,
-      transparent 27% 52%,
-      #000 61%,
-      transparent 74% 100%
-    );
-  mask-image:
-    radial-gradient(
-      circle 54% at 50% 43%,
-      transparent 0 47%,
-      #000 60% 84%,
-      transparent 100%
-    ),
-    conic-gradient(
-      from var(--energy-angle) at 50% 43%,
-      transparent 0 7%,
-      #000 15%,
-      transparent 27% 52%,
-      #000 61%,
-      transparent 74% 100%
-    );
-  -webkit-mask-composite: source-in;
-  mask-composite: intersect;
-  animation: original-energy-orbit 5.4s linear infinite;
-}
-
 .character-frame img.frame-eye-aura--trail,
 .character-frame img.frame-eye-aura--core {
   --eye-flow-width: 30%;
@@ -2999,15 +2930,6 @@ a {
   to { --aura-angle: 360deg; }
 }
 
-@keyframes original-lightning-breathe {
-  0%, 100% { opacity: 0.12; }
-  50% { opacity: 0.42; }
-}
-
-@keyframes original-energy-orbit {
-  to { --energy-angle: 360deg; }
-}
-
 @keyframes original-lightning-flow {
   0% {
     -webkit-mask-position: 40% 35%, 60% 35%;
@@ -3067,12 +2989,6 @@ a {
 }
 
 @property --aura-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@property --energy-angle {
   syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;

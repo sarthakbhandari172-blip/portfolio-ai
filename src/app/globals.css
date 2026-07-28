@@ -3590,20 +3590,139 @@ body:has(.hybrid-ui) .interface-cursor.is-processing .interface-cursor__ring {
   }
 }
 
-html.scroll-motion-ready .scroll-fall-target {
-  opacity: 0.68;
-  translate: 0 -24px;
-  transition:
-    opacity 240ms ease-out,
-    translate 520ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 220ms ease,
-    border-color 220ms ease,
-    box-shadow 220ms ease;
+html.scroll-motion-ready .scroll-phase-target {
+  --phase-duration: 760ms;
+  --phase-delay: 0ms;
+  opacity: 0;
+  will-change: opacity, translate;
 }
 
-html.scroll-motion-ready .scroll-fall-target.is-settled {
-  opacity: 1;
-  translate: 0;
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="heading"] {
+  translate: -30px 0;
+}
+
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="panel"],
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="copy"] {
+  translate: 0 -38px;
+}
+
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="heading"].is-settled {
+  animation: phase-lock-heading var(--phase-duration) cubic-bezier(0.16, 1, 0.3, 1) var(--phase-delay) both;
+}
+
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="panel"].is-settled,
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="copy"].is-settled {
+  animation: phase-lock-panel var(--phase-duration) cubic-bezier(0.16, 1, 0.3, 1) var(--phase-delay) both;
+}
+
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="panel"] {
+  position: relative;
+}
+
+.scroll-phase-shutter,
+.scroll-phase-scan {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+
+.scroll-phase-shutter {
+  z-index: 29;
+  background: #05030d;
+  clip-path: inset(0);
+}
+
+.scroll-phase-scan {
+  z-index: 30;
+  opacity: 0;
+  translate: 0 -50%;
+  background: linear-gradient(
+    180deg,
+    transparent 48.5%,
+    rgba(102, 235, 255, 0.08) 49.1%,
+    rgba(102, 235, 255, 0.86) 49.72%,
+    #f5ffff 50%,
+    rgba(154, 91, 255, 0.9) 50.28%,
+    rgba(154, 91, 255, 0.08) 50.9%,
+    transparent 51.5%
+  );
+  box-shadow: 0 0 18px rgba(104, 226, 255, 0.12);
+}
+
+html.scroll-motion-ready .scroll-phase-target.is-settled > .scroll-phase-shutter {
+  animation: phase-lock-shutter var(--phase-duration) cubic-bezier(0.16, 1, 0.3, 1) var(--phase-delay) both;
+}
+
+html.scroll-motion-ready .scroll-phase-target.is-settled > .scroll-phase-scan {
+  animation: phase-lock-scan var(--phase-duration) cubic-bezier(0.2, 0.75, 0.2, 1) var(--phase-delay) both;
+}
+
+@keyframes phase-lock-heading {
+  0% {
+    opacity: 0.12;
+    translate: -30px 0;
+  }
+  68% {
+    opacity: 1;
+    translate: 2px 0;
+  }
+  86% {
+    translate: -1px 0;
+  }
+  100% {
+    opacity: 1;
+    translate: 0;
+    will-change: auto;
+  }
+}
+
+@keyframes phase-lock-panel {
+  0% {
+    opacity: 0.12;
+    translate: 0 -38px;
+  }
+  16% {
+    opacity: 0.76;
+  }
+  72% {
+    opacity: 1;
+    translate: 0 2px;
+  }
+  88% {
+    translate: 0 -1px;
+  }
+  100% {
+    opacity: 1;
+    translate: 0;
+    will-change: auto;
+  }
+}
+
+@keyframes phase-lock-shutter {
+  0%, 10% {
+    clip-path: inset(0);
+  }
+  82%, 100% {
+    clip-path: inset(100% 0 0);
+  }
+}
+
+@keyframes phase-lock-scan {
+  0% {
+    opacity: 0;
+    translate: 0 -50%;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  78% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 50%;
+  }
 }
 
 @keyframes hybrid-lobby-lines {
@@ -3709,9 +3828,15 @@ html.scroll-motion-ready .scroll-fall-target.is-settled {
     transition-duration: 0.01ms !important;
   }
 
-  html.scroll-motion-ready .scroll-fall-target {
+  html.scroll-motion-ready .scroll-phase-target {
     opacity: 1;
     translate: 0;
+    animation: none;
+  }
+
+  .scroll-phase-shutter,
+  .scroll-phase-scan {
+    display: none;
   }
 
 }

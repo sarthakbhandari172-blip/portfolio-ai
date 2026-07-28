@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { submitContact } from "@/app/actions";
 import { CosmicLobby } from "@/app/cosmic-lobby";
+import { ScrollMotion } from "@/app/scroll-motion";
 import { getPortfolioData } from "@/lib/data";
 import type { SectionContent } from "@/lib/types";
 
@@ -93,6 +94,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
 
   return (
     <main className="hybrid-ui">
+      <ScrollMotion />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
         <div className="ambient-orb ambient-orb-one" />
@@ -247,7 +249,6 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                   aria-label={`${service.cta_text ?? "Open"} ${service.title}`}
                 />
               ) : null}
-              <span className="service-index">{String(service.sort_order).padStart(2, "0")}</span>
               {service.thumbnail_url ? (
                 <div className="service-media">
                   <Image
@@ -262,10 +263,15 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
                   />
                 </div>
               ) : null}
-              <div className="service-icon">{service.icon_text}</div>
-              <h3>{service.title}</h3>
-              <p>{service.description}</p>
-              <span className="service-cta">{service.cta_text ?? "Discuss project"} ↗</span>
+              <div className="service-body">
+                <div className="service-head">
+                  <div className="service-icon">{service.icon_text}</div>
+                  <span className="service-index">{String(service.sort_order).padStart(2, "0")}</span>
+                </div>
+                <h3>{service.title}</h3>
+                <p>{service.description}</p>
+                <span className="service-cta">{service.cta_text ?? "Discuss project"} ↗</span>
+              </div>
             </article>
           ))}
         </div>

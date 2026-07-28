@@ -29,7 +29,7 @@ export function ScrollMotion() {
 
       target.classList.add("scroll-fall-target");
       target.style.setProperty("--reveal-delay", `${Math.min(index, 5) * 70}ms`);
-      target.style.setProperty("--fall-tilt", `${index % 2 === 0 ? -1.1 : 1.1}deg`);
+      target.style.setProperty("--fall-tilt", `${index % 2 === 0 ? -0.55 : 0.55}deg`);
     });
 
     root.classList.add("scroll-motion-ready");

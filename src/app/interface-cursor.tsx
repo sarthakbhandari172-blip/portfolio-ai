@@ -19,6 +19,8 @@ export function InterfaceCursor() {
     let currentY = targetY;
     let previousX = targetX;
     let previousY = targetY;
+    let previousPointerTime = performance.now();
+    let previousFrameTime = performance.now();
     let targetSpeed = 0;
     let currentSpeed = 0;
     let lastTarget: EventTarget | null = null;
@@ -34,9 +36,11 @@ export function InterfaceCursor() {
       targetY = event.clientY;
       const deltaX = targetX - previousX;
       const deltaY = targetY - previousY;
-      targetSpeed = Math.min(Math.hypot(deltaX, deltaY) / 28, 1);
+      const pointerDelta = Math.max(event.timeStamp - previousPointerTime, 4);
+      targetSpeed = Math.min(Math.hypot(deltaX, deltaY) / pointerDelta / 1.25, 1);
       previousX = targetX;
       previousY = targetY;
+      previousPointerTime = event.timeStamp;
       cursor.style.setProperty("--cursor-dot-x", `${targetX}px`);
       cursor.style.setProperty("--cursor-dot-y", `${targetY}px`);
       cursor.classList.add("is-visible");
@@ -64,13 +68,19 @@ export function InterfaceCursor() {
         cursor.classList.remove("is-processing");
       }, 300);
     };
-    const animate = () => {
-      currentX += (targetX - currentX) * 0.82;
-      currentY += (targetY - currentY) * 0.82;
-      currentSpeed += (targetSpeed - currentSpeed) * 0.44;
-      targetSpeed *= 0.78;
-      cursor.style.setProperty("--cursor-ring-x", `${currentX}px`);
-      cursor.style.setProperty("--cursor-ring-y", `${currentY}px`);
+    const animate = (time: number) => {
+      const delta = Math.min(Math.max(time - previousFrameTime, 0), 32);
+      const positionBlend = 1 - Math.exp(-delta / 13.5);
+      const speedBlend = 1 - Math.exp(-delta / 38);
+      const speedDecay = Math.exp(-delta / 54);
+      previousFrameTime = time;
+
+      currentX += (targetX - currentX) * positionBlend;
+      currentY += (targetY - currentY) * positionBlend;
+      currentSpeed += (targetSpeed - currentSpeed) * speedBlend;
+      targetSpeed *= speedDecay;
+      cursor.style.setProperty("--cursor-ring-x", `${currentX.toFixed(2)}px`);
+      cursor.style.setProperty("--cursor-ring-y", `${currentY.toFixed(2)}px`);
       cursor.style.setProperty("--cursor-speed", currentSpeed.toFixed(3));
       frame = window.requestAnimationFrame(animate);
     };

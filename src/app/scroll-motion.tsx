@@ -15,10 +15,6 @@ const revealSelector = [
 
 const panelSelector = [
   ".hybrid-ui .project-card",
-  ".hybrid-ui .service-card",
-  ".hybrid-ui .timeline article",
-  ".hybrid-ui .skill-card",
-  ".hybrid-ui .contact-form",
 ].join(", ");
 
 export function ScrollMotion() {
@@ -29,6 +25,7 @@ export function ScrollMotion() {
     const root = document.documentElement;
     const targets = Array.from(document.querySelectorAll<HTMLElement>(revealSelector));
     const groupIndexes = new Map<Element, number>();
+    const animationEndHandlers = new Map<HTMLElement, (event: AnimationEvent) => void>();
     let previousScrollY = window.scrollY;
     let scrollDirection: "down" | "up" = "down";
 
@@ -49,18 +46,40 @@ export function ScrollMotion() {
       const index = parent ? groupIndexes.get(parent) ?? 0 : 0;
       if (parent) groupIndexes.set(parent, index + 1);
 
-      const phase = target.matches(".section-heading")
-        ? "heading"
-        : target.matches(panelSelector)
-          ? "panel"
-          : "copy";
+      let phase = "lift";
+
+      if (target.matches(".section-heading")) {
+        phase = "heading";
+      } else if (target.matches(".about-grid > :first-child, .contact-copy")) {
+        phase = "side-left";
+      } else if (target.matches(".about-grid > :last-child, .contact-form")) {
+        phase = "side-right";
+      } else if (target.matches(".project-card")) {
+        phase = index % 2 === 0 ? "wipe-left" : "wipe-right";
+      } else if (target.matches(".service-card, .timeline article")) {
+        phase = index % 2 === 0 ? "side-left" : "side-right";
+      } else if (target.matches(".skill-card")) {
+        phase = "lift";
+      }
 
       target.classList.add("scroll-phase-target");
       target.dataset.phaseReveal = phase;
       target.dataset.phaseDirection = "down";
-      target.style.setProperty("--phase-delay", `${phase === "panel" ? Math.min(index, 3) * 45 : 0}ms`);
+      target.style.setProperty(
+        "--phase-delay",
+        `${target.matches(".service-card, .timeline article, .skill-card") ? Math.min(index, 3) * 32 : 0}ms`,
+      );
 
-      if (phase === "panel") {
+      const handleAnimationEnd = (event: AnimationEvent) => {
+        if (event.target !== target) return;
+        if (!event.animationName.startsWith("phase-lock-")) return;
+        target.classList.add("phase-complete");
+      };
+
+      target.addEventListener("animationend", handleAnimationEnd);
+      animationEndHandlers.set(target, handleAnimationEnd);
+
+      if (target.matches(panelSelector)) {
         const shutter = document.createElement("span");
         shutter.className = "scroll-phase-shutter";
         shutter.setAttribute("aria-hidden", "true");
@@ -82,12 +101,13 @@ export function ScrollMotion() {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.06) {
             if (target.classList.contains("is-settled")) return;
             target.dataset.phaseDirection = scrollDirection;
+            target.classList.remove("phase-complete");
             target.classList.add("is-settled");
             return;
           }
 
           if (!entry.isIntersecting) {
-            target.classList.remove("is-settled");
+            target.classList.remove("is-settled", "phase-complete");
           }
         });
       },
@@ -104,7 +124,9 @@ export function ScrollMotion() {
       window.removeEventListener("scroll", trackScrollDirection);
       root.classList.remove("scroll-motion-ready");
       targets.forEach((target) => {
-        target.classList.remove("scroll-phase-target", "is-settled");
+        const handleAnimationEnd = animationEndHandlers.get(target);
+        if (handleAnimationEnd) target.removeEventListener("animationend", handleAnimationEnd);
+        target.classList.remove("scroll-phase-target", "is-settled", "phase-complete");
         target.style.removeProperty("--phase-delay");
         delete target.dataset.phaseReveal;
         delete target.dataset.phaseDirection;

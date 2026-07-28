@@ -29,6 +29,20 @@ export function ScrollMotion() {
     const root = document.documentElement;
     const targets = Array.from(document.querySelectorAll<HTMLElement>(revealSelector));
     const groupIndexes = new Map<Element, number>();
+    let previousScrollY = window.scrollY;
+    let scrollDirection: "down" | "up" = "down";
+
+    const trackScrollDirection = () => {
+      const nextScrollY = window.scrollY;
+      const delta = nextScrollY - previousScrollY;
+
+      if (Math.abs(delta) > 2) {
+        scrollDirection = delta > 0 ? "down" : "up";
+        previousScrollY = nextScrollY;
+      }
+    };
+
+    window.addEventListener("scroll", trackScrollDirection, { passive: true });
 
     targets.forEach((target) => {
       const parent = target.parentElement;
@@ -43,6 +57,7 @@ export function ScrollMotion() {
 
       target.classList.add("scroll-phase-target");
       target.dataset.phaseReveal = phase;
+      target.dataset.phaseDirection = "down";
       target.style.setProperty("--phase-delay", `${phase === "panel" ? Math.min(index, 3) * 45 : 0}ms`);
 
       if (phase === "panel") {
@@ -62,13 +77,22 @@ export function ScrollMotion() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add("is-settled");
-          observer.unobserve(entry.target);
+          const target = entry.target as HTMLElement;
+
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.06) {
+            if (target.classList.contains("is-settled")) return;
+            target.dataset.phaseDirection = scrollDirection;
+            target.classList.add("is-settled");
+            return;
+          }
+
+          if (!entry.isIntersecting) {
+            target.classList.remove("is-settled");
+          }
         });
       },
       {
-        threshold: 0.06,
+        threshold: [0, 0.06],
         rootMargin: "0px 0px -2% 0px",
       },
     );
@@ -77,11 +101,13 @@ export function ScrollMotion() {
 
     return () => {
       observer.disconnect();
+      window.removeEventListener("scroll", trackScrollDirection);
       root.classList.remove("scroll-motion-ready");
       targets.forEach((target) => {
         target.classList.remove("scroll-phase-target", "is-settled");
         target.style.removeProperty("--phase-delay");
         delete target.dataset.phaseReveal;
+        delete target.dataset.phaseDirection;
         target.querySelector(":scope > .scroll-phase-shutter")?.remove();
         target.querySelector(":scope > .scroll-phase-scan")?.remove();
       });

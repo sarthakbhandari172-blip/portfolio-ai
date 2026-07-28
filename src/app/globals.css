@@ -3597,22 +3597,40 @@ html.scroll-motion-ready .scroll-phase-target {
   will-change: opacity, translate;
 }
 
-html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="heading"] {
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="heading"][data-phase-direction="down"] {
   translate: -30px 0;
 }
 
-html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="panel"],
-html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="copy"] {
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="heading"][data-phase-direction="up"] {
+  translate: 30px 0;
+}
+
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="panel"][data-phase-direction="down"],
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="copy"][data-phase-direction="down"] {
+  translate: 0 38px;
+}
+
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="panel"][data-phase-direction="up"],
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="copy"][data-phase-direction="up"] {
   translate: 0 -38px;
 }
 
-html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="heading"].is-settled {
-  animation: phase-lock-heading var(--phase-duration) cubic-bezier(0.16, 1, 0.3, 1) var(--phase-delay) both;
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="heading"][data-phase-direction="down"].is-settled {
+  animation: phase-lock-heading-down var(--phase-duration) cubic-bezier(0.16, 1, 0.3, 1) var(--phase-delay) both;
 }
 
-html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="panel"].is-settled,
-html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="copy"].is-settled {
-  animation: phase-lock-panel var(--phase-duration) cubic-bezier(0.16, 1, 0.3, 1) var(--phase-delay) both;
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="heading"][data-phase-direction="up"].is-settled {
+  animation: phase-lock-heading-up var(--phase-duration) cubic-bezier(0.16, 1, 0.3, 1) var(--phase-delay) both;
+}
+
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="panel"][data-phase-direction="down"].is-settled,
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="copy"][data-phase-direction="down"].is-settled {
+  animation: phase-lock-panel-down var(--phase-duration) cubic-bezier(0.16, 1, 0.3, 1) var(--phase-delay) both;
+}
+
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="panel"][data-phase-direction="up"].is-settled,
+html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="copy"][data-phase-direction="up"].is-settled {
+  animation: phase-lock-panel-up var(--phase-duration) cubic-bezier(0.16, 1, 0.3, 1) var(--phase-delay) both;
 }
 
 html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="panel"] {
@@ -3650,15 +3668,23 @@ html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="panel"] {
   box-shadow: 0 0 18px rgba(104, 226, 255, 0.12);
 }
 
-html.scroll-motion-ready .scroll-phase-target.is-settled > .scroll-phase-shutter {
-  animation: phase-lock-shutter var(--phase-duration) cubic-bezier(0.16, 1, 0.3, 1) var(--phase-delay) both;
+html.scroll-motion-ready .scroll-phase-target[data-phase-direction="down"].is-settled > .scroll-phase-shutter {
+  animation: phase-lock-shutter-down var(--phase-duration) cubic-bezier(0.16, 1, 0.3, 1) var(--phase-delay) both;
 }
 
-html.scroll-motion-ready .scroll-phase-target.is-settled > .scroll-phase-scan {
-  animation: phase-lock-scan var(--phase-duration) cubic-bezier(0.2, 0.75, 0.2, 1) var(--phase-delay) both;
+html.scroll-motion-ready .scroll-phase-target[data-phase-direction="up"].is-settled > .scroll-phase-shutter {
+  animation: phase-lock-shutter-up var(--phase-duration) cubic-bezier(0.16, 1, 0.3, 1) var(--phase-delay) both;
 }
 
-@keyframes phase-lock-heading {
+html.scroll-motion-ready .scroll-phase-target[data-phase-direction="down"].is-settled > .scroll-phase-scan {
+  animation: phase-lock-scan-down var(--phase-duration) cubic-bezier(0.2, 0.75, 0.2, 1) var(--phase-delay) both;
+}
+
+html.scroll-motion-ready .scroll-phase-target[data-phase-direction="up"].is-settled > .scroll-phase-scan {
+  animation: phase-lock-scan-up var(--phase-duration) cubic-bezier(0.2, 0.75, 0.2, 1) var(--phase-delay) both;
+}
+
+@keyframes phase-lock-heading-down {
   0% {
     opacity: 0.12;
     translate: -30px 0;
@@ -3677,7 +3703,48 @@ html.scroll-motion-ready .scroll-phase-target.is-settled > .scroll-phase-scan {
   }
 }
 
-@keyframes phase-lock-panel {
+@keyframes phase-lock-heading-up {
+  0% {
+    opacity: 0.12;
+    translate: 30px 0;
+  }
+  68% {
+    opacity: 1;
+    translate: -2px 0;
+  }
+  86% {
+    translate: 1px 0;
+  }
+  100% {
+    opacity: 1;
+    translate: 0;
+    will-change: auto;
+  }
+}
+
+@keyframes phase-lock-panel-down {
+  0% {
+    opacity: 0.12;
+    translate: 0 38px;
+  }
+  16% {
+    opacity: 0.76;
+  }
+  72% {
+    opacity: 1;
+    translate: 0 -2px;
+  }
+  88% {
+    translate: 0 1px;
+  }
+  100% {
+    opacity: 1;
+    translate: 0;
+    will-change: auto;
+  }
+}
+
+@keyframes phase-lock-panel-up {
   0% {
     opacity: 0.12;
     translate: 0 -38px;
@@ -3699,7 +3766,16 @@ html.scroll-motion-ready .scroll-phase-target.is-settled > .scroll-phase-scan {
   }
 }
 
-@keyframes phase-lock-shutter {
+@keyframes phase-lock-shutter-down {
+  0%, 10% {
+    clip-path: inset(0);
+  }
+  82%, 100% {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+
+@keyframes phase-lock-shutter-up {
   0%, 10% {
     clip-path: inset(0);
   }
@@ -3708,7 +3784,24 @@ html.scroll-motion-ready .scroll-phase-target.is-settled > .scroll-phase-scan {
   }
 }
 
-@keyframes phase-lock-scan {
+@keyframes phase-lock-scan-down {
+  0% {
+    opacity: 0;
+    translate: 0 50%;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  78% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 -50%;
+  }
+}
+
+@keyframes phase-lock-scan-up {
   0% {
     opacity: 0;
     translate: 0 -50%;

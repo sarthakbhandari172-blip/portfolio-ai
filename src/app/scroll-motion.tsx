@@ -49,14 +49,16 @@ export function ScrollMotion() {
       let phase = "lift";
 
       if (target.matches(".section-heading")) {
-        phase = "heading";
+        phase = target.closest("#services") ? "service-heading" : "heading";
       } else if (target.matches(".about-grid > :first-child, .contact-copy")) {
         phase = "side-left";
       } else if (target.matches(".about-grid > :last-child, .contact-form")) {
         phase = "side-right";
       } else if (target.matches(".project-card")) {
         phase = index % 2 === 0 ? "wipe-left" : "wipe-right";
-      } else if (target.matches(".service-card, .timeline article")) {
+      } else if (target.matches(".service-card")) {
+        phase = "service-build";
+      } else if (target.matches(".timeline article")) {
         phase = index % 2 === 0 ? "side-left" : "side-right";
       } else if (target.matches(".skill-card")) {
         phase = "lift";
@@ -67,7 +69,13 @@ export function ScrollMotion() {
       target.dataset.phaseDirection = "down";
       target.style.setProperty(
         "--phase-delay",
-        `${target.matches(".service-card, .timeline article, .skill-card") ? Math.min(index, 3) * 32 : 0}ms`,
+        `${
+          target.matches(".service-card")
+            ? Math.min(index, 3) * 58
+            : target.matches(".timeline article, .skill-card")
+              ? Math.min(index, 3) * 32
+              : 0
+        }ms`,
       );
 
       const handleAnimationEnd = (event: AnimationEvent) => {

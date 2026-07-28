@@ -2259,7 +2259,7 @@ a {
 
 .role-terminal strong {
   font-weight: 500;
-  animation: terminal-role 420ms ease;
+  animation: terminal-role 260ms ease-out;
 }
 
 .role-terminal i {
@@ -2834,8 +2834,8 @@ a {
 }
 
 @keyframes terminal-role {
-  from { opacity: 0; translate: 0 5px; filter: blur(4px); }
-  to { opacity: 1; translate: 0; filter: blur(0); }
+  from { opacity: 0.35; translate: 0 4px; }
+  to { opacity: 1; translate: 0; }
 }
 
 @keyframes terminal-caret {
@@ -3588,24 +3588,14 @@ body:has(.hybrid-ui) .interface-cursor.is-processing .interface-cursor__ring {
     animation-timeline: view();
     animation-range: entry 0% cover 34%;
   }
-
-  .hybrid-ui .project-media img {
-    animation: hybrid-image-reveal linear both;
-    animation-timeline: view();
-    animation-range: entry 0% entry 45%;
-  }
 }
 
 html.scroll-motion-ready .scroll-fall-target {
-  opacity: 0.34;
-  translate: 0 -46px;
-  rotate: var(--fall-tilt, 0deg);
-  scale: 0.992;
+  opacity: 0.68;
+  translate: 0 -24px;
   transition:
-    opacity 480ms ease-out var(--reveal-delay, 0ms),
-    translate 780ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
-    rotate 780ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
-    scale 780ms cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    opacity 240ms ease-out,
+    translate 520ms cubic-bezier(0.22, 1, 0.36, 1),
     transform 220ms ease,
     border-color 220ms ease,
     box-shadow 220ms ease;
@@ -3614,22 +3604,6 @@ html.scroll-motion-ready .scroll-fall-target {
 html.scroll-motion-ready .scroll-fall-target.is-settled {
   opacity: 1;
   translate: 0;
-  rotate: 0deg;
-  scale: 1;
-}
-
-html.scroll-motion-ready .service-card.scroll-fall-target .service-media img {
-  translate: 0 -2%;
-  scale: 1.055;
-  transition:
-    translate 850ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--reveal-delay, 0ms) + 70ms),
-    scale 850ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--reveal-delay, 0ms) + 70ms),
-    transform 620ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-html.scroll-motion-ready .service-card.scroll-fall-target.is-settled .service-media img {
-  translate: 0;
-  scale: 1;
 }
 
 @keyframes hybrid-lobby-lines {
@@ -3646,11 +3620,6 @@ html.scroll-motion-ready .service-card.scroll-fall-target.is-settled .service-me
   0% { opacity: 0; transform: translateX(-82%) rotate(-2deg); }
   34%, 64% { opacity: 0.94; }
   100% { opacity: 0; transform: translateX(82%) rotate(-2deg); }
-}
-
-@keyframes hybrid-image-reveal {
-  from { clip-path: inset(0 18% 0 0); filter: saturate(0.35) contrast(1.18); }
-  to { clip-path: inset(0); filter: saturate(0.88) contrast(1.03); }
 }
 
 @media (max-width: 1100px) {
@@ -3743,8 +3712,6 @@ html.scroll-motion-ready .service-card.scroll-fall-target.is-settled .service-me
   html.scroll-motion-ready .scroll-fall-target {
     opacity: 1;
     translate: 0;
-    rotate: 0deg;
-    scale: 1;
   }
 
 }

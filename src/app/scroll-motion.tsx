@@ -20,16 +20,9 @@ export function ScrollMotion() {
 
     const root = document.documentElement;
     const targets = Array.from(document.querySelectorAll<HTMLElement>(revealSelector));
-    const groupIndexes = new Map<Element, number>();
 
     targets.forEach((target) => {
-      const parent = target.parentElement;
-      const index = parent ? groupIndexes.get(parent) ?? 0 : 0;
-      if (parent) groupIndexes.set(parent, index + 1);
-
       target.classList.add("scroll-fall-target");
-      target.style.setProperty("--reveal-delay", `${Math.min(index, 5) * 70}ms`);
-      target.style.setProperty("--fall-tilt", `${index % 2 === 0 ? -0.55 : 0.55}deg`);
     });
 
     root.classList.add("scroll-motion-ready");
@@ -43,8 +36,8 @@ export function ScrollMotion() {
         });
       },
       {
-        threshold: 0.12,
-        rootMargin: "0px 0px -8% 0px",
+        threshold: 0.01,
+        rootMargin: "0px 0px 14% 0px",
       },
     );
 
@@ -55,8 +48,6 @@ export function ScrollMotion() {
       root.classList.remove("scroll-motion-ready");
       targets.forEach((target) => {
         target.classList.remove("scroll-fall-target", "is-settled");
-        target.style.removeProperty("--reveal-delay");
-        target.style.removeProperty("--fall-tilt");
       });
     };
   }, []);

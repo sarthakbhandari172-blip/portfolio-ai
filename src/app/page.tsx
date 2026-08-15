@@ -1,6 +1,12 @@
 import Image from "next/image";
 import { submitContact } from "@/app/actions";
 import { CosmicLobby } from "@/app/cosmic-lobby";
+import { FxToggle } from "@/app/fx/fx-toggle";
+import { CardTilt } from "@/app/fx/card-tilt";
+import { HudOverlay } from "@/app/fx/hud-overlay";
+import { MotionCore } from "@/app/fx/motion-core";
+import { SoundToggle } from "@/app/fx/sound-toggle";
+import { XpBars } from "@/app/fx/xp-bars";
 import { ScrollMotion } from "@/app/scroll-motion";
 import { getPortfolioData } from "@/lib/data";
 import type { SectionContent } from "@/lib/types";
@@ -95,6 +101,10 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   return (
     <main className="hybrid-ui">
       <ScrollMotion />
+      <MotionCore />
+      <HudOverlay />
+      <CardTilt />
+      <XpBars />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
         <div className="ambient-orb ambient-orb-one" />
@@ -114,6 +124,10 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
           <a href="#journey">Journey</a>
           <a href="#skills">Skills</a>
           <a href="#contact">Contact</a>
+        </div>
+        <div className="nav-fx-cluster">
+          <SoundToggle />
+          <FxToggle />
         </div>
       </nav>
 

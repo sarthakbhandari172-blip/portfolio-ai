@@ -15,6 +15,7 @@ type Spark = {
 };
 
 const COUNT = 64;
+const MAX_BITMAP_DIMENSION = 2048;
 
 // Electric spark field behind the hero portrait. rAF-driven, DPR-capped,
 // pauses off-screen, disabled on mobile / reduced motion / data-fx="off".
@@ -28,7 +29,6 @@ export function ParticleField() {
     const context = canvas.getContext("2d");
     if (!context) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     let width = 0;
     let height = 0;
     let frame = 0;
@@ -52,16 +52,26 @@ export function ParticleField() {
     };
 
     const resize = () => {
-      const bounds = canvas.getBoundingClientRect();
-      width = bounds.width;
-      height = bounds.height;
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
-      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // Measure the explicit CSS box, not the transformed/intrinsic canvas.
+      // Reading getBoundingClientRect() and then writing canvas.width caused a
+      // ResizeObserver feedback loop on Retina screens until the bitmap grew
+      // into a failed, white compositor surface.
+      width = canvas.clientWidth;
+      height = canvas.clientHeight;
+      if (width <= 0 || height <= 0) return;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const bitmapWidth = Math.min(MAX_BITMAP_DIMENSION, Math.round(width * dpr));
+      const bitmapHeight = Math.min(MAX_BITMAP_DIMENSION, Math.round(height * dpr));
+      if (canvas.width !== bitmapWidth || canvas.height !== bitmapHeight) {
+        canvas.width = bitmapWidth;
+        canvas.height = bitmapHeight;
+      }
+      context.setTransform(bitmapWidth / width, 0, 0, bitmapHeight / height, 0, 0);
     };
     resize();
     const resizeObserver = new ResizeObserver(resize);
-    resizeObserver.observe(canvas);
+    resizeObserver.observe(canvas.parentElement ?? canvas);
 
     for (let i = 0; i < COUNT; i += 1) sparks.push(spawn());
 

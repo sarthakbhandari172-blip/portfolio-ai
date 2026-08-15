@@ -2318,6 +2318,9 @@ a {
 .deck-spark-field {
   position: absolute;
   inset: -12%;
+  display: block;
+  width: 124%;
+  height: 124%;
   z-index: 0;
   pointer-events: none;
   transform: translate3d(0, 0, -30px);

@@ -2384,7 +2384,7 @@ a {
   transform-origin: 50% 50%;
   will-change: transform;
   cursor: grab;
-  touch-action: none;
+  touch-action: pan-y;
   user-select: none;
 }
 
@@ -2984,6 +2984,13 @@ a {
     opacity: 1;
   }
 
+  .interface-cursor:not(.is-visible) .interface-cursor__ring::before,
+  .interface-cursor:not(.is-visible) .interface-cursor__ring::after,
+  .interface-cursor.is-typing .interface-cursor__ring::before,
+  .interface-cursor.is-typing .interface-cursor__ring::after {
+    animation-play-state: paused;
+  }
+
   .interface-cursor__dot,
   .interface-cursor__ring,
   .interface-cursor__status {
@@ -3193,6 +3200,15 @@ a {
   background:
     radial-gradient(circle at 78% 48%, rgba(103, 239, 255, 0.1), transparent 25%),
     linear-gradient(108deg, #05040d 0 48%, #10082b 48% 72%, #03101a 100%);
+}
+
+.character-lobby.motion-paused,
+.character-lobby.motion-paused::before,
+.character-lobby.motion-paused::after,
+.character-lobby.motion-paused *,
+.character-lobby.motion-paused *::before,
+.character-lobby.motion-paused *::after {
+  animation-play-state: paused !important;
 }
 
 .hybrid-ui .character-lobby::before,
@@ -4229,6 +4245,40 @@ html.scroll-motion-ready .scroll-phase-target.is-settled.phase-complete > .scrol
   }
 }
 
+@media (max-width: 700px), (hover: none) and (pointer: coarse) {
+  html.scroll-motion-ready .scroll-phase-target[data-phase-reveal] {
+    --phase-duration: 560ms;
+    --phase-x-down: 0px;
+    --phase-x-up: 0px;
+    --phase-y-down: 14px;
+    --phase-y-up: -14px;
+    --phase-scale: 0.994;
+    clip-path: none !important;
+  }
+
+  html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="service-heading"] > *,
+  html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="service-build"] .service-body > *,
+  html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="service-build"]::before,
+  html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="service-build"] .service-media img {
+    opacity: 1 !important;
+    translate: 0 !important;
+    scale: 1 !important;
+    animation: none !important;
+  }
+
+  .scroll-phase-shutter,
+  .scroll-phase-scan {
+    display: none;
+  }
+
+  .character-deck::before,
+  .character-frame::before,
+  .world-scan,
+  .frame-particles {
+    animation: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -4243,9 +4293,22 @@ html.scroll-motion-ready .scroll-phase-target.is-settled.phase-complete > .scrol
   }
 
   html.scroll-motion-ready .scroll-phase-target {
-    opacity: 1;
-    translate: 0;
-    animation: none;
+    opacity: 1 !important;
+    translate: 0 !important;
+    scale: 1 !important;
+    clip-path: none !important;
+    will-change: auto !important;
+    animation: none !important;
+  }
+
+  html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="service-heading"] > *,
+  html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="service-build"] .service-body > *,
+  html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="service-build"]::before,
+  html.scroll-motion-ready .scroll-phase-target[data-phase-reveal="service-build"] .service-media img {
+    opacity: 1 !important;
+    translate: 0 !important;
+    scale: 1 !important;
+    animation: none !important;
   }
 
   .scroll-phase-shutter,
@@ -4253,4 +4316,17 @@ html.scroll-motion-ready .scroll-phase-target.is-settled.phase-complete > .scrol
     display: none;
   }
 
+  html.interface-cursor-ready,
+  html.interface-cursor-ready body,
+  html.interface-cursor-ready body * {
+    cursor: revert !important;
+  }
+
+  .interface-cursor {
+    display: none !important;
+  }
+
+  .character-deck {
+    transform: none !important;
+  }
 }

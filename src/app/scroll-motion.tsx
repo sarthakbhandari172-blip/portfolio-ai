@@ -20,7 +20,7 @@ const panelSelector = [
 export function ScrollMotion() {
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (reducedMotion.matches) return;
+    if (reducedMotion.matches || !("IntersectionObserver" in window)) return;
 
     const root = document.documentElement;
     const targets = Array.from(document.querySelectorAll<HTMLElement>(revealSelector));

@@ -97,25 +97,56 @@ export function CosmicLobby({
     dragging: false,
     pointerType: "mouse",
   });
+  const requestMotionFrameRef = useRef<() => void>(() => undefined);
   const safeRoles = roles.length ? roles : ["Digital Creative"];
   const [roleIndex, setRoleIndex] = useState(0);
 
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      setRoleIndex((current) => (current + 1) % safeRoles.length);
-    }, 2400);
-    return () => window.clearInterval(timer);
+    if (safeRoles.length < 2) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let timer = 0;
+
+    const stop = () => {
+      window.clearInterval(timer);
+      timer = 0;
+    };
+    const sync = () => {
+      stop();
+      if (document.hidden || reducedMotion.matches) return;
+      timer = window.setInterval(() => {
+        setRoleIndex((current) => (current + 1) % safeRoles.length);
+      }, 2400);
+    };
+
+    document.addEventListener("visibilitychange", sync);
+    reducedMotion.addEventListener("change", sync);
+    sync();
+
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", sync);
+      reducedMotion.removeEventListener("change", sync);
+    };
   }, [safeRoles.length]);
 
   useEffect(() => {
     const scene = sceneRef.current;
-    if (!scene || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return;
-    }
+    if (!scene) return;
 
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let animationFrame = 0;
+    let sceneVisible = true;
     let previousTime = performance.now();
+
+    const requestFrame = () => {
+      if (animationFrame || document.hidden || !sceneVisible || reducedMotion.matches) return;
+      previousTime = performance.now();
+      animationFrame = window.requestAnimationFrame(animate);
+    };
+
     const animate = (time: number) => {
+      animationFrame = 0;
       const motion = motionRef.current;
       const frameRatio = Math.min(2, Math.max(0.25, (time - previousTime) / 16.667));
       const deltaSeconds = frameRatio / 60;
@@ -167,11 +198,74 @@ export function CosmicLobby({
       scene.style.setProperty("--shine-y", `${(42 + y * 32).toFixed(2)}%`);
       scene.style.setProperty("--scene-x", `${(-x * 18).toFixed(2)}px`);
       scene.style.setProperty("--scene-y", `${(-y * 12).toFixed(2)}px`);
-      animationFrame = window.requestAnimationFrame(animate);
+
+      const stillMoving =
+        Math.abs(motion.targetX - motion.currentX) > 0.001 ||
+        Math.abs(motion.targetY - motion.currentY) > 0.001 ||
+        Math.abs(motion.targetRotationX - motion.currentRotationX) > 0.002 ||
+        Math.abs(motion.targetRotationY - motion.currentRotationY) > 0.002 ||
+        Math.abs(motion.velocityX) > 0.002 ||
+        Math.abs(motion.velocityY) > 0.002;
+
+      if (stillMoving) animationFrame = window.requestAnimationFrame(animate);
     };
 
-    animationFrame = window.requestAnimationFrame(animate);
-    return () => window.cancelAnimationFrame(animationFrame);
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        window.cancelAnimationFrame(animationFrame);
+        animationFrame = 0;
+      } else {
+        requestFrame();
+      }
+      scene.classList.toggle("motion-paused", document.hidden || !sceneVisible);
+    };
+    const onMotionPreferenceChange = () => {
+      if (reducedMotion.matches) {
+        window.cancelAnimationFrame(animationFrame);
+        animationFrame = 0;
+        const motion = motionRef.current;
+        motion.targetX = 0;
+        motion.targetY = 0;
+        motion.currentX = 0;
+        motion.currentY = 0;
+        motion.targetRotationX = 0;
+        motion.targetRotationY = 0;
+        motion.currentRotationX = 0;
+        motion.currentRotationY = 0;
+        motion.velocityX = 0;
+        motion.velocityY = 0;
+      } else {
+        requestFrame();
+      }
+    };
+    const observer =
+      "IntersectionObserver" in window
+        ? new IntersectionObserver(([entry]) => {
+            sceneVisible = entry.isIntersecting;
+            scene.classList.toggle("motion-paused", document.hidden || !sceneVisible);
+            if (sceneVisible) {
+              requestFrame();
+            } else {
+              window.cancelAnimationFrame(animationFrame);
+              animationFrame = 0;
+            }
+          })
+        : null;
+
+    requestMotionFrameRef.current = requestFrame;
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    reducedMotion.addEventListener("change", onMotionPreferenceChange);
+    observer?.observe(scene);
+    requestFrame();
+
+    return () => {
+      requestMotionFrameRef.current = () => undefined;
+      scene.classList.remove("motion-paused");
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      reducedMotion.removeEventListener("change", onMotionPreferenceChange);
+      observer?.disconnect();
+      window.cancelAnimationFrame(animationFrame);
+    };
   }, []);
 
   function setMotionTarget(event: ReactPointerEvent<HTMLDivElement>) {
@@ -183,6 +277,7 @@ export function CosmicLobby({
     motionRef.current.targetX = Math.max(-1, Math.min(1, x));
     motionRef.current.targetY = Math.max(-1, Math.min(1, y));
     motionRef.current.pointerType = event.pointerType;
+    requestMotionFrameRef.current();
   }
 
   function enterDeck(event: ReactPointerEvent<HTMLDivElement>) {
@@ -223,6 +318,7 @@ export function CosmicLobby({
     motionRef.current.dragging = false;
     motionRef.current.targetX = 0;
     motionRef.current.targetY = 0;
+    requestMotionFrameRef.current();
     deckRef.current?.classList.remove("character-deck--dragging");
     if (deckRef.current?.hasPointerCapture(event.pointerId)) {
       deckRef.current.releasePointerCapture(event.pointerId);
@@ -234,6 +330,7 @@ export function CosmicLobby({
     if (!motionRef.current.dragging) {
       motionRef.current.targetX = 0;
       motionRef.current.targetY = 0;
+      requestMotionFrameRef.current();
     }
   }
 
@@ -280,7 +377,7 @@ export function CosmicLobby({
           <p className="character-tagline">{tagline}</p>
           <p className="character-bio">{bio}</p>
 
-          <div className="role-terminal" aria-live="polite">
+          <div className="role-terminal">
             <span>&gt;</span>
             <strong key={roleIndex}>{safeRoles[roleIndex]}</strong>
             <i />

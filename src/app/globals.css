@@ -2063,8 +2063,6 @@ a {
   --deck-ry: 0deg;
   --deck-x: 0px;
   --deck-y: 0px;
-  --scene-x: 0px;
-  --scene-y: 0px;
   min-height: calc(100svh - 84px);
   position: relative;
   display: grid;
@@ -2076,83 +2074,6 @@ a {
     radial-gradient(circle at 23% 35%, rgba(90, 50, 255, 0.28), transparent 30%),
     radial-gradient(circle at 82% 68%, rgba(0, 198, 255, 0.14), transparent 31%),
     linear-gradient(115deg, #060316 0%, #090521 48%, #020b16 100%);
-}
-
-.character-lobby__world,
-.character-lobby__world > span {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.character-lobby__world {
-  z-index: -1;
-  overflow: hidden;
-  transform: translate3d(0, var(--world-parallax, 0px), 0);
-  will-change: transform;
-}
-
-.world-grid {
-  background-image:
-    linear-gradient(rgba(113, 93, 225, 0.075) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(113, 93, 225, 0.075) 1px, transparent 1px),
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 4px);
-  background-size: 62px 62px, 62px 62px, 100% 4px;
-  transform: translate3d(var(--scene-x), var(--scene-y), 0) scale(1.05);
-  transition: transform 180ms ease-out;
-}
-
-.world-orbit {
-  width: min(62vw, 900px);
-  aspect-ratio: 1;
-  inset: 10% auto auto 29% !important;
-  border: 1px solid rgba(111, 88, 255, 0.13);
-  border-radius: 50%;
-  animation: interface-orbit 42s linear infinite;
-}
-
-.world-orbit::before,
-.world-orbit::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-}
-
-.world-orbit::before {
-  inset: 11%;
-  border: 1px dashed rgba(66, 210, 255, 0.14);
-}
-
-.world-orbit::after {
-  width: 13px;
-  aspect-ratio: 1;
-  top: 24%;
-  right: 2%;
-  border: 2px solid var(--accent);
-  box-shadow: 0 0 18px var(--accent);
-}
-
-.world-orbit--two {
-  width: min(42vw, 620px);
-  inset: 26% auto auto 42% !important;
-  animation-direction: reverse;
-  animation-duration: 27s;
-}
-
-.world-flare {
-  inset: 16% 34% 18% 9% !important;
-  background:
-    radial-gradient(circle at 74% 35%, rgba(109, 232, 255, 0.17), transparent 7%),
-    radial-gradient(circle at 63% 45%, rgba(144, 77, 255, 0.18), transparent 18%);
-  filter: blur(12px);
-  animation: world-flare 5s ease-in-out infinite;
-}
-
-.world-scan {
-  z-index: 4;
-  background: linear-gradient(180deg, transparent 0 49%, rgba(90, 225, 255, 0.09) 50%, transparent 51%);
-  background-size: 100% 330px;
-  animation: interface-scan 9s linear infinite;
 }
 
 .character-lobby__grid {
@@ -2833,16 +2754,6 @@ a {
   to { rotate: 360deg; }
 }
 
-@keyframes interface-scan {
-  from { background-position: 0 -330px; }
-  to { background-position: 0 calc(100% + 330px); }
-}
-
-@keyframes world-flare {
-  0%, 100% { opacity: 0.48; scale: 0.96; }
-  50% { opacity: 1; scale: 1.05; }
-}
-
 @keyframes terminal-role {
   from { opacity: 0.35; translate: 0 4px; }
   to { opacity: 1; translate: 0; }
@@ -3300,10 +3211,6 @@ a {
     linear-gradient(171deg, transparent 0 76%, var(--accent-2) 76.1% 76.18%, transparent 76.3%);
   filter: drop-shadow(0 0 7px rgba(103, 239, 255, 0.22));
   animation: hybrid-tech-lines 6.8s ease-in-out infinite alternate;
-}
-
-.hybrid-ui .character-lobby__world {
-  opacity: 0.74;
 }
 
 .hybrid-ui .character-lobby__grid {

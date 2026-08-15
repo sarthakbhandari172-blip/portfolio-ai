@@ -34,13 +34,12 @@ export function MotionCore() {
     const triggers: ScrollTrigger[] = [];
     const tweens: gsap.core.Tween[] = [];
 
-    // Hero portrait + world parallax (transform-only, scrubbed).
+    // Hero portrait parallax (transform-only, scrubbed).
     const lobby = document.querySelector<HTMLElement>(".character-lobby");
     if (lobby && !mobile) {
       tweens.push(
         gsap.to(lobby, {
           "--deck-parallax": "-92px",
-          "--world-parallax": "70px",
           ease: "none",
           scrollTrigger: {
             trigger: lobby,
@@ -98,7 +97,6 @@ export function MotionCore() {
       headings.forEach((heading) => heading.classList.remove("glitch-in"));
       if (lobby) {
         lobby.style.removeProperty("--deck-parallax");
-        lobby.style.removeProperty("--world-parallax");
       }
       if (rafSync) gsap.ticker.remove(rafSync);
       lenis?.destroy();

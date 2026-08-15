@@ -90,8 +90,6 @@ type DeckStyle = CSSProperties & {
   "--ring-y": string;
   "--shine-x": string;
   "--shine-y": string;
-  "--scene-x": string;
-  "--scene-y": string;
 };
 
 type MotionState = {
@@ -262,8 +260,6 @@ export function CosmicLobby({
       scene.style.setProperty("--ring-y", `${(-y * 14).toFixed(2)}px`);
       scene.style.setProperty("--shine-x", `${(50 + x * 36).toFixed(2)}%`);
       scene.style.setProperty("--shine-y", `${(42 + y * 32).toFixed(2)}%`);
-      scene.style.setProperty("--scene-x", `${(-x * 18).toFixed(2)}px`);
-      scene.style.setProperty("--scene-y", `${(-y * 12).toFixed(2)}px`);
       animationFrame = window.requestAnimationFrame(animate);
     };
 
@@ -351,19 +347,9 @@ export function CosmicLobby({
           "--ring-y": "0px",
           "--shine-x": "50%",
           "--shine-y": "42%",
-          "--scene-x": "0px",
-          "--scene-y": "0px",
         } as DeckStyle
       }
     >
-      <div className="character-lobby__world" aria-hidden="true">
-        <span className="world-grid" />
-        <span className="world-orbit world-orbit--one" />
-        <span className="world-orbit world-orbit--two" />
-        <span className="world-flare" />
-        <span className="world-scan" />
-      </div>
-
       <div className="character-lobby__grid shell">
         <div className={`character-copy${heroLive ? " character-copy--intro" : ""}`}>
           <p className="character-label">

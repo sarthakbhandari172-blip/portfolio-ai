@@ -2344,7 +2344,9 @@ a {
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
-  mask-composite: exclude;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
   filter:
     drop-shadow(0 0 10px rgba(83, 226, 255, 0.68))
     drop-shadow(0 0 24px rgba(151, 78, 255, 0.48));
@@ -2445,7 +2447,9 @@ a {
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
-  mask-composite: exclude;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
   filter:
     drop-shadow(0 0 7px rgba(82, 219, 255, 0.78))
     drop-shadow(0 0 18px rgba(143, 74, 255, 0.5));
@@ -4650,9 +4654,8 @@ html:not([data-fx="off"]) .hybrid-ui :is(.project-card, .service-card, .skill-ca
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask:
-    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0) content-box exclude,
     linear-gradient(#fff 0 0);
-  mask-composite: exclude;
   animation: holo-trace 2.8s linear infinite;
 }
 

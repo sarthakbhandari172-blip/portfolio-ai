@@ -73,7 +73,23 @@ export function MotionCore() {
       );
     });
 
+    // Nav scroll-spy: [ ] brackets track the active section.
+    const navLinks = document.querySelectorAll<HTMLAnchorElement>('.nav-links a[href^="#"]');
+    navLinks.forEach((link) => {
+      const section = document.querySelector(link.getAttribute("href") ?? "");
+      if (!section) return;
+      triggers.push(
+        ScrollTrigger.create({
+          trigger: section,
+          start: "top center",
+          end: "bottom center",
+          onToggle: (self) => link.classList.toggle("is-active", self.isActive),
+        }),
+      );
+    });
+
     return () => {
+      navLinks.forEach((link) => link.classList.remove("is-active"));
       triggers.forEach((trigger) => trigger.kill());
       tweens.forEach((tween) => {
         tween.scrollTrigger?.kill();

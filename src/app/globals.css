@@ -2088,6 +2088,8 @@ a {
 .character-lobby__world {
   z-index: -1;
   overflow: hidden;
+  transform: translate3d(0, var(--world-parallax, 0px), 0);
+  will-change: transform;
 }
 
 .world-grid {
@@ -2378,7 +2380,7 @@ a {
   transform-style: preserve-3d;
   transform:
     perspective(1300px)
-    translate3d(var(--panel-x), var(--panel-y), 0)
+    translate3d(var(--panel-x), calc(var(--panel-y) + var(--deck-parallax, 0px)), 0)
     rotateX(var(--panel-rx))
     rotateY(var(--panel-ry));
   transform-origin: 50% 50%;
@@ -2390,6 +2392,14 @@ a {
 
 .character-deck--dragging {
   cursor: grabbing;
+}
+
+.deck-spark-field {
+  position: absolute;
+  inset: -12%;
+  z-index: 0;
+  pointer-events: none;
+  transform: translate3d(0, 0, -30px);
 }
 
 .character-deck::before {
@@ -4253,4 +4263,326 @@ html.scroll-motion-ready .scroll-phase-target.is-settled.phase-complete > .scrol
     display: none;
   }
 
+}
+
+/* ————————————————————————————————————————————————
+   FX contract — html[data-fx="off"] disables all motion.
+   Shared with the cursor / HUD / micro-interaction agent.
+   ———————————————————————————————————————————————— */
+
+.fx-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: rgba(11, 8, 26, 0.6);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--muted);
+  font-family: var(--font-hud);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 180ms ease, color 180ms ease;
+}
+
+.fx-toggle:hover {
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+
+.fx-toggle__state {
+  color: var(--accent);
+  min-width: 26px;
+  text-align: left;
+}
+
+.fx-toggle__led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+html[data-fx="off"] .fx-toggle__state {
+  color: var(--danger);
+}
+
+html[data-fx="off"] .fx-toggle__led {
+  background: var(--danger);
+  box-shadow: none;
+}
+
+html[data-fx="off"] {
+  scroll-behavior: auto;
+}
+
+html[data-fx="off"] *,
+html[data-fx="off"] *::before,
+html[data-fx="off"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+html[data-fx="off"].scroll-motion-ready .scroll-phase-target {
+  opacity: 1;
+  translate: 0;
+  animation: none;
+}
+
+html[data-fx="off"] .scroll-phase-shutter,
+html[data-fx="off"] .scroll-phase-scan {
+  display: none;
+}
+
+/* ————————————————————————————————————————————————
+   Boot preloader — terminal uplink sequence
+   ———————————————————————————————————————————————— */
+
+.boot-preloader {
+  display: none;
+}
+
+html[data-boot="show"] {
+  overflow: hidden;
+}
+
+html[data-boot="show"] .boot-preloader {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(110, 55, 255, 0.12), transparent 55%),
+    #030109;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.boot-preloader__frame {
+  width: min(560px, calc(100vw - 48px));
+  padding: 28px 30px;
+  border: 1px solid var(--line);
+  background: rgba(9, 6, 22, 0.72);
+  box-shadow: 0 0 60px rgba(110, 55, 255, 0.14), inset 0 0 30px rgba(103, 239, 255, 0.03);
+}
+
+.boot-preloader__terminal {
+  min-height: 118px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  text-shadow: 0 0 9px rgba(103, 239, 255, 0.45);
+}
+
+.boot-preloader__terminal p {
+  margin: 0 0 8px;
+  min-height: 1.2em;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.boot-preloader__terminal p[data-granted] {
+  color: var(--accent-2);
+  text-shadow: 0 0 11px rgba(155, 92, 255, 0.6);
+}
+
+.boot-preloader__caret {
+  display: inline-block;
+  width: 0.62em;
+  height: 1em;
+  margin-left: 3px;
+  vertical-align: text-bottom;
+  background: var(--accent);
+  animation: boot-caret 640ms steps(1) infinite;
+}
+
+@keyframes boot-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.boot-preloader__bar {
+  display: flex;
+  gap: 4px;
+  margin-top: 20px;
+}
+
+.boot-preloader__bar span {
+  flex: 1;
+  height: 9px;
+  background: rgba(158, 139, 255, 0.12);
+  opacity: 0.55;
+}
+
+.boot-preloader__bar span[data-on] {
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 9px rgba(103, 239, 255, 0.55);
+  opacity: 1;
+}
+
+.boot-preloader__hint {
+  margin: 18px 0 0;
+  font-family: var(--font-hud);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--muted);
+  opacity: 0.6;
+  text-align: right;
+}
+
+.boot-preloader__scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0 3px,
+    rgba(103, 239, 255, 0.025) 3px 4px
+  );
+}
+
+html[data-boot="show"] .boot-preloader--wipe {
+  animation: boot-wipe 420ms steps(6, end) forwards;
+}
+
+/* ————————————————————————————————————————————————
+   Lenis smooth scroll + heading glitch
+   ———————————————————————————————————————————————— */
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.glitch-in {
+  animation: heading-glitch 360ms steps(2, end) 1;
+}
+
+@keyframes heading-glitch {
+  0% {
+    transform: translate(-6px, 0) skewX(-4deg);
+    text-shadow:
+      3px 0 0 rgba(103, 239, 255, 0.85),
+      -3px 0 0 rgba(226, 83, 255, 0.85);
+    opacity: 0.7;
+  }
+  30% {
+    transform: translate(4px, -2px) skewX(3deg);
+    text-shadow:
+      -4px 0 0 rgba(103, 239, 255, 0.7),
+      4px 0 0 rgba(155, 92, 255, 0.7);
+    opacity: 0.9;
+  }
+  60% {
+    transform: translate(-2px, 1px);
+    text-shadow:
+      2px 0 0 rgba(103, 239, 255, 0.5),
+      -2px 0 0 rgba(226, 83, 255, 0.5);
+  }
+  100% {
+    transform: none;
+    text-shadow: none;
+    opacity: 1;
+  }
+}
+
+/* ————————————————————————————————————————————————
+   Hero decrypt intro
+   ———————————————————————————————————————————————— */
+
+.character-copy h1 .is-decrypting {
+  color: var(--accent);
+  text-shadow: 0 0 18px rgba(103, 239, 255, 0.35);
+}
+
+.character-copy--intro .character-label {
+  animation: hero-rise 560ms cubic-bezier(0.2, 0.8, 0.2, 1) 60ms both;
+}
+
+.character-copy--intro h1 strong {
+  animation: hero-rise 620ms cubic-bezier(0.2, 0.8, 0.2, 1) 620ms both;
+}
+
+.character-copy--intro .character-tagline {
+  animation: hero-rise 640ms cubic-bezier(0.2, 0.8, 0.2, 1) 820ms both;
+}
+
+.character-copy--intro .character-bio {
+  animation: hero-rise 640ms cubic-bezier(0.2, 0.8, 0.2, 1) 940ms both;
+}
+
+.character-copy--intro .role-terminal {
+  animation: hero-rise 560ms cubic-bezier(0.2, 0.8, 0.2, 1) 1080ms both;
+}
+
+.character-copy--intro .character-actions {
+  animation: hero-rise 560ms cubic-bezier(0.2, 0.8, 0.2, 1) 1200ms both;
+}
+
+.character-copy--intro .character-uplinks {
+  animation: hero-rise 560ms cubic-bezier(0.2, 0.8, 0.2, 1) 1320ms both;
+}
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(9px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@keyframes boot-wipe {
+  0% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    filter: none;
+  }
+  30% {
+    opacity: 1;
+    clip-path: inset(4% 0 12% 0);
+    filter: hue-rotate(38deg) saturate(2.4);
+    transform: translateX(-8px);
+  }
+  55% {
+    opacity: 0.9;
+    clip-path: inset(28% 0 6% 0);
+    filter: hue-rotate(-30deg) saturate(3);
+    transform: translateX(10px);
+  }
+  75% {
+    opacity: 0.7;
+    clip-path: inset(12% 0 46% 0);
+    transform: translateX(-5px);
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(50% 0 50% 0);
+    transform: none;
+  }
 }

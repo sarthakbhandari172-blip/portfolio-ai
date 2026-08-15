@@ -8,6 +8,54 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from "react";
+import { useBootPending, useFxEnabled, useMotionOk } from "@/app/fx/fx";
+import { ParticleField } from "@/app/fx/particle-field";
+
+const SCRAMBLE_GLYPHS = "!<>-_\\/[]{}=+*^?#01·▓░";
+
+/** Character-scramble decrypt: glyph noise resolves into `text` left to right. */
+function useDecrypt(text: string, active: boolean, delay = 0) {
+  // null = not currently scrambling; render falls back to the real text.
+  const [frameText, setFrameText] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!active) return;
+    let frame = 0;
+    const duration = 900;
+    let start = 0;
+
+    const tick = (now: number) => {
+      if (!start) start = now;
+      const t = Math.min(1, (now - start) / duration);
+      if (t >= 1) {
+        setFrameText(null);
+        return;
+      }
+      const locked = Math.floor(t * text.length);
+      let out = "";
+      for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        out +=
+          char === " " || i < locked
+            ? char
+            : SCRAMBLE_GLYPHS[(Math.random() * SCRAMBLE_GLYPHS.length) | 0];
+      }
+      setFrameText(out);
+      frame = window.requestAnimationFrame(tick);
+    };
+
+    const timer = window.setTimeout(() => {
+      frame = window.requestAnimationFrame(tick);
+    }, delay);
+    return () => {
+      window.clearTimeout(timer);
+      window.cancelAnimationFrame(frame);
+    };
+  }, [text, active, delay]);
+
+  const running = active && frameText !== null;
+  return { display: running ? (frameText as string) : text, running };
+}
 
 type HeroLink = {
   id: number;
@@ -99,17 +147,66 @@ export function CosmicLobby({
   });
   const safeRoles = roles.length ? roles : ["Digital Creative"];
   const [roleIndex, setRoleIndex] = useState(0);
+  const [roleText, setRoleText] = useState(safeRoles[0]);
+  const fxOn = useFxEnabled();
+  const motionOk = useMotionOk();
+  const bootPending = useBootPending();
+  const heroLive = !bootPending && fxOn && motionOk;
+  const typing = fxOn && motionOk;
+  const { display: decryptedTitle, running: decrypting } = useDecrypt(
+    displayTitle,
+    heroLive,
+    140,
+  );
 
+  // Role terminal: typewriter loop when FX allow it, plain rotation otherwise.
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      setRoleIndex((current) => (current + 1) % safeRoles.length);
-    }, 2400);
-    return () => window.clearInterval(timer);
-  }, [safeRoles.length]);
+    if (!typing) {
+      const timer = window.setInterval(() => {
+        setRoleIndex((current) => (current + 1) % safeRoles.length);
+      }, 2400);
+      return () => window.clearInterval(timer);
+    }
+
+    let timer = 0;
+    let index = 0;
+    let position = 0;
+    let deleting = false;
+
+    const step = () => {
+      const word = safeRoles[index];
+      if (!deleting) {
+        position += 1;
+        setRoleText(word.slice(0, position));
+        if (position === word.length) {
+          deleting = true;
+          timer = window.setTimeout(step, 1500);
+          return;
+        }
+        timer = window.setTimeout(step, 42 + Math.random() * 46);
+      } else {
+        position -= 1;
+        setRoleText(word.slice(0, position));
+        if (position === 0) {
+          deleting = false;
+          index = (index + 1) % safeRoles.length;
+          timer = window.setTimeout(step, 320);
+          return;
+        }
+        timer = window.setTimeout(step, 26);
+      }
+    };
+
+    timer = window.setTimeout(() => {
+      setRoleText("");
+      timer = window.setTimeout(step, 700);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [typing, safeRoles.join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const scene = sceneRef.current;
-    if (!scene || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (!scene || !fxOn || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
 
@@ -172,7 +269,7 @@ export function CosmicLobby({
 
     animationFrame = window.requestAnimationFrame(animate);
     return () => window.cancelAnimationFrame(animationFrame);
-  }, []);
+  }, [fxOn]);
 
   function setMotionTarget(event: ReactPointerEvent<HTMLDivElement>) {
     const deck = deckRef.current;
@@ -268,13 +365,15 @@ export function CosmicLobby({
       </div>
 
       <div className="character-lobby__grid shell">
-        <div className="character-copy">
+        <div className={`character-copy${heroLive ? " character-copy--intro" : ""}`}>
           <p className="character-label">
             <span />
             {label}
           </p>
           <h1>
-            <span>{displayTitle}</span>
+            <span className={decrypting ? "is-decrypting" : undefined} aria-label={displayTitle}>
+              {decryptedTitle}
+            </span>
             <strong>{accentTitle}</strong>
           </h1>
           <p className="character-tagline">{tagline}</p>
@@ -282,7 +381,11 @@ export function CosmicLobby({
 
           <div className="role-terminal" aria-live="polite">
             <span>&gt;</span>
-            <strong key={roleIndex}>{safeRoles[roleIndex]}</strong>
+            {typing ? (
+              <strong className="role-terminal__typed">{roleText}</strong>
+            ) : (
+              <strong key={roleIndex}>{safeRoles[roleIndex]}</strong>
+            )}
             <i />
           </div>
 
@@ -329,6 +432,7 @@ export function CosmicLobby({
           aria-label="Interactive character interface. Move or drag to inspect."
         >
           <span className="deck-aura" />
+          <ParticleField />
           <span className="deck-ring deck-ring--outer" />
           <span className="deck-ring deck-ring--inner" />
           <span className="deck-reticle" />

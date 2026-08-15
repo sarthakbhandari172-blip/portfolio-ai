@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useFxEnabled } from "@/app/fx/fx";
 
 const revealSelector = [
   ".hybrid-ui > .section > .section-heading",
@@ -18,7 +19,10 @@ const panelSelector = [
 ].join(", ");
 
 export function ScrollMotion() {
+  const fxOn = useFxEnabled();
+
   useEffect(() => {
+    if (!fxOn) return;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (reducedMotion.matches) return;
 
@@ -142,7 +146,7 @@ export function ScrollMotion() {
         target.querySelector(":scope > .scroll-phase-scan")?.remove();
       });
     };
-  }, []);
+  }, [fxOn]);
 
   return null;
 }

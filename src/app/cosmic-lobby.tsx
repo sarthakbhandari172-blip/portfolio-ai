@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import {
   useEffect,
   useRef,
@@ -424,15 +423,17 @@ export function CosmicLobby({
           <span className="deck-reticle" />
           <div className="character-frame">
             <div className="frame-particles" aria-hidden="true" />
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={imageUrl}
               alt={`${displayTitle} character portrait`}
               width={1085}
               height={1449}
-              quality={95}
               sizes="(max-width: 700px) 86vw, (max-width: 1100px) 78vw, 510px"
-              priority
+              loading="eager"
+              fetchPriority="high"
               draggable={false}
+              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
             />
             <span className="frame-grade" />
             <span className="frame-scan" />

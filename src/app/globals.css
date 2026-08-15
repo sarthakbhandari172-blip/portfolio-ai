@@ -2348,7 +2348,7 @@ a {
   filter:
     drop-shadow(0 0 10px rgba(83, 226, 255, 0.68))
     drop-shadow(0 0 24px rgba(151, 78, 255, 0.48));
-  opacity: 0.86;
+  opacity: 0.45;
   pointer-events: none;
   animation: frame-aura-spin 5.4s linear infinite reverse;
 }
@@ -2416,42 +2416,18 @@ a {
   border-radius: 30px;
   background: #050313;
   box-shadow:
-    0 0 0 1px rgba(124, 71, 255, 0.2) inset,
+    0 0 0 1px rgba(124, 71, 255, 0.25) inset,
     0 30px 70px rgba(0, 0, 0, 0.43),
-    0 0 60px rgba(56, 151, 255, 0.13);
+    0 0 40px rgba(82, 219, 255, 0.18),
+    0 0 80px rgba(143, 74, 255, 0.12);
   transform: translateZ(34px);
   transform-style: preserve-3d;
   will-change: transform, box-shadow;
 }
 
-.character-frame::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  z-index: 6;
-  border-radius: inherit;
-  padding: 2.5px;
-  background: conic-gradient(
-    from var(--aura-angle, 0deg),
-    transparent 0deg,
-    rgba(103, 239, 255, 0.16) 48deg,
-    rgba(74, 174, 255, 0.92) 102deg,
-    rgba(155, 92, 255, 0.92) 164deg,
-    transparent 226deg,
-    rgba(103, 239, 255, 0.74) 306deg,
-    transparent 360deg
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  filter:
-    drop-shadow(0 0 7px rgba(82, 219, 255, 0.78))
-    drop-shadow(0 0 18px rgba(143, 74, 255, 0.5));
-  pointer-events: none;
-  animation: frame-aura-spin 3.8s linear infinite;
-}
+/* Inner conic ring removed — mask-composite is unreliable across
+   browsers and a failure paints a full-card bright sheet. The outer
+   deck ring + box-shadow glow carry the aura effect instead. */
 
 .character-frame img {
   width: 100%;
@@ -2503,12 +2479,11 @@ a {
 .frame-shine {
   z-index: 4;
   background:
-    radial-gradient(circle at var(--shine-x) var(--shine-y), rgba(126, 240, 255, 0.2), transparent 19%),
-    linear-gradient(118deg, transparent 28%, rgba(255, 255, 255, 0.12) 46%, transparent 61%);
-  background-size: 100% 100%, 230% 230%;
-  background-position: center, var(--shine-x) var(--shine-y);
+    radial-gradient(circle at var(--shine-x) var(--shine-y), rgba(126, 240, 255, 0.14), transparent 19%);
+  background-size: 100% 100%;
+  background-position: center;
   mix-blend-mode: screen;
-  opacity: 0.7;
+  opacity: 0.5;
   will-change: background-position;
 }
 

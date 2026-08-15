@@ -137,7 +137,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         label={data.profile.hero_label ?? "System Online — Digital Portfolio"}
         tagline={data.profile.tagline ?? "Software · Hardware · Interfaces"}
         bio={data.profile.bio ?? "Exploring the space between an idea and its execution."}
-        imageUrl={data.profile.avatar_url ?? "/media/profile/cosmic-avatar.png"}
+        imageUrl={(data.profile.avatar_url ?? "/media/profile/portrait.png").replace("cosmic-avatar.png", "portrait.png")}
         roles={data.profile.hero_roles ?? []}
         primaryCta={{
           text: data.profile.hero_primary_cta_text ?? "View Work",

@@ -263,6 +263,56 @@ export function LivingPortrait({ stateRef }: { stateRef: React.RefObject<LivingP
       const vcx = w * VORTEX_CX, vcy = h * VORTEX_CY;
       const pSpeed = 1 + prox * 0.3;
 
+      // 0. AMBIENT AURA FILL — purple/cyan energy flooding the entire deck
+      if (!reduced) {
+        // Large pulsing aura blobs at different positions, slow drift
+        const auraPulse = 0.7 + Math.sin(elapsed * 0.6) * 0.3;
+        const auraPulse2 = 0.6 + Math.sin(elapsed * 0.45 + 1.5) * 0.4;
+        const auraBase = 0.08 + intensity * 0.06;
+
+        // Center main aura (purple, large)
+        const ag1 = ctx.createRadialGradient(vcx, vcy, 0, vcx, vcy, w * 0.55);
+        ag1.addColorStop(0, `rgba(120, 50, 255, ${(auraBase * 1.2 * auraPulse).toFixed(3)})`);
+        ag1.addColorStop(0.3, `rgba(100, 40, 220, ${(auraBase * 0.8 * auraPulse).toFixed(3)})`);
+        ag1.addColorStop(0.6, `rgba(70, 20, 180, ${(auraBase * 0.4).toFixed(3)})`);
+        ag1.addColorStop(1, "rgba(40, 10, 120, 0)");
+        ctx.fillStyle = ag1;
+        ctx.fillRect(0, 0, w, h);
+
+        // Upper-left aura (cyan tint, offset)
+        const ax1 = vcx - w * 0.15, ay1 = vcy - h * 0.2;
+        const ag2 = ctx.createRadialGradient(ax1, ay1, 0, ax1, ay1, w * 0.4);
+        ag2.addColorStop(0, `rgba(60, 160, 255, ${(auraBase * 0.5 * auraPulse2).toFixed(3)})`);
+        ag2.addColorStop(0.5, `rgba(80, 100, 220, ${(auraBase * 0.25).toFixed(3)})`);
+        ag2.addColorStop(1, "rgba(50, 30, 150, 0)");
+        ctx.fillStyle = ag2;
+        ctx.fillRect(0, 0, w, h);
+
+        // Lower-right aura (deep purple, offset)
+        const ax2 = vcx + w * 0.12, ay2 = vcy + h * 0.25;
+        const ag3 = ctx.createRadialGradient(ax2, ay2, 0, ax2, ay2, w * 0.45);
+        ag3.addColorStop(0, `rgba(140, 40, 255, ${(auraBase * 0.6 * auraPulse).toFixed(3)})`);
+        ag3.addColorStop(0.4, `rgba(100, 30, 200, ${(auraBase * 0.3 * auraPulse2).toFixed(3)})`);
+        ag3.addColorStop(1, "rgba(60, 15, 140, 0)");
+        ctx.fillStyle = ag3;
+        ctx.fillRect(0, 0, w, h);
+
+        // Edge aura wisps (4 corners, very faint, makes the whole card glow)
+        const corners = [
+          { x: w * 0.1, y: h * 0.1 },
+          { x: w * 0.9, y: h * 0.15 },
+          { x: w * 0.15, y: h * 0.85 },
+          { x: w * 0.85, y: h * 0.9 },
+        ];
+        for (const c of corners) {
+          const cg = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, w * 0.3);
+          cg.addColorStop(0, `rgba(100, 60, 220, ${(auraBase * 0.35).toFixed(3)})`);
+          cg.addColorStop(1, "rgba(60, 20, 150, 0)");
+          ctx.fillStyle = cg;
+          ctx.fillRect(c.x - w * 0.3, c.y - w * 0.3, w * 0.6, w * 0.6);
+        }
+      }
+
       // 1. ROTATING ENERGY RINGS (thick, chunky, plasma-like)
       if (!reduced) {
         const ringN = mobile ? 1 : 3;

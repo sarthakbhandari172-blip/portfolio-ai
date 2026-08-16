@@ -172,39 +172,18 @@ export function LivingPortrait({ stateRef }: { stateRef: React.RefObject<LivingP
       }
     }
 
-    // === EYE BLOOM: amplify the painted-in lightning, don't replace it ===
+    // === EYE BLOOM: very subtle purple spill only — the painted eyes do the work ===
     function drawEyeBloom(ex: number, ey: number, intensity: number) {
       const baseR = Math.min(w, h) * 0.055;
-
-      // Broad soft glow — like the light from the painted lightning spilling onto the face
-      const r1 = baseR * (1.5 + intensity * 2.5);
-      const a1 = 0.06 + intensity * 0.18;
+      // Soft purple spill — NO white, just faint colored light on cheekbones
+      const r1 = baseR * (1.2 + intensity * 1.8);
+      const a1 = 0.03 + intensity * 0.08;
       const g1 = ctx.createRadialGradient(ex, ey, 0, ex, ey, r1);
-      g1.addColorStop(0, `rgba(180, 150, 255, ${(a1 * 0.8).toFixed(3)})`);
-      g1.addColorStop(0.25, `rgba(140, 90, 255, ${(a1 * 0.5).toFixed(3)})`);
-      g1.addColorStop(0.5, `rgba(100, 50, 230, ${(a1 * 0.2).toFixed(3)})`);
-      g1.addColorStop(1, "rgba(80, 30, 200, 0)");
+      g1.addColorStop(0, `rgba(140, 80, 255, ${(a1 * 0.6).toFixed(3)})`);
+      g1.addColorStop(0.4, `rgba(100, 50, 220, ${(a1 * 0.3).toFixed(3)})`);
+      g1.addColorStop(1, "rgba(80, 30, 180, 0)");
       ctx.fillStyle = g1;
       ctx.fillRect(ex - r1, ey - r1, r1 * 2, r1 * 2);
-
-      // Intense core bloom — white-hot center that matches the painted eye glow
-      const r2 = baseR * (0.4 + intensity * 0.6);
-      const a2 = 0.15 + intensity * 0.4;
-      const g2 = ctx.createRadialGradient(ex, ey, 0, ex, ey, r2);
-      g2.addColorStop(0, `rgba(240, 230, 255, ${(a2).toFixed(3)})`);
-      g2.addColorStop(0.4, `rgba(200, 170, 255, ${(a2 * 0.5).toFixed(3)})`);
-      g2.addColorStop(1, "rgba(155, 92, 255, 0)");
-      ctx.fillStyle = g2;
-      ctx.beginPath(); ctx.arc(ex, ey, r2, 0, Math.PI * 2); ctx.fill();
-
-      // Pulsing intensity flicker (subtle — makes it feel alive, not mechanical)
-      if (intensity > 0.5) {
-        const flicker = Math.sin(elapsed * 12 + ex) * 0.5 + 0.5;
-        const r3 = baseR * 0.8 * flicker;
-        const a3 = (intensity - 0.5) * 0.12 * flicker;
-        ctx.fillStyle = `rgba(220, 200, 255, ${a3.toFixed(3)})`;
-        ctx.beginPath(); ctx.arc(ex, ey, r3, 0, Math.PI * 2); ctx.fill();
-      }
     }
 
     // === ANAMORPHIC FLARE: horizontal streak at peak surges ===
@@ -329,7 +308,7 @@ export function LivingPortrait({ stateRef }: { stateRef: React.RefObject<LivingP
       const rx = RIGHT_EYE.x * w, ry = RIGHT_EYE.y * h;
       drawEyeBloom(lx, ly, intensity);
       drawEyeBloom(rx, ry, intensity);
-      if (!reduced) { drawFlare(lx, ly, intensity); drawFlare(rx, ry, intensity); }
+      // Flares removed — the painted eye lightning handles its own light
 
       // 5. EMBERS
       if (!reduced) {

@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useBootPending, useFxEnabled, useMotionOk } from "@/app/fx/fx";
 import { ParticleField } from "@/app/fx/particle-field";
+import { LivingPortrait, type LivingPortraitState } from "@/app/fx/living-portrait";
 
 const SCRAMBLE_GLYPHS = "!<>-_\\/[]{}=+*^?#01·▓░";
 
@@ -125,6 +126,7 @@ export function CosmicLobby({
 }: CharacterDeckProps) {
   const sceneRef = useRef<HTMLElement>(null);
   const deckRef = useRef<HTMLDivElement>(null);
+  const livingRef = useRef<LivingPortraitState>({ proximity: 0, hovering: false });
   const motionRef = useRef<MotionState>({
     targetX: 0,
     targetY: 0,
@@ -279,12 +281,24 @@ export function CosmicLobby({
 
   function enterDeck(event: ReactPointerEvent<HTMLDivElement>) {
     motionRef.current.hovering = true;
+    livingRef.current.hovering = true;
+    livingRef.current.proximity = 0.6;
     setMotionTarget(event);
   }
 
   function moveDeck(event: ReactPointerEvent<HTMLDivElement>) {
     if (!motionRef.current.hovering && !motionRef.current.dragging) return;
     const motion = motionRef.current;
+    // Feed proximity to living portrait — distance from card center
+    const deck = deckRef.current;
+    if (deck) {
+      const b = deck.getBoundingClientRect();
+      const cx = b.left + b.width / 2;
+      const cy = b.top + b.height / 2;
+      const maxDist = Math.max(b.width, b.height) * 0.6;
+      const dist = Math.hypot(event.clientX - cx, event.clientY - cy);
+      livingRef.current.proximity = Math.max(0, Math.min(1, 1 - dist / maxDist));
+    }
     if (motion.dragging) {
       const deltaX = event.clientX - motion.lastPointerX;
       const deltaY = event.clientY - motion.lastPointerY;
@@ -323,6 +337,8 @@ export function CosmicLobby({
 
   function leaveDeck() {
     motionRef.current.hovering = false;
+    livingRef.current.hovering = false;
+    livingRef.current.proximity = 0;
     if (!motionRef.current.dragging) {
       motionRef.current.targetX = 0;
       motionRef.current.targetY = 0;
@@ -421,7 +437,7 @@ export function CosmicLobby({
           <span className="deck-ring deck-ring--outer" />
           <span className="deck-ring deck-ring--inner" />
           <span className="deck-reticle" />
-          <div className="character-frame">
+          <div className={`character-frame${heroLive ? " character-frame--alive" : ""}`}>
             <div className="frame-particles" aria-hidden="true" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -435,6 +451,7 @@ export function CosmicLobby({
               draggable={false}
               onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
             />
+            <LivingPortrait stateRef={livingRef} />
             <span className="frame-grade" />
             <span className="frame-scan" />
             <span className="frame-shine" />

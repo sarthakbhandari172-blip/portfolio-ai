@@ -7,6 +7,8 @@ import { HudOverlay } from "@/app/fx/hud-overlay";
 import { MotionCore } from "@/app/fx/motion-core";
 import { SoundToggle } from "@/app/fx/sound-toggle";
 import { XpBars } from "@/app/fx/xp-bars";
+import { HeroEntrance } from "@/app/fx/hero-entrance";
+import { HeroSound } from "@/app/fx/hero-sound";
 import { ScrollMotion } from "@/app/scroll-motion";
 import { getPortfolioData } from "@/lib/data";
 import type { SectionContent } from "@/lib/types";
@@ -105,6 +107,8 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
       <HudOverlay />
       <CardTilt />
       <XpBars />
+      <HeroEntrance />
+      <HeroSound />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
         <div className="ambient-orb ambient-orb-one" />

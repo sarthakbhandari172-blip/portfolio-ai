@@ -2412,10 +2412,113 @@ a {
   object-fit: cover;
   object-position: center 44%;
   scale: 1.04;
-  transform: translateZ(18px);
+  transform-origin: 50% 35%;
   image-rendering: auto;
   filter: saturate(1.02) contrast(1.07) brightness(1.015);
 }
+
+/* --- LIVING PORTRAIT: Breathing + Ken Burns + Cinema Grade --- */
+
+/* Breathing: layered transforms that never sync — reads as alive, not looped.
+   Layer 1: chest/shoulder area (larger movement)
+   Layer 2: head micro-sway on offset period */
+.character-frame--alive img {
+  animation:
+    hero-breathe 4s ease-in-out infinite,
+    hero-ken-burns 22s ease-in-out infinite alternate;
+}
+
+@keyframes hero-breathe {
+  0%, 100% { transform: scale(1) translateY(0); }
+  42% { transform: scale(1.012) translateY(-2.5px); }
+  58% { transform: scale(1.008) translateY(-1.5px); }
+}
+
+@keyframes hero-ken-burns {
+  0% { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.03) translate(-0.4%, -0.3%); }
+}
+
+/* Head micro-sway via the frame itself (longer cycle, never syncs with breathing) */
+.character-frame--alive {
+  animation: hero-head-sway 7.2s ease-in-out infinite;
+}
+
+@keyframes hero-head-sway {
+  0%, 100% { transform: translateZ(34px) translate(0, 0) rotate(0deg); }
+  33% { transform: translateZ(34px) translate(0.3px, 0.2px) rotate(0.15deg); }
+  66% { transform: translateZ(34px) translate(-0.2px, -0.1px) rotate(-0.1deg); }
+}
+
+/* Living portrait canvas — overlays the portrait inside the frame */
+.living-portrait-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Cinema grade: teal shadows / purple highlights, applied to the whole frame */
+.character-frame--alive::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(30, 180, 200, 0.04) 0%, transparent 40%, rgba(100, 40, 180, 0.05) 100%);
+  mix-blend-mode: color;
+}
+
+/* Hero entrance: camera push-in */
+.hero-entrance-active .character-frame {
+  animation: hero-entrance-push 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes hero-entrance-push {
+  0% { transform: translateZ(34px) scale(1.06); filter: brightness(0.3); }
+  60% { filter: brightness(1.1); }
+  100% { transform: translateZ(34px) scale(1); filter: brightness(1); }
+}
+
+/* Entrance shockwave ring */
+.hero-entrance-shockwave {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: hero-shockwave 1s ease-out forwards;
+}
+
+@keyframes hero-shockwave {
+  0% {
+    box-shadow: inset 0 0 30px rgba(155, 92, 255, 0.5), 0 0 20px rgba(103, 239, 255, 0.3);
+    opacity: 1;
+    scale: 0.95;
+  }
+  100% {
+    box-shadow: inset 0 0 80px rgba(155, 92, 255, 0), 0 0 60px rgba(103, 239, 255, 0);
+    opacity: 0;
+    scale: 1.08;
+  }
+}
+
+/* Reduced motion: breathing off, static glow only */
+@media (prefers-reduced-motion: reduce) {
+  .character-frame--alive img { animation: none; }
+  .character-frame--alive { animation: none; }
+  .hero-entrance-active .character-frame { animation: none; }
+}
+
+/* FX off: no living effects */
+html[data-fx="off"] .character-frame--alive img { animation: none; }
+html[data-fx="off"] .character-frame--alive { animation: none; }
+html[data-fx="off"] .character-frame--alive::after { display: none; }
+html[data-fx="off"] .living-portrait-canvas { display: none; }
+html[data-fx="off"] .hero-entrance-shockwave { display: none; }
 
 .frame-grade,
 .frame-scan,

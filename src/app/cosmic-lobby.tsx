@@ -77,6 +77,8 @@ type CharacterDeckProps = {
   region: string;
   statusText: string;
   links: HeroLink[];
+  charClass?: string;
+  charXp?: string;
 };
 
 type DeckStyle = CSSProperties & {
@@ -123,6 +125,8 @@ export function CosmicLobby({
   region,
   statusText,
   links,
+  charClass,
+  charXp,
 }: CharacterDeckProps) {
   const sceneRef = useRef<HTMLElement>(null);
   const deckRef = useRef<HTMLDivElement>(null);
@@ -460,6 +464,21 @@ export function CosmicLobby({
             <span>Region</span>
             <strong>{region}</strong>
           </div>
+          {charClass ? (
+            <div className="character-node character-node--class">
+              <span>Class</span>
+              <strong>{charClass}</strong>
+            </div>
+          ) : null}
+          {charXp ? (
+            <div className="character-node character-node--state">
+              <span className="node-pulse" aria-hidden="true" />
+              <div>
+                <span>XP</span>
+                <strong>{charXp}</strong>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 

@@ -154,6 +154,8 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         }}
         region={data.settings.hero_region ?? data.profile.location ?? "Nepal"}
         statusText={data.profile.status_text ?? "Available for selected projects"}
+        charClass={data.settings.hero_class ?? "Graphic & digital designer"}
+        charXp={`${data.projects.filter((p) => p.is_active).length} projects live`}
         links={heroLinks.map((link) => ({
           id: link.id,
           label: link.label,

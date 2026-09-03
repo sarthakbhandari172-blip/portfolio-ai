@@ -114,6 +114,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
           <a href="#journey">Journey</a>
           <a href="#skills">Skills</a>
           <a href="#contact">Contact</a>
+          <a href="/cv">CV</a>
         </div>
       </nav>
 

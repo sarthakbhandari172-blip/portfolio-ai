@@ -1,0 +1,517 @@
+{
+  "profile": [
+    {
+      "id": 1,
+      "full_name": "Sarthak Bhandari",
+      "tagline": "Visual Design ·   AI Workflows·   Full stack development",
+      "bio": "I design visual identities, digital content and responsive web experiences, combining visual thinking with development and AI-assisted\r\n                         workflows.",
+      "avatar_url": "/media/profile/cosmic-avatar.png",
+      "email": "sarthakbhandari172@gmail.com",
+      "phone": "9769291674",
+      "location": "Nepal",
+      "resume_url": null,
+      "updated_at": "2026-07-24T16:40:20.020868+00:00",
+      "hero_label": "System Online — Digital Portfolio",
+      "hero_display_title": "Sarthak Bhandari",
+      "hero_accent_title": "Design and development",
+      "hero_roles": [
+        "Visual Designer",
+        "Full Stack Developer",
+        "AI-Assisted Workflows"
+      ],
+      "hero_primary_cta_text": "View Selected Work",
+      "hero_primary_cta_url": "#work",
+      "hero_secondary_cta_text": "Explore",
+      "hero_secondary_cta_url": "#services",
+      "status_text": "Open to internships, freelance projects and creative collaboration."
+    }
+  ],
+  "skills": [
+    {
+      "id": 1,
+      "name": "PHP & PDO",
+      "category": "Languages",
+      "proficiency": 85,
+      "icon": "PHP",
+      "sort_order": 1,
+      "description": null,
+      "link_url": null,
+      "is_active": true
+    },
+    {
+      "id": 2,
+      "name": "MySQL / PostgreSQL",
+      "category": "Data",
+      "proficiency": 80,
+      "icon": "DB",
+      "sort_order": 2,
+      "description": null,
+      "link_url": null,
+      "is_active": true
+    },
+    {
+      "id": 3,
+      "name": "JavaScript / TypeScript",
+      "category": "Languages",
+      "proficiency": 85,
+      "icon": "JS",
+      "sort_order": 3,
+      "description": null,
+      "link_url": null,
+      "is_active": true
+    },
+    {
+      "id": 4,
+      "name": "CSS & Interface Design",
+      "category": "Frontend",
+      "proficiency": 90,
+      "icon": "UI",
+      "sort_order": 4,
+      "description": null,
+      "link_url": null,
+      "is_active": true
+    },
+    {
+      "id": 5,
+      "name": "Next.js",
+      "category": "Frameworks",
+      "proficiency": 70,
+      "icon": "NX",
+      "sort_order": 5,
+      "description": null,
+      "link_url": null,
+      "is_active": true
+    },
+    {
+      "id": 6,
+      "name": "Supabase",
+      "category": "Cloud",
+      "proficiency": 70,
+      "icon": "SB",
+      "sort_order": 6,
+      "description": null,
+      "link_url": null,
+      "is_active": true
+    },
+    {
+      "id": 7,
+      "name": "Git & GitHub",
+      "category": "Tools",
+      "proficiency": 80,
+      "icon": "GT",
+      "sort_order": 7,
+      "description": null,
+      "link_url": null,
+      "is_active": true
+    },
+    {
+      "id": 8,
+      "name": "Hardware Prototyping",
+      "category": "Hardware",
+      "proficiency": 60,
+      "icon": "HW",
+      "sort_order": 8,
+      "description": null,
+      "link_url": null,
+      "is_active": true
+    }
+  ],
+  "projects": [
+    {
+      "id": 1,
+      "title": "Portfolio Engine",
+      "slug": "portfolio-engine",
+      "category": "Web Platform",
+      "description": "A dynamic portfolio with an authenticated content dashboard, structured data and responsive interface.",
+      "tech_stack": [
+        "Next.js",
+        "Supabase",
+        "TypeScript"
+      ],
+      "thumbnail_url": "/media/projects/project-1.jpg",
+      "external_url": null,
+      "live_url": "#",
+      "github_url": "https://github.com/sarthakbhandari172-blip",
+      "icon_text": "WEB",
+      "featured": true,
+      "sort_order": 1,
+      "is_active": true,
+      "thumbnail_fit": "cover",
+      "thumbnail_position": "center center",
+      "created_at": "2026-07-23T18:24:24.160777+00:00",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00"
+    },
+    {
+      "id": 2,
+      "title": "Interface Experiments",
+      "slug": "interface-experiments",
+      "category": "UI Systems",
+      "description": "A collection of interface studies focused on motion, hierarchy and clear technical presentation.",
+      "tech_stack": [
+        "CSS",
+        "JavaScript",
+        "Figma"
+      ],
+      "thumbnail_url": "/media/projects/project-2.jpg",
+      "external_url": null,
+      "live_url": "#",
+      "github_url": "https://github.com/sarthakbhandari172-blip",
+      "icon_text": "UI",
+      "featured": true,
+      "sort_order": 2,
+      "is_active": true,
+      "thumbnail_fit": "cover",
+      "thumbnail_position": "center center",
+      "created_at": "2026-07-23T18:24:24.160777+00:00",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00"
+    }
+  ],
+  "experience": [
+    {
+      "id": 1,
+      "company": "Independent Projects",
+      "role": "Software and Interface Development",
+      "start_date": null,
+      "end_date": null,
+      "period": "2025 — Present",
+      "description": "Building web interfaces, automation experiments and database-backed applications.",
+      "icon": "01",
+      "status": "Current",
+      "sort_order": 1,
+      "link_url": null,
+      "is_active": true
+    },
+    {
+      "id": 2,
+      "company": "Hardware Exploration",
+      "role": "Prototyping and Systems Learning",
+      "start_date": null,
+      "end_date": null,
+      "period": "2024 — Present",
+      "description": "Exploring electronics, physical computing and the connection between hardware and software.",
+      "icon": "02",
+      "status": "Ongoing",
+      "sort_order": 2,
+      "link_url": null,
+      "is_active": true
+    }
+  ],
+  "services": [
+    {
+      "id": 2,
+      "title": "Portfolio Websites",
+      "description": "Focused portfolio systems for presenting work, experience and technical identity.",
+      "icon_text": "PF",
+      "badge_text": "Service",
+      "badge_style": "cyan",
+      "cta_text": "Discuss project",
+      "cta_url": "#contact",
+      "sort_order": 2,
+      "is_active": true,
+      "created_at": "2026-07-23T18:24:24.160777+00:00",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00",
+      "thumbnail_url": null,
+      "thumbnail_fit": "cover",
+      "thumbnail_position": "center center"
+    },
+    {
+      "id": 3,
+      "title": "Landing Pages",
+      "description": "Single-purpose pages designed around one message and one clear action.",
+      "icon_text": "LP",
+      "badge_text": "Service",
+      "badge_style": "ok",
+      "cta_text": "Discuss project",
+      "cta_url": "#contact",
+      "sort_order": 3,
+      "is_active": true,
+      "created_at": "2026-07-23T18:24:24.160777+00:00",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00",
+      "thumbnail_url": null,
+      "thumbnail_fit": "cover",
+      "thumbnail_position": "center center"
+    },
+    {
+      "id": 4,
+      "title": "Website Redesign",
+      "description": "Interface and structure improvements for existing websites.",
+      "icon_text": "UI",
+      "badge_text": "Service",
+      "badge_style": "cyan",
+      "cta_text": "Discuss project",
+      "cta_url": "#contact",
+      "sort_order": 4,
+      "is_active": true,
+      "created_at": "2026-07-23T18:24:24.160777+00:00",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00",
+      "thumbnail_url": null,
+      "thumbnail_fit": "cover",
+      "thumbnail_position": "center center"
+    },
+    {
+      "id": 5,
+      "title": "Workflow Automation",
+      "description": "Practical automation connecting forms, data and external services.",
+      "icon_text": "AU",
+      "badge_text": "Service",
+      "badge_style": "ok",
+      "cta_text": "Discuss project",
+      "cta_url": "#contact",
+      "sort_order": 5,
+      "is_active": true,
+      "created_at": "2026-07-23T18:24:24.160777+00:00",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00",
+      "thumbnail_url": null,
+      "thumbnail_fit": "cover",
+      "thumbnail_position": "center center"
+    },
+    {
+      "id": 6,
+      "title": "AI-Assisted Builds",
+      "description": "Human-directed development accelerated by modern AI tools.",
+      "icon_text": "AI",
+      "badge_text": "Service",
+      "badge_style": "cyan",
+      "cta_text": "Discuss project",
+      "cta_url": "#contact",
+      "sort_order": 6,
+      "is_active": true,
+      "created_at": "2026-07-23T18:24:24.160777+00:00",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00",
+      "thumbnail_url": null,
+      "thumbnail_fit": "cover",
+      "thumbnail_position": "center center"
+    },
+    {
+      "id": 8,
+      "title": "Web Setup",
+      "description": "Essential deployment, domain and platform setup for a new web presence.",
+      "icon_text": "WS",
+      "badge_text": "Service",
+      "badge_style": "cyan",
+      "cta_text": "Discuss project",
+      "cta_url": "#contact",
+      "sort_order": 8,
+      "is_active": true,
+      "created_at": "2026-07-23T18:24:24.160777+00:00",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00",
+      "thumbnail_url": null,
+      "thumbnail_fit": "cover",
+      "thumbnail_position": "center center"
+    },
+    {
+      "id": 7,
+      "title": "Visual Assets",
+      "description": "Project thumbnails and supporting graphics for digital products.",
+      "icon_text": "VA",
+      "badge_text": null,
+      "badge_style": null,
+      "cta_text": "Discuss project",
+      "cta_url": "#contact",
+      "sort_order": 7,
+      "is_active": true,
+      "created_at": "2026-07-23T18:24:24.160777+00:00",
+      "updated_at": "2026-07-24T17:36:24.402507+00:00",
+      "thumbnail_url": null,
+      "thumbnail_fit": "cover",
+      "thumbnail_position": "center center"
+    },
+    {
+      "id": 1,
+      "title": "Business Websites",
+      "description": "Responsive websites structured around clear content, performance and usability.",
+      "icon_text": "WEB",
+      "badge_text": null,
+      "badge_style": null,
+      "cta_text": "Discuss project",
+      "cta_url": "#contact",
+      "sort_order": 1,
+      "is_active": true,
+      "created_at": "2026-07-23T18:24:24.160777+00:00",
+      "updated_at": "2026-07-28T11:25:29.48714+00:00",
+      "thumbnail_url": "https://ehaikbuoqpujhxgwxxin.supabase.co/storage/v1/object/public/portfolio-media/services/1785237928357-e29b7479-12a7-4e23-a294-870ecafdd7ca.jpeg",
+      "thumbnail_fit": "cover",
+      "thumbnail_position": "center center"
+    }
+  ],
+  "section_content": [
+    {
+      "section_key": "contact",
+      "label": "Contact",
+      "title": "Start a",
+      "accent": "Conversation",
+      "description": "Reach out for a project, collaboration or technical discussion.",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00",
+      "cta_text": null,
+      "cta_url": null
+    },
+    {
+      "section_key": "journey",
+      "label": "Journey",
+      "title": "Experience",
+      "accent": "",
+      "description": "A concise view of practical work and ongoing technical exploration.",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00",
+      "cta_text": null,
+      "cta_url": null
+    },
+    {
+      "section_key": "services",
+      "label": "Capabilities",
+      "title": "What I",
+      "accent": "Build",
+      "description": "Focused digital work across software, interfaces and automation.",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00",
+      "cta_text": null,
+      "cta_url": null
+    },
+    {
+      "section_key": "work",
+      "label": "Selected Work",
+      "title": "Featured",
+      "accent": "Projects",
+      "description": "Projects that connect ideas, implementation and clear interface design.",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00",
+      "cta_text": null,
+      "cta_url": null
+    },
+    {
+      "section_key": "about",
+      "label": "Identity File",
+      "title": "About",
+      "accent": "Sarthak",
+      "description": "A multidisciplinary builder exploring visual design, software, automation and the interfaces connecting them.",
+      "updated_at": "2026-07-24T10:35:34.256433+00:00",
+      "cta_text": null,
+      "cta_url": null
+    },
+    {
+      "section_key": "skills",
+      "label": "System Modules",
+      "title": "Skills",
+      "accent": "Inventory",
+      "description": "Tools and technologies currently used across design, development and experimentation.",
+      "updated_at": "2026-07-24T10:35:34.256433+00:00",
+      "cta_text": null,
+      "cta_url": null
+    }
+  ],
+  "settings": [
+    {
+      "setting_key": "ai_enabled",
+      "setting_value": "1"
+    },
+    {
+      "setting_key": "maintenance_mode",
+      "setting_value": "0"
+    },
+    {
+      "setting_key": "site_tagline",
+      "setting_value": "Software · Hardware · Interfaces"
+    },
+    {
+      "setting_key": "site_title",
+      "setting_value": "Sarthak Bhandari | Portfolio"
+    },
+    {
+      "setting_key": "about_approach",
+      "setting_value": "Explore → prototype → refine"
+    },
+    {
+      "setting_key": "about_mode",
+      "setting_value": "Learning through practical projects"
+    },
+    {
+      "setting_key": "about_tools",
+      "setting_value": "Design, web, automation and physical computing"
+    },
+    {
+      "setting_key": "hero_class",
+      "setting_value": "Digital creative"
+    },
+    {
+      "setting_key": "hero_region",
+      "setting_value": "Kathmandu, Nepal"
+    },
+    {
+      "setting_key": "hero_system_state",
+      "setting_value": "Portfolio system online"
+    },
+    {
+      "setting_key": "footer_signature",
+      "setting_value": "Built across design, code and curiosity"
+    }
+  ],
+  "social_links": [
+    {
+      "id": 1,
+      "platform": "email",
+      "label": "Email",
+      "url": "mailto:sarthakbhandari172@gmail.com",
+      "icon_text": "EM",
+      "sort_order": 1,
+      "is_active": true,
+      "show_in_hero": false,
+      "show_in_contact": true,
+      "show_in_footer": true,
+      "created_at": "2026-07-23T18:24:24.160777+00:00",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00"
+    },
+    {
+      "id": 2,
+      "platform": "github",
+      "label": "GitHub",
+      "url": "https://github.com/sarthakbhandari172-blip",
+      "icon_text": "GH",
+      "sort_order": 2,
+      "is_active": true,
+      "show_in_hero": true,
+      "show_in_contact": true,
+      "show_in_footer": true,
+      "created_at": "2026-07-23T18:24:24.160777+00:00",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00"
+    },
+    {
+      "id": 3,
+      "platform": "linkedin",
+      "label": "LinkedIn",
+      "url": "https://www.linkedin.com/in/sarthak-bhandari-1303b0365/",
+      "icon_text": "LI",
+      "sort_order": 3,
+      "is_active": true,
+      "show_in_hero": false,
+      "show_in_contact": true,
+      "show_in_footer": true,
+      "created_at": "2026-07-23T18:24:24.160777+00:00",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00"
+    },
+    {
+      "id": 4,
+      "platform": "instagram",
+      "label": "Instagram",
+      "url": "https://www.instagram.com/_hell.spawn",
+      "icon_text": "IG",
+      "sort_order": 4,
+      "is_active": true,
+      "show_in_hero": false,
+      "show_in_contact": true,
+      "show_in_footer": true,
+      "created_at": "2026-07-23T18:24:24.160777+00:00",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00"
+    },
+    {
+      "id": 5,
+      "platform": "whatsapp",
+      "label": "WhatsApp",
+      "url": "https://wa.me/9779769291674",
+      "icon_text": "WA",
+      "sort_order": 5,
+      "is_active": true,
+      "show_in_hero": false,
+      "show_in_contact": true,
+      "show_in_footer": true,
+      "created_at": "2026-07-23T18:24:24.160777+00:00",
+      "updated_at": "2026-07-23T18:24:24.160777+00:00"
+    }
+  ]
+}

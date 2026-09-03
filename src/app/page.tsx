@@ -1,6 +1,14 @@
 import Image from "next/image";
 import { submitContact } from "@/app/actions";
 import { CosmicLobby } from "@/app/cosmic-lobby";
+import { FxToggle } from "@/app/fx/fx-toggle";
+import { CardTilt } from "@/app/fx/card-tilt";
+import { HudOverlay } from "@/app/fx/hud-overlay";
+import { MotionCore } from "@/app/fx/motion-core";
+import { SoundToggle } from "@/app/fx/sound-toggle";
+import { XpBars } from "@/app/fx/xp-bars";
+import { HeroEntrance } from "@/app/fx/hero-entrance";
+import { HeroSound } from "@/app/fx/hero-sound";
 import { ScrollMotion } from "@/app/scroll-motion";
 import { getPortfolioData } from "@/lib/data";
 import type { SectionContent } from "@/lib/types";
@@ -95,6 +103,12 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   return (
     <main className="hybrid-ui">
       <ScrollMotion />
+      <MotionCore />
+      <HudOverlay />
+      <CardTilt />
+      <XpBars />
+      <HeroEntrance />
+      <HeroSound />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
         <div className="ambient-orb ambient-orb-one" />
@@ -116,6 +130,10 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
           <a href="#contact">Contact</a>
           <a href="/cv">CV</a>
         </div>
+        <div className="nav-fx-cluster">
+          <SoundToggle />
+          <FxToggle />
+        </div>
       </nav>
 
       <CosmicLobby
@@ -124,7 +142,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         label={data.profile.hero_label ?? "System Online — Digital Portfolio"}
         tagline={data.profile.tagline ?? "Software · Hardware · Interfaces"}
         bio={data.profile.bio ?? "Exploring the space between an idea and its execution."}
-        imageUrl={data.profile.avatar_url ?? "/media/profile/cosmic-avatar.png"}
+        imageUrl={(data.profile.avatar_url ?? "/media/profile/portrait.png").replace("cosmic-avatar.png", "portrait.png")}
         roles={data.profile.hero_roles ?? []}
         primaryCta={{
           text: data.profile.hero_primary_cta_text ?? "View Work",

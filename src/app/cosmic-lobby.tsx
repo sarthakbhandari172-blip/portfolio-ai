@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import {
   useEffect,
   useRef,
@@ -8,6 +7,55 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from "react";
+import { useBootPending, useFxEnabled, useMotionOk } from "@/app/fx/fx";
+import { ParticleField } from "@/app/fx/particle-field";
+import { LivingPortrait, type LivingPortraitState } from "@/app/fx/living-portrait";
+
+const SCRAMBLE_GLYPHS = "!<>-_\\/[]{}=+*^?#01·▓░";
+
+/** Character-scramble decrypt: glyph noise resolves into `text` left to right. */
+function useDecrypt(text: string, active: boolean, delay = 0) {
+  // null = not currently scrambling; render falls back to the real text.
+  const [frameText, setFrameText] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!active) return;
+    let frame = 0;
+    const duration = 900;
+    let start = 0;
+
+    const tick = (now: number) => {
+      if (!start) start = now;
+      const t = Math.min(1, (now - start) / duration);
+      if (t >= 1) {
+        setFrameText(null);
+        return;
+      }
+      const locked = Math.floor(t * text.length);
+      let out = "";
+      for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        out +=
+          char === " " || i < locked
+            ? char
+            : SCRAMBLE_GLYPHS[(Math.random() * SCRAMBLE_GLYPHS.length) | 0];
+      }
+      setFrameText(out);
+      frame = window.requestAnimationFrame(tick);
+    };
+
+    const timer = window.setTimeout(() => {
+      frame = window.requestAnimationFrame(tick);
+    }, delay);
+    return () => {
+      window.clearTimeout(timer);
+      window.cancelAnimationFrame(frame);
+    };
+  }, [text, active, delay]);
+
+  const running = active && frameText !== null;
+  return { display: running ? (frameText as string) : text, running };
+}
 
 type HeroLink = {
   id: number;
@@ -42,8 +90,6 @@ type DeckStyle = CSSProperties & {
   "--ring-y": string;
   "--shine-x": string;
   "--shine-y": string;
-  "--scene-x": string;
-  "--scene-y": string;
 };
 
 type MotionState = {
@@ -80,6 +126,7 @@ export function CosmicLobby({
 }: CharacterDeckProps) {
   const sceneRef = useRef<HTMLElement>(null);
   const deckRef = useRef<HTMLDivElement>(null);
+  const livingRef = useRef<LivingPortraitState>({ proximity: 0, hovering: false });
   const motionRef = useRef<MotionState>({
     targetX: 0,
     targetY: 0,
@@ -99,17 +146,66 @@ export function CosmicLobby({
   });
   const safeRoles = roles.length ? roles : ["Digital Creative"];
   const [roleIndex, setRoleIndex] = useState(0);
+  const [roleText, setRoleText] = useState(safeRoles[0]);
+  const fxOn = useFxEnabled();
+  const motionOk = useMotionOk();
+  const bootPending = useBootPending();
+  const heroLive = !bootPending && fxOn && motionOk;
+  const typing = fxOn && motionOk;
+  const { display: decryptedTitle, running: decrypting } = useDecrypt(
+    displayTitle,
+    heroLive,
+    140,
+  );
 
+  // Role terminal: typewriter loop when FX allow it, plain rotation otherwise.
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      setRoleIndex((current) => (current + 1) % safeRoles.length);
-    }, 2400);
-    return () => window.clearInterval(timer);
-  }, [safeRoles.length]);
+    if (!typing) {
+      const timer = window.setInterval(() => {
+        setRoleIndex((current) => (current + 1) % safeRoles.length);
+      }, 2400);
+      return () => window.clearInterval(timer);
+    }
+
+    let timer = 0;
+    let index = 0;
+    let position = 0;
+    let deleting = false;
+
+    const step = () => {
+      const word = safeRoles[index];
+      if (!deleting) {
+        position += 1;
+        setRoleText(word.slice(0, position));
+        if (position === word.length) {
+          deleting = true;
+          timer = window.setTimeout(step, 1500);
+          return;
+        }
+        timer = window.setTimeout(step, 42 + Math.random() * 46);
+      } else {
+        position -= 1;
+        setRoleText(word.slice(0, position));
+        if (position === 0) {
+          deleting = false;
+          index = (index + 1) % safeRoles.length;
+          timer = window.setTimeout(step, 320);
+          return;
+        }
+        timer = window.setTimeout(step, 26);
+      }
+    };
+
+    timer = window.setTimeout(() => {
+      setRoleText("");
+      timer = window.setTimeout(step, 700);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [typing, safeRoles.join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const scene = sceneRef.current;
-    if (!scene || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (!scene || !fxOn || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
 
@@ -165,14 +261,12 @@ export function CosmicLobby({
       scene.style.setProperty("--ring-y", `${(-y * 14).toFixed(2)}px`);
       scene.style.setProperty("--shine-x", `${(50 + x * 36).toFixed(2)}%`);
       scene.style.setProperty("--shine-y", `${(42 + y * 32).toFixed(2)}%`);
-      scene.style.setProperty("--scene-x", `${(-x * 18).toFixed(2)}px`);
-      scene.style.setProperty("--scene-y", `${(-y * 12).toFixed(2)}px`);
       animationFrame = window.requestAnimationFrame(animate);
     };
 
     animationFrame = window.requestAnimationFrame(animate);
     return () => window.cancelAnimationFrame(animationFrame);
-  }, []);
+  }, [fxOn]);
 
   function setMotionTarget(event: ReactPointerEvent<HTMLDivElement>) {
     const deck = deckRef.current;
@@ -187,12 +281,24 @@ export function CosmicLobby({
 
   function enterDeck(event: ReactPointerEvent<HTMLDivElement>) {
     motionRef.current.hovering = true;
+    livingRef.current.hovering = true;
+    livingRef.current.proximity = 0.6;
     setMotionTarget(event);
   }
 
   function moveDeck(event: ReactPointerEvent<HTMLDivElement>) {
     if (!motionRef.current.hovering && !motionRef.current.dragging) return;
     const motion = motionRef.current;
+    // Feed proximity to living portrait — distance from card center
+    const deck = deckRef.current;
+    if (deck) {
+      const b = deck.getBoundingClientRect();
+      const cx = b.left + b.width / 2;
+      const cy = b.top + b.height / 2;
+      const maxDist = Math.max(b.width, b.height) * 0.6;
+      const dist = Math.hypot(event.clientX - cx, event.clientY - cy);
+      livingRef.current.proximity = Math.max(0, Math.min(1, 1 - dist / maxDist));
+    }
     if (motion.dragging) {
       const deltaX = event.clientX - motion.lastPointerX;
       const deltaY = event.clientY - motion.lastPointerY;
@@ -231,6 +337,8 @@ export function CosmicLobby({
 
   function leaveDeck() {
     motionRef.current.hovering = false;
+    livingRef.current.hovering = false;
+    livingRef.current.proximity = 0;
     if (!motionRef.current.dragging) {
       motionRef.current.targetX = 0;
       motionRef.current.targetY = 0;
@@ -254,27 +362,19 @@ export function CosmicLobby({
           "--ring-y": "0px",
           "--shine-x": "50%",
           "--shine-y": "42%",
-          "--scene-x": "0px",
-          "--scene-y": "0px",
         } as DeckStyle
       }
     >
-      <div className="character-lobby__world" aria-hidden="true">
-        <span className="world-grid" />
-        <span className="world-orbit world-orbit--one" />
-        <span className="world-orbit world-orbit--two" />
-        <span className="world-flare" />
-        <span className="world-scan" />
-      </div>
-
       <div className="character-lobby__grid shell">
-        <div className="character-copy">
+        <div className={`character-copy${heroLive ? " character-copy--intro" : ""}`}>
           <p className="character-label">
             <span />
             {label}
           </p>
           <h1>
-            <span>{displayTitle}</span>
+            <span className={decrypting ? "is-decrypting" : undefined} aria-label={displayTitle}>
+              {decryptedTitle}
+            </span>
             <strong>{accentTitle}</strong>
           </h1>
           <p className="character-tagline">{tagline}</p>
@@ -282,7 +382,11 @@ export function CosmicLobby({
 
           <div className="role-terminal" aria-live="polite">
             <span>&gt;</span>
-            <strong key={roleIndex}>{safeRoles[roleIndex]}</strong>
+            {typing ? (
+              <strong className="role-terminal__typed">{roleText}</strong>
+            ) : (
+              <strong key={roleIndex}>{safeRoles[roleIndex]}</strong>
+            )}
             <i />
           </div>
 
@@ -329,21 +433,25 @@ export function CosmicLobby({
           aria-label="Interactive character interface. Move or drag to inspect."
         >
           <span className="deck-aura" />
+          <ParticleField />
           <span className="deck-ring deck-ring--outer" />
           <span className="deck-ring deck-ring--inner" />
           <span className="deck-reticle" />
-          <div className="character-frame">
+          <div className={`character-frame${heroLive ? " character-frame--alive" : ""}`}>
             <div className="frame-particles" aria-hidden="true" />
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={imageUrl}
               alt={`${displayTitle} character portrait`}
               width={1085}
               height={1449}
-              quality={95}
               sizes="(max-width: 700px) 86vw, (max-width: 1100px) 78vw, 510px"
-              priority
+              loading="eager"
+              fetchPriority="high"
               draggable={false}
+              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
             />
+            <LivingPortrait stateRef={livingRef} />
             <span className="frame-grade" />
             <span className="frame-scan" />
             <span className="frame-shine" />

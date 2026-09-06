@@ -50,7 +50,7 @@ export default function CvPage() {
             <li><a href="mailto:sarthakbhandari172@gmail.com">sarthakbhandari172@gmail.com</a></li>
             <li>+977 9769291674</li>
             <li><a href="https://portfolio-ai-eta-kohl.vercel.app/">portfolio-ai-eta-kohl.vercel.app</a></li>
-            <li><a href="https://www.linkedin.com/in/sarthak-bhandari-1303b0365/">linkedin.com/in/sarthak-bhandari</a></li>
+            <li><a href="https://github.com/sarthakbhandari172-blip">github.com/sarthakbhandari172-blip</a></li>
           </ul>
         </header>
 

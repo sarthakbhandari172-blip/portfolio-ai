@@ -285,7 +285,7 @@ export const fallbackData: PortfolioData = {
   socialLinks: [
     { id: 1, platform: "email", label: "Email", url: "mailto:sarthakbhandari172@gmail.com", icon_text: "EM", sort_order: 1, is_active: true, show_in_hero: false, show_in_contact: true, show_in_footer: true },
     { id: 2, platform: "github", label: "GitHub", url: "https://github.com/sarthakbhandari172-blip", icon_text: "GH", sort_order: 2, is_active: true, show_in_hero: true, show_in_contact: true, show_in_footer: true },
-    { id: 3, platform: "linkedin", label: "LinkedIn", url: "https://www.linkedin.com/in/sarthak-bhandari-1303b0365/", icon_text: "LI", sort_order: 3, is_active: true, show_in_hero: false, show_in_contact: true, show_in_footer: true },
+    { id: 3, platform: "linkedin", label: "LinkedIn", url: "https://www.linkedin.com/in/sarthak-bhandari-1303b0365/", icon_text: "LI", sort_order: 3, is_active: false, show_in_hero: false, show_in_contact: false, show_in_footer: false },
     { id: 4, platform: "instagram", label: "Instagram", url: "https://www.instagram.com/_hell.spawn", icon_text: "IG", sort_order: 4, is_active: true, show_in_hero: false, show_in_contact: true, show_in_footer: true },
     { id: 5, platform: "whatsapp", label: "WhatsApp", url: "https://wa.me/9779769291674", icon_text: "WA", sort_order: 5, is_active: true, show_in_hero: false, show_in_contact: true, show_in_footer: true },
   ],

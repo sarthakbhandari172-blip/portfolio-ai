@@ -77,12 +77,20 @@ export default function CvPage() {
                 <p>Two poster directions and a social adaptation: marigold memory metaphor, bilingual typography, and an accessible palette checked against WCAG contrast (12:1 body text).</p>
               </div>
               <div className="cv-entry">
-                <div className="top"><h3>Portfolio Engine</h3><span className="when">2025 — present</span></div>
-                <p>Designed and built a dynamic portfolio platform: layout and type system, responsive interface, and an authenticated content dashboard for updating work without touching code.</p>
+                <div className="top"><h3>Orbit One — product page <span className="cv-note">(concept)</span></h3><span className="when">2026</span></div>
+                <p>Bold product-hero page for a fictional minimalist phone: giant product shot, honest spec strip, single pre-order CTA.</p>
               </div>
               <div className="cv-entry">
-                <div className="top"><h3>Nine more projects</h3><span className="when">2026</span></div>
-                <p>YouTube thumbnail system, fintech dashboard UI, logofolio, tea packaging, risograph gig poster, editorial cover &amp; spread and more — on the <a href="/#work">work grid</a>.</p>
+                <div className="top"><h3>Loopwise — SaaS landing page <span className="cv-note">(concept)</span></h3><span className="when">2026</span></div>
+                <p>Full marketing-page anatomy for a fictional team-time product: hero, proof strip, feature cards, product shot, CTA band.</p>
+              </div>
+              <div className="cv-entry">
+                <div className="top"><h3>Portfolio Engine</h3><span className="when">2025 — present</span></div>
+                <p>Designed and built this dynamic portfolio platform: layout and type system, responsive interface, and an authenticated content dashboard.</p>
+              </div>
+              <div className="cv-entry">
+                <div className="top"><h3>Thirteen more, all live</h3></div>
+                <p>Arc &amp; Oak (e-commerce UI) · Nepse Pulse (dashboard UI) · Gham Café (identity) · Himali Chiya (packaging) · PAILA (editorial) · Patan Sessions (gig poster) · Stride (ad set) · Trail Nepal &amp; Torque Theory (YouTube thumbnail systems) · Logofolio Vol. 01 · 1400M (apparel) · Lekh App (mobile UI) · Interface Experiments (UI studies) — all on the <a href="/#work">work grid</a>.</p>
               </div>
             </section>
 

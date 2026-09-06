@@ -59,11 +59,11 @@ export default function CvPage() {
             <section>
               <h2>Profile</h2>
               <p className="cv-lede">
-                Graphic and digital designer with a developer&apos;s toolkit: brand, social and campaign
-                visuals in Adobe Creative Cloud and Figma, photo retouching, and responsive web builds —
-                including this portfolio platform, designed and coded end to end. 18 published projects
-                across brand, campaign, editorial, packaging, content and UI. Organised,
-                deadline-reliable, and careful with the details.
+                Graphic and digital designer with a developer&apos;s toolkit and two years of hands-on
+                freelance and self-initiated work. Brand, social and campaign visuals in Adobe Creative
+                Cloud and Figma, photo retouching, and responsive web builds — including this portfolio
+                platform, designed and coded end to end. 18 published projects across brand, campaign,
+                editorial, packaging, content and UI.
               </p>
             </section>
 

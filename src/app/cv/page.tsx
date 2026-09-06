@@ -59,10 +59,11 @@ export default function CvPage() {
             <section>
               <h2>Profile</h2>
               <p className="cv-lede">
-                Graphic and digital designer with a developer&apos;s toolkit. I create brand, social and
-                campaign visuals in Adobe Creative Cloud and Figma, retouch photography, and build
-                responsive web experiences — I designed, coded and shipped my own portfolio platform
-                end-to-end. Learning by making, managing my own deadlines, and caring about the details.
+                Graphic and digital designer with a developer&apos;s toolkit: brand, social and campaign
+                visuals in Adobe Creative Cloud and Figma, photo retouching, and responsive web builds —
+                including this portfolio platform, designed and coded end to end. 18 published projects
+                across brand, campaign, editorial, packaging, content and UI. Organised,
+                deadline-reliable, and careful with the details.
               </p>
             </section>
 
@@ -89,7 +90,7 @@ export default function CvPage() {
                 <p>Designed and built this dynamic portfolio platform: layout and type system, responsive interface, and an authenticated content dashboard.</p>
               </div>
               <div className="cv-entry">
-                <div className="top"><h3>Thirteen more, all live</h3></div>
+                <div className="top"><h3>Additional projects</h3></div>
                 <p>Arc &amp; Oak (e-commerce UI) · Nepse Pulse (dashboard UI) · Gham Café (identity) · Himali Chiya (packaging) · PAILA (editorial) · Patan Sessions (gig poster) · Stride (ad set) · Trail Nepal &amp; Torque Theory (YouTube thumbnail systems) · Logofolio Vol. 01 · 1400M (apparel) · Lekh App (mobile UI) · Interface Experiments (UI studies) — all on the <a href="/#work">work grid</a>.</p>
               </div>
             </section>
@@ -143,7 +144,10 @@ export default function CvPage() {
 
             <section>
               <h2>Certificates</h2>
-              <dl><dd>Graphic Design Essentials — Canva Design School, Sept 2026 · ID 505afa</dd></dl>
+              <dl>
+                <dd>Graphic Design Essentials — Canva Design School, Sept 2026 · ID 505afa</dd>
+                <dd>Meet Canva&apos;s Visual Suite — Canva Design School, Sept 2026 · ID 5534b9</dd>
+              </dl>
             </section>
 
             <section>

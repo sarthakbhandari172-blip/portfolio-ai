@@ -199,9 +199,9 @@ export const fallbackData: PortfolioData = {
     {
       id: 4,
       company: "Canva Design School",
-      role: "Certified — Graphic Design Essentials",
+      role: "Certified — Graphic Design Essentials & Visual Suite",
       period: "Sept 2026",
-      description: "Canva certification in graphic design foundations. Credential ID 505afa — click to verify.",
+      description: "Canva Design School certifications. Credential IDs 505afa · 5534b9 — click to verify.",
       icon: "04",
       status: "Certified",
       sort_order: 4,

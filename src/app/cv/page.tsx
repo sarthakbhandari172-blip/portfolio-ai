@@ -121,10 +121,23 @@ export default function CvPage() {
             </section>
 
             <section>
+              <h2>Design practice</h2>
+              <dl>
+                <dd>Layout &amp; visual hierarchy</dd>
+                <dd>Social &amp; campaign assets</dd>
+                <dd>Photo editing &amp; retouching</dd>
+                <dd>File prep &amp; export for web and print</dd>
+                <dd>Accessible contrast &amp; legibility basics</dd>
+                <dd>Adapting assets across formats on-brand</dd>
+              </dl>
+            </section>
+
+            <section>
               <h2>Education</h2>
               <div className="cv-entry">
                 <div className="top"><h3>BSc (Hons) Computer Science with Artificial Intelligence</h3></div>
                 <p>Birmingham City University (UK) programme, delivered at Sunway College, Kathmandu. <span className="when">Oct 2024 — present · Year 2</span></p>
+                <p style={{ color: "#71717b", fontSize: "8.6pt" }}>Coursework: programming (Python, C), web development, databases, Linux fundamentals.</p>
               </div>
             </section>
 
